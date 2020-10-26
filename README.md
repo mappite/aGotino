@@ -28,9 +28,9 @@ Photos and more details on hardware on [CloudyNights (English)](https://www.clou
 
 blanks are ignored and can be omitted.
 
-> WARNING: watch your scope while slewing! 
->          There are no controls to avoid collisions with mount
->          for this reason defaul maximum range for slew is 30°
+> WARNING: watch your scope while slewing!
+> There are no controls to avoid collisions with mount,
+> for this reason defaul maximum range for slew is 30°
 
 #### Example 
 
