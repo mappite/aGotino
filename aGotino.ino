@@ -1,5 +1,5 @@
 /*
-   aGotino v 0.5 an almost-Goto with Arduino (Nano/Uno)
+   aGotino a simple Goto with Arduino (Nano/Uno)
 
       * move Right Ascension at 1x 
       * at button1&2 press, cycle among forward and backward speeds on RA&Dec
