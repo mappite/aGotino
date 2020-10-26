@@ -44,37 +44,38 @@ Point scope to Mizar in UMa (star 223 in aGotino Star List) and slew to M101 Pin
     19:07:08 Goto M101
     19:07:08  *** moving...
     19:07:17  *** done
-    19:07:17 Current Position: 14h3'12" 54°20'57"
+    19:07:17 Current Position: 14h03'12" 54°20'57"
     > s 195147+085206
-    19:09:59 Current Position: 19h51'47" 8°52'6"
+    19:09:59 Current Position: 19h51'47" 08°52'06"
     > g M11
     19:10:19 Goto M11
     19:10:19  *** moving...
     19:10:32  *** done
-    19:10:32 Current Position: 18h51'6" ‑6°16'0"
+    19:10:32 Current Position: 18h51'06" ‑06°16'00"
 
-Slew by 1° W and 1° S.  1° = 60' and in HH:MI it correspond to 60x4 secs = 4 mins.
+Slew by 1° W and 1° S.  1° = 60' (which in HH:MI corresponds to 60x4 secs = 4 mins).
 
+    19:22:28 Current Position: 02h03'54" 42°19'47
     > +0060+0060
     21:23:10  *** moving...
     21:23:12  *** done
     21:23:12 Current Position: 1h59'54" 41°19'47"
 
 ### Code
-    aGotino.ino           Arduino Source
+    aGotino.ino           C Source
     catalogs.h            Contains catalogues (Messiers and aGotino Star List)
     aGotino-StarList.pdf  Star list in PDF
     aGotino-wiring.png    wirings 
 
 ### AstroMath (i.e. adapt for your mount)
 
-Suppose we drive a stepper motor that takes 32 microsteps to complete one of the 400 steps (0.9°) needed for a complete motor rotation that will rotate 2.5 times (via pulleys) the worm screw that needs 144 rotations to drive a complete a 360° RA axis rotation (24h): it may sound tricky but it is (32x400x2.5x144)) / 360° = 12800 microsteps (or 400 steps) to move the scope by one degree.
+Suppose to drive a stepper motor that takes 32 microsteps to complete one of the 400 steps (0.9°) needed for a complete motor rotation that will rotate 1/2.5 times (via pulleys) the worm screw that needs 144 rotations to drive a complete a 360° RA axis rotation (24h): it may sound tricky but it is (32x400x2.5x144) / 360° = 12800 microsteps (or 400 steps) to move the scope by one degree.
 
-How long to properly follow stars? Earth 360° rotation takes 23h 56m 4 sec, i.e. 86164 secs. 86164/360=239.34 secs to rotate by one degree.
+How long to properly follow stars? Well, earth 360° rotation takes 23h 56m 4 sec, i.e. 86164 secs thus 86164/360=239.34 are secs to rotate by one degree.
 
 This leads to 239.34/12800 = 0.018699 secs for each microsteps.
 
-Arduino Nano runs at 16MHz, i.e. 16 million cycles per secs so driving something at 18699µsecs is more than doable, leaving a lot of time to do something else (that would be for a phase 2 of the project).
+Arduino Nano runs at 16MHz, i.e. 16 million cycles per secs so driving something at 18699µsecs is more than doable, leaving a lot of time to do something else (listed on serial, do some validations etc.).
 
     How to calculate STEP_DELAY to drive motor at right sidereal speed for your mount
     
