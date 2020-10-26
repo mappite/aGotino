@@ -20,7 +20,7 @@ Photos and hardware details on [CloudyNights (English)](https://www.cloudynights
   - **`x HHMMSS±DDMMSS`** set/goto position
   - **`x Mn`**            set/goto Messier object n
   - **`x Sn`**            set/goto Star number n in aGotino Star List
-  - **`±RRRR±DDDD`**     slew by Ra&Dec by RRRR&DDDD degree mins (RRRRx4 corresponds to seconds hours) r & d are signs  (r = + is clockwise)
+  - **`±RRRR±DDDD`**     slew Ra&Dec by RRRR&DDDD degree mins (RRRRx4 corresponds to hour seconds)
   - **`±debug`**       verbose output
   - **`±sleep`**       power saving on dec motor when unused
   - **`±speed`**       increase or decrease speed by 4x
