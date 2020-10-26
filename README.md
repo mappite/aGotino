@@ -16,10 +16,10 @@ Photos and hardware details on [CloudyNights (English)](https://www.cloudynights
 - listen on serial port for aGotino commands
 
 ### aGotino Command set
-**x** can be **s (sync)** or **g (goto)**:    
-  - **`x HHMMSS±DDMMSS`** sync/goto position
-  - **`x Mn`**            sync/goto Messier object n
-  - **`x Sn`**            sync/goto Star number n in aGotino Star List
+**x** can be **s (set)** or **g (goto)**:    
+  - **`x HHMMSS±DDMMSS`** set/goto position
+  - **`x Mn`**            set/goto Messier object n
+  - **`x Sn`**            set/goto Star number n in aGotino Star List
   - **`±RRRR±DDDD`**     slew by Ra&Dec by RRRR&DDDD degree mins (RRRRx4 corresponds to seconds hours) r & d are signs  (r = + is clockwise)
   - **`±debug`**       verbose output
   - **`±sleep`**       power saving on dec motor when unused
@@ -61,9 +61,13 @@ Slew by 1° W and 1° S.  1° = 60' (which in HH:MI corresponds to 60x4 secs = 4
     21:23:12  *** done
     21:23:12 Current Position: 1h59'54" 41°19'47"
 
+#### aGotino Star List
+
+Contains all α, β, γ constellations stars up to mag 4 and other stars up to mag 3. The goal is to provide a quick number reference for easy-to-point stars (vs having to type RA&Dec). Credits to Nasa's [BSC5P - Bright Star Catalog](https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html).
+
 ### Code
     aGotino.ino           C Source
-    catalogs.h            Contains catalogues (Messiers and aGotino Star List)
+    catalogs.h            Contains catalogues (Messiers and aGotino Star List in J2000.0)
     aGotino-StarList.pdf  Star list in PDF
     aGotino-wiring.png    wirings 
 
