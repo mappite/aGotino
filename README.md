@@ -8,6 +8,8 @@ Goal is to provide a simple&cheap, but high precision, solution for *augmented s
 
 Photos and hardware details on [CloudyNights (English)](https://www.cloudynights.com/topic/735800-agotino-a-simple-arduino-nano-goto/) or [Astronomia.com (Italian)](https://www.astronomia.com/forum/showthread.php?34605-aGotino-un-goto-con-Arduino).
 
+![aGotino](https://www.cloudynights.com/uploads/gallery/album_14775/sml_gallery_329462_14775_4192.jpg)
+
 ### Features
 
 - move Right Ascension at sidereal speed (1x) 
@@ -66,20 +68,13 @@ Slew by 1° W and 1° S.  1° = 60' (which in HH:MI corresponds to 60x4 secs = 4
 Contains all α, β, γ constellations stars up to mag 4 and other stars up to mag 3. The goal is to provide a quick number reference for easy-to-point stars (vs having to type RA&Dec). Credits to Nasa's [BSC5P - Bright Star Catalog](https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html).
 
 ### Code
+
     aGotino.ino           C Source
     catalogs.h            Contains catalogues (Messiers and aGotino Star List in J2000.0)
     aGotino-StarList.pdf  Star list in PDF
     aGotino-wiring.png    wirings 
 
 ### AstroMath (i.e. adapt for your mount)
-
-Suppose to drive a stepper motor that takes 32 microsteps to complete one of the 400 steps (0.9°) needed for a complete motor rotation that will rotate 1/2.5 times (via pulleys) the worm screw that needs 144 rotations to drive a complete a 360° RA axis rotation (24h): it may sound tricky but it is (32x400x2.5x144) / 360° = 12800 microsteps (or 400 steps) to move the scope by one degree.
-
-How long to properly follow stars? Well, earth 360° rotation takes 23h 56m 4 sec, i.e. 86164 secs thus 86164/360=239.34 are secs to rotate by one degree.
-
-This leads to 239.34/12800 = 0.018699 secs for each microsteps.
-
-Arduino Nano runs at 16MHz, i.e. 16 million cycles per secs so driving something at 18699µsecs is more than doable, leaving a lot of time to do something else (listed on serial, do some validations etc.).
 
     How to calculate STEP_DELAY to drive motor at right sidereal speed for your mount
     
