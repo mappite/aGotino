@@ -1,30 +1,30 @@
 # aGotino
 A simple telescope Goto solution based on Arduino Nano (or Uno) that supports
 
-- aGotino commands on serial - an Android phone can do the job via an [USB OTG cable](https://www.amazon.com/s?k=usb+otg+cable) and a [Serial App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it)
+- aGotino commands - an Android phone can do the job via an [USB OTG cable](https://www.amazon.com/s?k=usb+otg+cable) and a [Serial App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it)
 - basic Meade LX200 protocol (INDI)
 
-Goal is to provide a simple&cheap, but high precision, solution for *augmented starhopping*: you point the scope to something you can find easily and then get help moving to a remote, low magnitude object.
+Goal is to provide a simple&cheap, but high precision, solution for *augmented starhopping*: you point the scope to something you can find easily and get help moving to a remote, low magnitude object.
 
-Photos and more details on hardware on [CloudyNights (English)](https://www.cloudynights.com/topic/735800-agotino-a-simple-arduino-nano-goto/) or [Astronomia.com (Italian)](https://www.astronomia.com/forum/showthread.php?34605-aGotino-un-goto-con-Arduino).
+Photos and hardware details on [CloudyNights (English)](https://www.cloudynights.com/topic/735800-agotino-a-simple-arduino-nano-goto/) or [Astronomia.com (Italian)](https://www.astronomia.com/forum/showthread.php?34605-aGotino-un-goto-con-Arduino).
 
 ### Features
 
 - move Right Ascension at sidereal speed (1x) 
-- at button 1 & 2 press, cycle among forward and backward speeds on RA&Dec
+- at button 1 & 2 press, cycle among forward and backward speeds (8x) on RA&Dec
 - listen on serial port for basic LX200 commands (tested with INDI LX200 Basic driver and Stellarium, Kstar, Cartes du Ciel)
 - listen on serial port for aGotino commands
 
 ### aGotino Command set
 **x** can be **s (sync)** or **g (goto)**:    
-  - **x HHMMSS±DDMMSS** sync/goto position
-  - **x Mn**            sync/goto Messier object n
-  - **x Sn**            sync/goto Star number n in aGotino Star List
-  - **±RRRR±DDDD**     slew by Ra&Dec by RRRR&DDDD degree mins (RRRRx4 corresponds to seconds hours) r & d are signs  (r = + is clockwise)
-  - **±debug**       verbose output
-  - **±sleep**       power saving on dec motor when unused
-  - **±speed**       increase or decrease speed by 4x
-  - **±range**       increase or decrease max slew range (default 30°)
+  - **`x HHMMSS±DDMMSS`** sync/goto position
+  - **`x Mn`**            sync/goto Messier object n
+  - **`x Sn`**            sync/goto Star number n in aGotino Star List
+  - **`±RRRR±DDDD`**     slew by Ra&Dec by RRRR&DDDD degree mins (RRRRx4 corresponds to seconds hours) r & d are signs  (r = + is clockwise)
+  - **`±debug`**       verbose output
+  - **`±sleep`**       power saving on dec motor when unused
+  - **`±speed`**       increase or decrease speed by 4x
+  - **`±range`**       increase or decrease max slew range (default 30°)
 
 blanks are ignored and can be omitted.
 
