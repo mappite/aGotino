@@ -4,7 +4,7 @@ A simple telescope Goto solution based on Arduino Nano (or Uno) that supports
 - aGotino commands on serial - an Android phone can do the job via an [USB OTG cable](https://www.amazon.com/s?k=usb+otg+cable) and a [Serial App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it)
 - basic Meade LX200 protocol (INDI)
 
-The goal? Create a simple&cheap, but high precision, solution for *augmented starhopping*: you point the scope to something you can find easily and then get help moving to a remote, low magnitude object.
+Goal is to provide a simple&cheap, but high precision, solution for *augmented starhopping*: you point the scope to something you can find easily and then get help moving to a remote, low magnitude object.
 
 Photos and more details on hardware on [CloudyNights (English)](https://www.cloudynights.com/topic/735800-agotino-a-simple-arduino-nano-goto/) or [Astronomia.com (Italian)](https://www.astronomia.com/forum/showthread.php?34605-aGotino-un-goto-con-Arduino).
 
