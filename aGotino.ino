@@ -1,5 +1,5 @@
 /*
-   aGotino v 0.4 an almost-Goto with Arduino (Nano/Uno)
+   aGotino v 0.5 an almost-Goto with Arduino (Nano/Uno)
 
       * move Right Ascension at 1x 
       * at button1&2 press, cycle among forward and backward speeds on RA&Dec
@@ -20,20 +20,8 @@
         WARNING: watch your scope while slewing! 
                  There are no controls to avoid collisions with mount
 
-        Example: 
-         Goto M11 (Wild Duck) after pointing the scope to well-know Altair star in Aql
-           Altair: 19h 51m 47s, +08° 52' 06" send "s195147+085206" to set current position
-                                             or just "sS6" since Altair is the 6th star in 
-                                             aGotino Star List
-           M11:    18h 51m 05s, -06° 16' 12" send "gM11"
-         or convert coordinates in secs (Altair: +71507s, +31926"; M11: +67865s, -22572"), 
-         calculate deltas (+3642s, +54498" => +3642/4, +908'=> +0910+0908) and send "+0910+0908".
-
-    This code or newer versions at https://mappite.org/stars/aGotino.ino
-                                   https://mappite.org/stars/catalogs.h
-    Star List                      https://mappite.org/stars/aGotino-StarList.pdf
-    Wirings:                       https://mappite.org/stars/aGotino-wiring.png
-
+    This code or newer versions at https://github.com/mappite/aGotino
+    
     by gspeed @ astronomia.com / qde / cloudynights.com forum
     This code is free software under GPL v3 License use at your risk and fun ;)
 

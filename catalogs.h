@@ -1,5 +1,5 @@
 /*
- * Copy this file in Arduino/libraries and restart the IDE
+ * Copy this file in Arduino/libraries/aGotino and restart the IDE
  */
 #include <avr/pgmspace.h>
 
@@ -371,7 +371,7 @@ const RaDec Stars[] PROGMEM = {
 {25725,-250204}	// (238) Vol Gam	
 };
 
-/*
+/* ideas
 typedef struct {
    int  con;
    char bd[3];  
@@ -399,5 +399,3 @@ const NGC NGCs[] PROGMEM = {
 
 
 */
-
-
