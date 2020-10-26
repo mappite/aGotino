@@ -65,7 +65,7 @@ Slew by 1° W and 1° S.  1° = 60' (which in HH:MI corresponds to 60x4 secs = 4
 
 #### aGotino Star List
 
-Contains all α, β, γ constellations stars up to mag 4 and other stars up to mag 3. The goal is to provide a quick number reference for easy-to-point stars (vs having to type RA&Dec). Credits to Nasa's [BSC5P - Bright Star Catalog](https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html).
+Contains all α, β, γ constellations stars up to mag 4 and other stars up to mag 3. The goal is to provide a quick lookup number reference for easy-to-point stars (vs having to type RA&Dec). Credits to Nasa's [BSC5P - Bright Star Catalog](https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html).
 
 ### Code
 
