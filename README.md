@@ -1,30 +1,32 @@
 # aGotino
 A simple telescope Goto solution based on Arduino Nano (or Uno) that supports
 
-- aGotino commands on serial - an Android phone can do the job via an [USB OTG cable](https://www.amazon.com/s?k=usb+otg+cable) and a [Serial App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it)
+- aGotino commands - an Android phone can do the job via an [USB OTG cable](https://www.amazon.com/s?k=usb+otg+cable) and a [Serial App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it)
 - basic Meade LX200 protocol (INDI)
 
-The goal? Create a simple&cheap, but high precision, solution for *augmented starhopping*: you point the scope to something you can find easily and then get help moving to a remote, low magnitude object.
+Goal is to provide a simple&cheap, but high precision, solution for *augmented starhopping*: you point the scope to something you can find easily and get help moving to a remote, low magnitude object.
 
-Photos and more details on hardware on [CloudyNights (English)](https://www.cloudynights.com/topic/735800-agotino-a-simple-arduino-nano-goto/) or [Astronomia.com (Italian)](https://www.astronomia.com/forum/showthread.php?34605-aGotino-un-goto-con-Arduino).
+Photos and hardware details on [CloudyNights (English)](https://www.cloudynights.com/topic/735800-agotino-a-simple-arduino-nano-goto/) or [Astronomia.com (Italian)](https://www.astronomia.com/forum/showthread.php?34605-aGotino-un-goto-con-Arduino).
+
+![aGotino](https://www.cloudynights.com/uploads/gallery/album_14775/sml_gallery_329462_14775_4192.jpg)
 
 ### Features
 
 - move Right Ascension at sidereal speed (1x) 
-- at button 1 & 2 press, cycle among forward and backward speeds on RA&Dec
+- at button 1 & 2 press, cycle among forward and backward speeds (8x) on RA&Dec
 - listen on serial port for basic LX200 commands (tested with INDI LX200 Basic driver and Stellarium, Kstar, Cartes du Ciel)
 - listen on serial port for aGotino commands
 
 ### aGotino Command set
-**x** can be **s (sync)** or **g (goto)**:    
-  - **x HHMMSS±DDMMSS** sync/goto position
-  - **x Mn**            sync/goto Messier object n
-  - **x Sn**            sync/goto Star number n in aGotino Star List
-  - **±RRRR±DDDD**     slew by Ra&Dec by RRRR&DDDD degree mins (RRRRx4 corresponds to seconds hours) r & d are signs  (r = + is clockwise)
-  - **±debug**       verbose output
-  - **±sleep**       power saving on dec motor when unused
-  - **±speed**       increase or decrease speed by 4x
-  - **±range**       increase or decrease max slew range (default 30°)
+**x** can be **s (set)** or **g (goto)**:    
+  - **`x HHMMSS±DDMMSS`** set/goto position
+  - **`x Mn`**            set/goto Messier object n
+  - **`x Sn`**            set/goto Star number n in aGotino Star List
+  - **`±RRRR±DDDD`**     slew Ra&Dec by RRRR&DDDD degree mins (RRRRx4 corresponds to hour seconds)
+  - **`±debug`**       verbose output
+  - **`±sleep`**       power saving on dec motor when unused
+  - **`±speed`**       increase or decrease speed by 4x
+  - **`±range`**       increase or decrease max slew range (default 30°)
 
 blanks are ignored and can be omitted.
 
@@ -61,21 +63,18 @@ Slew by 1° W and 1° S.  1° = 60' (which in HH:MI corresponds to 60x4 secs = 4
     21:23:12  *** done
     21:23:12 Current Position: 1h59'54" 41°19'47"
 
+#### aGotino Star List
+
+Contains all α, β, γ constellations stars up to mag 4 and other stars up to mag 3. The goal is to provide a quick lookup number reference for easy-to-point stars (vs having to type RA&Dec). Credits to Nasa's [BSC5P - Bright Star Catalog](https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html).
+
 ### Code
+
     aGotino.ino           C Source
-    catalogs.h            Contains catalogues (Messiers and aGotino Star List)
+    catalogs.h            Contains catalogues (Messiers and aGotino Star List in J2000.0)
     aGotino-StarList.pdf  Star list in PDF
     aGotino-wiring.png    wirings 
 
 ### AstroMath (i.e. adapt for your mount)
-
-Suppose to drive a stepper motor that takes 32 microsteps to complete one of the 400 steps (0.9°) needed for a complete motor rotation that will rotate 1/2.5 times (via pulleys) the worm screw that needs 144 rotations to drive a complete a 360° RA axis rotation (24h): it may sound tricky but it is (32x400x2.5x144) / 360° = 12800 microsteps (or 400 steps) to move the scope by one degree.
-
-How long to properly follow stars? Well, earth 360° rotation takes 23h 56m 4 sec, i.e. 86164 secs thus 86164/360=239.34 are secs to rotate by one degree.
-
-This leads to 239.34/12800 = 0.018699 secs for each microsteps.
-
-Arduino Nano runs at 16MHz, i.e. 16 million cycles per secs so driving something at 18699µsecs is more than doable, leaving a lot of time to do something else (listed on serial, do some validations etc.).
 
     How to calculate STEP_DELAY to drive motor at right sidereal speed for your mount
     
