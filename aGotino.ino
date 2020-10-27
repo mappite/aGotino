@@ -99,6 +99,10 @@ long currRA = 0;
 long currDEC = NORTH_DEC;
 long inRA  = 0;
 long inDEC = 0;
+const long MIN_RA = 0;
+const long MAX_RA = 24*3600;
+const long MIN_DEC = -90*3600;
+const long MAX_DEC = 90*36000;
 
 int raSpeed  = 1;    // default RA speed (start at 1x to follow stars)
 int decSpeed = 0;    // default DEC speed (don't move)
@@ -182,8 +186,6 @@ void decPlay(unsigned long stepDelay) {
   /** debug **
     i++;
     if (i == 1234) {
-      Serial.println("logB:");
-      Serial.print("stepDelay: "); Serial.println(stepDelay);
       Serial.print("decLastTime: ");Serial.println(decLastTime);
       Serial.print("halfStepDelay: "); Serial.println(halfStepDelay);
       Serial.print("dt: "); Serial.println(dt);
@@ -256,7 +258,10 @@ int slewRaDecBySecs(long raSecs, long decSecs) {
 
 /*
  *  Slew RA and Dec by steps
- *   assume direction and microstepping is set
+ *   . assume direction and microstepping is set
+ *   . listen on serial port and reply to lx200 GR&GD
+ *     commands with current (initial) position to avoid
+ *     INDI timeouts during long slewings actions
  */
 void slewRaDecBySteps(unsigned long raSteps, unsigned long decSteps) {
   digitalWrite(LED_BUILTIN, HIGH);
@@ -363,7 +368,7 @@ void decSleep(boolean b) {
 > #:GD#
 < +81ß11:39#
 */
-void lx200(String s) {
+void lx200(String s) { // all :.*# commands are passed 
   if (s.substring(1,3).equals("GR")) { // :GR# 
     printLog("GR");
     // send current RA to computer
@@ -394,7 +399,7 @@ void lx200(String s) {
       updateLx200Coords(currRA, currDEC); // recompute strings
     } 
     Serial.print(1);
-  } else if (s.substring(1,3).equals("MS")) { // move
+  } else if (s.substring(1,3).equals("MS")) { // :MS# move
     printLog("MS");
     // assumes Sr and Sd have been processed
     // inRA and inDEC have been set, now it's time to move
@@ -411,7 +416,7 @@ void lx200(String s) {
     } else { // failure
       Serial.print("1Range_too_big#");
     }
-  } else if (s.substring(1,3).equals("CM")) { // sync
+  } else if (s.substring(1,3).equals("CM")) { // :CM# sync
     // assumes Sr and Sd have been processed
     // sync current position with input
     printLog("CM");
@@ -492,15 +497,22 @@ void agoto(String s) {
     if (s.charAt(5) == '+' || s.charAt(5) == '-') { // rRRRRdDDDD (r and d are signs) - Move by rRRRR and dDDDD deg mins
       // toInt() returns 0 if conversion fails, logic belows detects this
       if (!s.substring(1, 5).equals("0000")) {
-        deltaRaSecs = s.substring(1, 5).toInt() * (s.charAt(0) == '+' ? +1 : -1) * 4;
+        deltaRaSecs = s.substring(1, 5).toInt() * (s.charAt(0) == '+' ? -1 : +1) * 4;
         if (deltaRaSecs == 0) { Serial.println("RA conversion error"); return; }
       }
       if (!s.substring(6, 10).equals("0000")) {
-        deltaDecSecs = s.substring(6, 10).toInt() * (s.charAt(5) == '+' ? +1 : -1) * 60;
+        deltaDecSecs = s.substring(6, 10).toInt() * (s.charAt(5) == '+' ? -1 : +1) * 60;
         if (deltaDecSecs == 0) { Serial.println("Dec conversion error"); return; }
       }
-      inRA = currRA - deltaRaSecs;
-      inDEC = currDEC - deltaDecSecs;
+      long tmp_inRA = currRA - deltaRaSecs;
+      long tmp_inDEC = currDEC - deltaDecSecs;
+      if ( (tmp_inRA<MIN_RA   || tmp_inRA>MAX_RA) || 
+           (tmp_inDEC<MIN_DEC || tmp_inDEC>MAX_DEC) ) {
+        Serial.println("Values out of range"); return; 
+      } else {
+        inRA = tmp_inRA ;
+        inDEC = tmp_inDEC;      
+      }
     } else { // decode coords to inRA and inDEC
       if (s.charAt(1) == 'M' || s.charAt(1) == 'm') { // MESSIER coords
         int m = s.substring(2,5).toInt(); // toInt() returns 0 if conversion fails

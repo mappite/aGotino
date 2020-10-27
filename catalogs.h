@@ -1,5 +1,8 @@
-/*
- * Copy this file in Arduino/libraries/aGotino and restart the IDE
+/* aGotino catalog.h
+ *  
+ *  Contains Messier objects and aGotino Star List
+ * 
+ *  Copy this file in Arduino/libraries/aGotino and restart the IDE
  */
 #include <avr/pgmspace.h>
 
@@ -7,8 +10,9 @@ typedef struct {
      long ra, dec;
 }  RaDec; // contains Ra and Dec in secs Epoch J2000  // 8 byte
 
-// MESSIER
-// Source: Wikipedia https://en.wikipedia.org/wiki/Messier_object
+/* Messier Catalog
+ *  Source: Wikipedia https://en.wikipedia.org/wiki/Messier_object
+ */
 
 const RaDec Messier[] PROGMEM = {
 {0,0},          // Dummy so M[n] is Mn
@@ -124,30 +128,33 @@ const RaDec Messier[] PROGMEM = {
 {2422,150067}   // M110 00h 40m 22.1s +41° 41′ 07″
 };
 
-// Alpha, Beta and Gamma Stars and others with mag <4
-// Edited from Source: 
-// BSC5P - Bright Star Catalog	https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html
-// Names from Kstars project
+/* aGotino Star List
+ *  Contains constellations Alpha, Beta and Gamma stars 
+ *  with mag < 4 and the remaining stars with mag <3
+ * Source: 
+ * BSC5P - Bright Star Catalog	https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html
+ * Names from Kstars project https://edu.kde.org/kstars/ * 
+ */
 
 const RaDec Stars[] PROGMEM = {		
 {0,324000},     // True North
-{503,104726},	// (1) And Alp	Alpheratz
+{503,104726},	  // (1) And Alp	Alpheratz
 {4184,128234},	// (2) And Bet	Mirach
 {7434,152387},	// (3) And Gam	Almach
-{53272,-284239},	// (4) Aps Alp	
-{59607,-277570},	// (5) Aps Gam	
+{53272,-284239},// (4) Aps Alp	
+{59607,-277570},// (5) Aps Gam	
 {71447,31926},	// (6) Aql Alp	Altair
 {71719,23064},	// (7) Aql Bet	Alshain
 {71176,38208},	// (8) Aql Gam	Tarazed
 {68725,49908},	// (9) Aql Zet	
-{79547,1151},	// (10) Aqr Alp	Sadalmelik
+{79547,1151},	  // (10) Aqr Alp	Sadalmelik
 {77494,-15944},	// (11) Aqr Bet	Sadalsud
 {80499,-2206},	// (12) Aqr Gam	Sadachbia
-{63111,-173246},	// (13) Ara Alp	Tchou
-{62718,-196092},	// (14) Ara Bet	
-{62724,-200241},	// (15) Ara Gam	
-{7630,84465},	// (16) Ari Alp	Hamal
-{6878,74909},	// (17) Ari Bet	Sheratan
+{63111,-173246},// (13) Ara Alp	Tchou
+{62718,-196092},// (14) Ara Bet	
+{62724,-200241},// (15) Ara Gam	
+{7630,84465},	  // (16) Ari Alp	Hamal
+{6878,74909},	  // (17) Ari Bet	Sheratan
 {19001,165593},	// (18) Aur Alp	Capella
 {21572,161811},	// (19) Aur Bet	Menkalinan
 {18118,157764},	// (20) Aur Eps	Maaz
@@ -357,13 +364,13 @@ const RaDec Stars[] PROGMEM = {
 {9109,321351},	// (224) UMi Alp	Polaris
 {53442,266960},	// (225) UMi Bet	Kocab
 {55244,258602},	// (226) UMi Gam	Pherkab
-{31482,-191850},	// (227) Vel Del	
-{29372,-167988},	// (228) Vel Gam	Regor
-{33727,-197961},	// (229) Vel Kap	Merkab
-{32880,-153243},	// (230) Vel Lam	Suhail
-{38806,-174888},	// (231) Vel Mu 	
+{31482,-191850},// (227) Vel Del	
+{29372,-167988},// (228) Vel Gam	Regor
+{33727,-197961},// (229) Vel Kap	Merkab
+{32880,-153243},// (230) Vel Lam	Suhail
+{38806,-174888},// (231) Vel Mu 	
 {48312,-39019},	// (232) Vir Alp	Spica
-{42642,6353},	// (233) Vir Bet	Zawijah
+{42642,6353},	  // (233) Vir Bet	Zawijah
 {46931,39453},	// (234) Vir Eps	Vindemiatrix
 {45700,-1982},	// (235) Vir Gam	
 {32547,-236174},// (236) Vol Alp	
