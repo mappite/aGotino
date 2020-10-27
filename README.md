@@ -55,10 +55,10 @@ Point scope to Mizar in UMa (star 223 in aGotino Star List) and slew to M101 Pin
     19:10:32  *** done
     19:10:32 Current Position: 18h51'06" ‑06°16'00"
 
-Slew by 1° E and 1° N.  1° = 60' (which in HH:MI corresponds to 60x4 secs = 4 mins).
+Slew by 1° W and 1° S.  Note: 1° = 60' which in HH:MI corresponds to 60x4 secs = 4 mins.
 
     19:22:28 Current Position: 02h03'54" 42°19'47
-    > +0060+0060
+    > -0060-0060
     21:23:10  *** moving...
     21:23:12  *** done
     21:23:12 Current Position: 1h59'54" 41°19'47"
