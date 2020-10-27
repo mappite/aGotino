@@ -132,8 +132,8 @@ const RaDec Messier[] PROGMEM = {
  *  Contains constellations Alpha, Beta and Gamma stars 
  *  with mag < 4 and the remaining stars with mag <3
  * Source: 
- * BSC5P - Bright Star Catalog	https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html
- * Names from Kstars project https://edu.kde.org/kstars/ * 
+ *  BSC5P - Bright Star Catalog	https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html
+ *  Names from Kstars project https://edu.kde.org/kstars/ * 
  */
 
 const RaDec Stars[] PROGMEM = {		
