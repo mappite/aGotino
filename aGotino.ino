@@ -497,11 +497,11 @@ void agoto(String s) {
     if (s.charAt(5) == '+' || s.charAt(5) == '-') { // rRRRRdDDDD (r and d are signs) - Move by rRRRR and dDDDD deg mins
       // toInt() returns 0 if conversion fails, logic belows detects this
       if (!s.substring(1, 5).equals("0000")) {
-        deltaRaSecs = s.substring(1, 5).toInt() * (s.charAt(0) == '+' ? -1 : +1) * 4;
+        deltaRaSecs = s.substring(1, 5).toInt() * (s.charAt(0) == '+' ? -1 : +1) * 4;// sign reversed to honor result (E > 0)
         if (deltaRaSecs == 0) { Serial.println("RA conversion error"); return; }
       }
       if (!s.substring(6, 10).equals("0000")) {
-        deltaDecSecs = s.substring(6, 10).toInt() * (s.charAt(5) == '+' ? -1 : +1) * 60;
+        deltaDecSecs = s.substring(6, 10).toInt() * (s.charAt(5) == '+' ? -1 : +1) * 60; // sign reversed to honor result (N > 0)
         if (deltaDecSecs == 0) { Serial.println("Dec conversion error"); return; }
       }
       long tmp_inRA = currRA - deltaRaSecs;
@@ -578,18 +578,22 @@ void printCoord(long raSecs, long decSecs) {
   Serial.print(pp);
   Serial.print("h");
   long mi = (raSecs-pp*3600)/60;
+  if (mi<10) = Serial.print('0');
   Serial.print(mi);
   Serial.print("'");
   long ss = (raSecs-mi*60-pp*3600);
+  if (ss<10) = Serial.print('0');
   Serial.print(ss);
   Serial.print("\" ");
   pp = abs(decSecs)/3600;
   Serial.print((decSecs>0?pp:-pp));
   Serial.print("°");
   mi = (abs(decSecs)-pp*3600)/60;
+  if (mi<10) = Serial.print('0');
   Serial.print(mi);
   Serial.print("'");
   ss = (abs(decSecs)-mi*60-pp*3600);
+  if (ss<10) = Serial.print('0');
   Serial.print(ss);
   Serial.println("\"");
 }
