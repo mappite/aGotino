@@ -1,10 +1,10 @@
 # aGotino
-A simple telescope Goto solution based on Arduino Nano (or Uno) that supports
+A simple telescope Goto solution based on Arduino Nano (or Uno) supporting:
 
 - aGotino commands - an Android phone can do the job via an [USB OTG cable](https://www.amazon.com/s?k=usb+otg+cable) and a [Serial App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it)
 - basic Meade LX200 protocol (INDI)
 
-Goal is to provide a simple&cheap, but high precision, solution for *augmented starhopping*: you point the scope to something you can find easily and get help moving to a remote, low magnitude object.
+Goal is to provide a simple&cheap, but high precision, solution for *augmented starhopping*: you point the scope to something you can find easily and get help to reach a remote, low magnitude object.
 
 Photos and hardware details on [CloudyNights (English)](https://www.cloudynights.com/topic/735800-agotino-a-simple-arduino-nano-goto/) or [Astronomia.com (Italian)](https://www.astronomia.com/forum/showthread.php?34605-aGotino-un-goto-con-Arduino).
 
@@ -12,7 +12,7 @@ Photos and hardware details on [CloudyNights (English)](https://www.cloudynights
 
 ### Features
 
-- move Right Ascension at sidereal speed (1x) 
+- tracking (move Right Ascension at sidereal speed, 1x) 
 - at button 1 & 2 press, cycle among forward and backward speeds (8x) on RA&Dec
 - listen on serial port for basic LX200 commands (tested with INDI LX200 Basic driver and Stellarium, Kstar, Cartes du Ciel)
 - listen on serial port for aGotino commands
