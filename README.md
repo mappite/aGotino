@@ -1,5 +1,5 @@
 # aGotino
-A simple telescope Goto solution based on Arduino Nano (or Uno) supporting:
+A simple telescope Goto solution based on Arduino Nano (or Uno) that supports:
 
 - aGotino commands - an Android phone can do the job via an [USB OTG cable](https://www.amazon.com/s?k=usb+otg+cable) and a [Serial App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it)
 - basic Meade LX200 protocol (INDI)
