@@ -55,17 +55,17 @@ Point scope to Mizar in UMa (star 223 in aGotino Star List) and slew to M101 Pin
     19:10:32  *** done
     19:10:32 Current Position: 18h51'06" ‑06°16'00"
 
-Slew by 1° W and 1° S.  Note: 1° = 60' which in HH:MI corresponds to 60x4 secs = 4 mins.
+Slew +1° Dec (North) and -1° in RA.  *Note:* 1° = 60' which in HH:MI translates to 60x4 secs = 4 mins.
 
     19:22:28 Current Position: 02h03'54" 42°19'47
-    > -0060-0060
+    > -0060+0060
     21:23:10  *** moving...
     21:23:12  *** done
-    21:23:12 Current Position: 1h59'54" 41°19'47"
+    21:23:12 Current Position: 1h59'54" 43°19'47"
 
-#### aGotino Star List
+#### [aGotino Star List](https://github.com/mappite/aGotino/blob/main/aGotino-StarList.pdf)
 
-Contains all α, β, γ constellations stars up to mag 4 and other stars up to mag 3. The goal is to provide a quick lookup number reference for easy-to-point stars (vs having to type RA&Dec). Credits to Nasa's [BSC5P - Bright Star Catalog](https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html).
+Contains all α, β, γ constellations stars up to mag 4 and other stars up to mag 3. The goal is to provide a quick lookup number reference for easy-to-point stars (vs having to type RA&Dec). Credits to Nasa's [BSC5P - Bright Star Catalog](https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html) and KStars project for star names.
 
 ### Code
 
