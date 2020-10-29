@@ -2,7 +2,7 @@
 A simple telescope Goto solution based on Arduino Nano (or Uno) that supports:
 
 - aGotino commands - an Android phone can do the job via an [USB OTG cable](https://www.amazon.com/s?k=usb+otg+cable) and a [Serial App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it)
-- basic Meade LX200 protocol (INDI)
+- basic Meade LX200 protocol
 
 Goal is to provide a simple&cheap, but high precision, solution for *augmented starhopping*: you point the scope to something you can find easily and get help to reach a remote, low magnitude object.
 
@@ -66,6 +66,12 @@ Slew +1° Dec (North) and -1° in RA.  *Note:* 1° = 60' which in HH:MI translat
 #### [aGotino Star List](https://github.com/mappite/aGotino/blob/main/aGotino-StarList.pdf)
 
 Contains all α, β, γ constellations stars up to mag 4 and other stars up to mag 3. The goal is to provide a quick lookup number reference for easy-to-point stars (vs having to type RA&Dec). Credits to Nasa's [BSC5P - Bright Star Catalog](https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html) and KStars project for star names.
+
+### Meade LX200 Protocol Support
+
+Sync&Slew commands are supported, tested with INDI LX200 Basic driver with KStars, Cartes du Ciel, Stellarium
+
+[Here a short video!](https://youtu.be/PdkoGX5PcDA)
 
 ### Code
 
