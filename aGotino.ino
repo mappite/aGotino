@@ -373,20 +373,20 @@ void lx200(String s) { // all :.*# commands are passed
     printLog("GD");
     // send current DEC to computer
     Serial.print(lx200DEC);
-  } else if (s.substring(1,3).equals("Sr")) { // :Sr HH:MM:SS# 
+  } else if (s.substring(1,3).equals("Sr")) { // :SrHH:MM:SS# // blanks after :Sr removed as per Meade specs
     printLog("Sr");
     // this is INITAL step for setting position (RA)
-    long hh = s.substring(4,6).toInt();
-    long mi = s.substring(7,9).toInt();
-    long ss = s.substring(10,12).toInt();
+    long hh = s.substring(3,5).toInt();
+    long mi = s.substring(6,8).toInt();
+    long ss = s.substring(9,11).toInt();
     inRA = hh*3600+mi*60+ss;
     Serial.print(1);
-  } else if (s.substring(1,3).equals("Sd")) { // :Sd sDD*MM:SS# 
+  } else if (s.substring(1,3).equals("Sd")) { // :SdsDD*MM:SS# // blanks after :Sr removed as per Meade specs
     printLog("Sd");
     // this is the FINAL step of setting a pos (DEC) 
-    long dd = s.substring(5,7).toInt()*(s.charAt(4)=='-'?-1:1);
-    long mi = s.substring(8,10).toInt();
-    long ss = s.substring(11,13).toInt();
+    long dd = s.substring(4,6).toInt()*(s.charAt(3)=='-'?-1:1);
+    long mi = s.substring(7,9).toInt();
+    long ss = s.substring(10,12).toInt();
     inDEC = dd*3600+mi*60+ss;
     if (currDEC == NORTH_DEC) { // if currDEC is still the initial default position (North)
       // assume this is to sync current position to new input
@@ -456,7 +456,7 @@ void updateLx200Coords(long raSecs, long decSecs) {
  */
 void agoto(String s) {
   // remove blanks
-  s.replace(" ", "");
+  //s.replace(" ", ""); // not needed anymore, these are ignored in loop()
   // keywords: debug, sleep, range, speed  
   if (s.substring(1,6).equals("debug")) {
     DEBUG = (s.charAt(0) == '+')?true:false;
@@ -654,7 +654,12 @@ void loop() {
     unsigned long slewTime = micros(); // record when slew code starts, RA 1x movement will be on hold hence we need to fix the gap later on
 
     input[in] = Serial.read(); 
-  
+
+    // discard blanks. This is needed to avoid an odd behavioud
+    // with LX200 protocol where Meade specs states :Sd and :Sr are
+    // not followed by a blank but most implementation do...
+    if (input[in] == ' ') return; 
+    
     if (input[in] == '#' || input[in] == '\n') { // time to check what is in the buffer
       if ((input[0] == '+' || input[0] == '-' 
         || input[0] == 's' || input[0] == 'g')) { // agoto
@@ -694,9 +699,7 @@ void loop() {
       slewRaDecBySecs(slewTime / 1000000, 0); // it's the real number of seconds!
       printLog("*** adjusting Ra done");
     }
-    // FIXME - this will slow down RA every time a string is received,
-    //    i.e. Stellarium asking for current position, but perhaps it is not noticeable
-    // raLastTime = micros(); // reset time 
+
     
   }
 
