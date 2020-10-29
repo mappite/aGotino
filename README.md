@@ -19,7 +19,7 @@ Photos and hardware details on [CloudyNights (English)](https://www.cloudynights
 
 ### aGotino Command set
 **x** can be **s (set)** or **g (goto)**:    
-  - **`x HHMMSS±DDMMSS`** set/goto position
+  - **`x HHMMSS±DDMMSS`** set/goto coordinates
   - **`x Mn`**            set/goto Messier object n
   - **`x Sn`**            set/goto Star number n in aGotino Star List
   - **`±RRRR±DDDD`**     slew Ra&Dec by RRRR&DDDD degree mins (RRRRx4 corresponds to hour seconds)
@@ -33,6 +33,10 @@ blanks are ignored and can be omitted.
 > WARNING: watch your scope while slewing!
 > There are no controls to avoid collisions with mount,
 > for this reason defaul maximum range for slew is 30°
+
+#### [aGotino Star List](https://github.com/mappite/aGotino/blob/main/aGotino-StarList.pdf)
+
+Contains all α, β, γ constellations stars up to mag 4 and other stars up to mag 3. The goal is to provide a quick lookup number reference for easy-to-point stars (vs having to type coords). Credits to Nasa's [BSC5P - Bright Star Catalog](https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html) and KStars project for star names.
 
 #### Example 
 
@@ -55,17 +59,14 @@ Point scope to Mizar in UMa (star 223 in aGotino Star List) and slew to M101 Pin
     19:10:32  *** done
     19:10:32 Current Position: 18h51'06" ‑06°16'00"
 
-Slew +1° Dec (North) and -1° in RA.  *Note:* 1° = 60' which in HH:MI translates to 60x4 secs = 4 mins.
+Slew +1° Dec (North) and -1° in RA.  
+*Note:* 1° = 60' which in HH:MI translates to 60x4 secs = 4 mins.
 
     19:22:28 Current Position: 02h03'54" 42°19'47
     > -0060+0060
     21:23:10  *** moving...
     21:23:12  *** done
     21:23:12 Current Position: 1h59'54" 43°19'47"
-
-#### [aGotino Star List](https://github.com/mappite/aGotino/blob/main/aGotino-StarList.pdf)
-
-Contains all α, β, γ constellations stars up to mag 4 and other stars up to mag 3. The goal is to provide a quick lookup number reference for easy-to-point stars (vs having to type RA&Dec). Credits to Nasa's [BSC5P - Bright Star Catalog](https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html) and KStars project for star names.
 
 ### Meade LX200 Protocol Support
 
