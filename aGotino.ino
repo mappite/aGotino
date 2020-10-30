@@ -213,7 +213,7 @@ int slewRaDecBySecs(long raSecs, long decSecs) {
   // FIXME: detect if direction has changed and add back-slash steps
 
   // calculate how many (micro)steps are needed
-  unsigned long raSteps  = (abs(raSecs) * MICROSTEPS_PER_HOUR) / 3600; // FIXME: implicit conversion from long to unsigned long, will it work?
+  unsigned long raSteps  = (abs(raSecs) * MICROSTEPS_PER_HOUR) / 3600;
   unsigned long decSteps = (abs(decSecs) * MICROSTEPS_PER_DEGREE) / 3600;
 
   unsigned long raFullSteps   = raSteps / MICROSTEPS;             // this will truncate the result...
@@ -233,8 +233,8 @@ int slewRaDecBySecs(long raSecs, long decSecs) {
   printLog("FullSteps Slew Done");
 
   // Final Adjustment - re-enable micro stepping
-  // FIXME: this is likely superflous since precision is 6.66 full steps per minute,
-  //        i.e. one full step is already less than a minute... 
+  //    this is likely superflous since precision is 6.66 full steps per minute,
+  //    i.e. one full step is already less than a minute... 
   printLog("Re-enabling Microstepping");
   digitalWrite(raEnableMicroStepsPin, HIGH);
   digitalWrite(decEnableMicroStepsPin, HIGH);
@@ -444,7 +444,7 @@ void updateLx200Coords(long raSecs, long decSecs) {
   lx200DEC = "";
   lx200DEC.concat(decSecs>0?'+':'-');
   if (pp<10) lx200DEC.concat('0');
-  lx200DEC.concat(pp);lx200DEC.concat(char(223));
+  lx200DEC.concat(pp);lx200DEC.concat(char(223)); // FIXME: may be just * nowadays
   if (mi<10) lx200DEC.concat('0'); 
   lx200DEC.concat(mi);lx200DEC.concat(':');
   if (ss<10) lx200DEC.concat('0');
