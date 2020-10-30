@@ -78,7 +78,7 @@ Tested with INDI LX200 Basic driver with KStars, Cartes du Ciel, Stellarium
 ### Files
 
     aGotino.ino           C Source
-    catalogs.h            Contains catalogues (Messiers and aGotino Star List in J2000.0)
+    catalogs.h            Contains catalogues (Messier and aGotino Star List in J2000.0)
     aGotino-StarList.pdf  Star list in PDF
     aGotino-wiring.png    wirings 
 
