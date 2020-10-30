@@ -373,7 +373,7 @@ void lx200(String s) { // all :.*# commands are passed
     printLog("GD");
     // send current DEC to computer
     Serial.print(lx200DEC);
-  } else if (s.substring(1,3).equals("Sr")) { // :SrHH:MM:SS# // blanks after :Sr removed as per Meade specs
+  } else if (s.substring(1,3).equals("Sr")) { // :SrHH:MM:SS# // no blanks after :Sr as per Meade specs
     printLog("Sr");
     // this is INITAL step for setting position (RA)
     long hh = s.substring(3,5).toInt();
@@ -381,7 +381,7 @@ void lx200(String s) { // all :.*# commands are passed
     long ss = s.substring(9,11).toInt();
     inRA = hh*3600+mi*60+ss;
     Serial.print(1);
-  } else if (s.substring(1,3).equals("Sd")) { // :SdsDD*MM:SS# // blanks after :Sr removed as per Meade specs
+  } else if (s.substring(1,3).equals("Sd")) { // :SdsDD*MM:SS# // blanks after :Sd
     printLog("Sd");
     // this is the FINAL step of setting a pos (DEC) 
     long dd = s.substring(4,6).toInt()*(s.charAt(3)=='-'?-1:1);
@@ -455,8 +455,6 @@ void updateLx200Coords(long raSecs, long decSecs) {
  * aGoto simple protocol
  */
 void agoto(String s) {
-  // remove blanks
-  //s.replace(" ", ""); // not needed anymore, these are ignored in loop()
   // keywords: debug, sleep, range, speed  
   if (s.substring(1,6).equals("debug")) {
     DEBUG = (s.charAt(0) == '+')?true:false;
@@ -655,9 +653,9 @@ void loop() {
 
     input[in] = Serial.read(); 
 
-    // discard blanks. This is needed to avoid an odd behavioud
-    // with LX200 protocol where Meade specs states :Sd and :Sr are
-    // not followed by a blank but most implementation do...
+    // discard blanks. Meade LX200 specs states :Sd and :Sr are
+    // not followed by a blank but some implementation do...
+    // also this allows aGoto commands to be typed with blanks in
     if (input[in] == ' ') return; 
     
     if (input[in] == '#' || input[in] == '\n') { // time to check what is in the buffer
@@ -669,8 +667,8 @@ void loop() {
         lx200(input);
       } else {
         // unknown command, print message only
-        // if buffer contains more than one chars
-        // since stellarium seems to sedn extra #'s
+        // if buffer contains more than one char
+        // since stellarium seems to send extra #'s
         if (in > 0) Serial.println("String unknown. Expected lx200 or aGoto commands");
       }
       in = 0; // reset buffer
@@ -678,19 +676,6 @@ void loop() {
       if (in++>20) in = 0; // prepare for next char or reset buffer if max lenght reached
     }
     
-    /*
-  
-    String s = Serial.readString();    // FIXME: evaluate switch to char buffer to improve performance
-    // printLog(s);
-    if (s.charAt(0) == '#' || s.charAt(0) == ':') { // assume lx200 protocol
-      lx200(s);
-    } else if ((s.charAt(0) == '+' || s.charAt(0) == '-' 
-             || s.charAt(0) == 's' || s.charAt(0) == 'g')) { // assume aGoto protocol
-      agoto(s);
-    } else {
-      Serial.println("String unknown. Expected lx200 or aGoto commands");
-    }
-    */
     // if slewing took more than 5 secs, adjust RA
     slewTime = micros() - slewTime; // time elapsed for slewing
     if ( slewTime > (5 * 1000000) ) {
