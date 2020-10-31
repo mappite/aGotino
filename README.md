@@ -73,7 +73,7 @@ Slew +1° Dec (North) and -1° in RA.
 Sync&Slew actions are supported, commands **`:GR :GD :Sr :Sd :MS :CM`**  
 Tested with Stellarium (direct) and INDI LX200 Basic driver (KStars, Cartes du Ciel, Stellarium, etc)
 
-[Here a short video!](https://youtu.be/PdkoGX5PcDA){:target="_blank"}
+[Here a short video!](https://youtu.be/PdkoGX5PcDA)
 
 ### Files
 
