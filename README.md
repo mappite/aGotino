@@ -22,7 +22,7 @@ Photos and hardware details on [CloudyNights (English)](https://www.cloudynights
   - **`x HHMMSS±DDMMSS`** set/goto coordinates
   - **`x Mn`**            set/goto Messier object n
   - **`x Sn`**            set/goto Star number n in aGotino Star List
-  - **`±RRRR±DDDD`**     slew Ra&Dec by RRRR&DDDD degree mins (RRRRx4 corresponds to hour seconds)
+  - **`±RRRR±DDDD`**     slew Ra&Dec by RRRR&DDDD primes (RRRRx4 corresponds to arcsecs)
   - **`±debug`**       verbose output
   - **`±sleep`**       power saving on dec motor when unused
   - **`±speed`**       increase or decrease speed by 4x
@@ -60,7 +60,7 @@ Point scope to Mizar in UMa (star 223 in aGotino Star List) and slew to M101 Pin
     19:10:32 Current Position: 18h51'06" ‑06°16'00"
 
 Slew +1° Dec (North) and -1° in RA.  
-*Note:* 1° = 60' which in HH:MI translates to 60x4 secs = 4 mins.
+*Note:* 1° = 60' (arcmins) translates to 60*4 secs = 4 mins.
 
     19:22:28 Current Position: 02h03'54" 42°19'47
     > -0060+0060
