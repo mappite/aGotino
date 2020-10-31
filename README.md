@@ -32,7 +32,7 @@ blanks are ignored and can be omitted.
 
 > WARNING: watch your scope while slewing!
 > There are no controls to avoid collisions with mount,
-> for this reason defaul maximum range for slew is 30°
+> for this reason default maximum range for slew is 30°
 
 #### [aGotino Star List](https://github.com/mappite/aGotino/blob/main/aGotino-StarList.pdf)
 
@@ -73,7 +73,7 @@ Slew +1° Dec (North) and -1° in RA.
 Sync&Slew actions are supported, commands **`:GR :GD :Sr :Sd :MS :CM`**  
 Tested with Stellarium (direct) and INDI LX200 Basic driver (KStars, Cartes du Ciel, Stellarium, etc)
 
-[Here a short video!](https://youtu.be/PdkoGX5PcDA)
+[Here a short video!](https://youtu.be/PdkoGX5PcDA){:target="_blank"}
 
 ### Files
 
