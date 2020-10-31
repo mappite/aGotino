@@ -2,9 +2,9 @@
 A simple telescope Goto solution based on Arduino Nano (or Uno) that supports:
 
 - aGotino commands - an Android phone can do the job via an [USB OTG cable](https://www.amazon.com/s?k=usb+otg+cable) and a [Serial App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it)
-- basic Meade LX200 protocol
+- basic Meade LX200 protocol - drive with Stellarium or any software that supports INDI
 
-Goal is to provide a simple&cheap, but high precision, solution for *augmented starhopping*: you point the scope to something you can find easily and get help to reach a remote, low magnitude object.
+Goal is to provide a simple&cheap to build, but high precision, solution for *augmented starhopping*: you point the scope to something you can  easily find and get help to reach a remote, low magnitude object.
 
 Photos and hardware details on [CloudyNights (English)](https://www.cloudynights.com/topic/735800-agotino-a-simple-arduino-nano-goto/) or [Astronomia.com (Italian)](https://www.astronomia.com/forum/showthread.php?34605-aGotino-un-goto-con-Arduino).
 
@@ -12,9 +12,9 @@ Photos and hardware details on [CloudyNights (English)](https://www.cloudynights
 
 ### Features
 
-- tracking (move Right Ascension at sidereal speed, 1x) 
-- at button 1 & 2 press, cycle among forward and backward speeds (8x) on RA&Dec
-- listen on serial port for basic LX200 commands (tested with INDI LX200 Basic driver and Stellarium, Kstar, Cartes du Ciel)
+- tracking - move Right Ascension at sidereal speed, 1x
+- a two button remote allows to cycle among forward and backward speeds (8x) on RA&Dec
+- listen on serial port for basic LX200 commands
 - listen on serial port for aGotino commands
 
 ### aGotino Command set
@@ -36,7 +36,7 @@ blanks are ignored and can be omitted.
 
 #### [aGotino Star List](https://github.com/mappite/aGotino/blob/main/aGotino-StarList.pdf)
 
-Contains all α, β, γ constellations stars up to mag 4 and other stars up to mag 3. The goal is to provide a quick lookup number reference for easy-to-point stars (vs having to type coords). Credits to Nasa's [BSC5P - Bright Star Catalog](https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html) and KStars project for star names.
+Contains all α, β, γ constellation stars up to mag 4 and other stars up to mag 3. The goal is to provide a quick lookup number reference for easy-to-point stars vs having to type coords. Credits to Nasa's [BSC5P - Bright Star Catalog](https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html) and KStars project for star names.
 
 #### Example 
 
@@ -71,7 +71,7 @@ Slew +1° Dec (North) and -1° in RA.
 ### Meade LX200 Protocol Support
 
 Sync&Slew actions are supported, commands **`:GR, :GD, :Sr, :Sd, :MS, :CM`**  
-Tested with INDI LX200 Basic driver with KStars, Cartes du Ciel, Stellarium
+Tested with Stellarium (direct) and INDI LX200 Basic driver (KStars, Cartes du Ciel, Stellarium, etc)
 
 [Here a short video!](https://youtu.be/PdkoGX5PcDA)
 
