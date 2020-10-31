@@ -70,7 +70,7 @@ Slew +1° Dec (North) and -1° in RA.
 
 ### Meade LX200 Protocol Support
 
-Sync&Slew actions are supported, commands **`:GR, :GD, :Sr, :Sd, :MS, :CM`**  
+Sync&Slew actions are supported, commands **`:GR :GD :Sr :Sd :MS :CM`**  
 Tested with Stellarium (direct) and INDI LX200 Basic driver (KStars, Cartes du Ciel, Stellarium, etc)
 
 [Here a short video!](https://youtu.be/PdkoGX5PcDA)
