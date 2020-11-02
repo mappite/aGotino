@@ -97,3 +97,17 @@ Tested with Stellarium (direct) and INDI LX200 Basic driver (KStars, Cartes du C
     STEP_DELAY              18699   // = (86164/360)/(MicroSteps per Degree)*1000000
                                     // = microseconds to advance a microstep
                                     // 86164 is the number of secs for earth 360deg rotation (23h56m04s)
+                                  
+The above example is for an EQ5/Exos2 with 40T-16T pulleys which provides 53 microsteps/second or .281 arcsec/mstep.
+
+### Hardware
+
+- Steppers Motor:  Nema 17 400 step per revolution is a good solution - for visual only you can select smaller ones
+  - Support to attach motor to the mount - depends on your mount, be creative
+- Motor Driver: at least 32 microstep. Cheap DRV8825 works, but better TMC or LV can be used of course
+- 4 Pulleys and 2 Belts (GT2). Size depends on your mount (see [Belt Calculator](https://www.bbman.com/belt-length-calculator/))
+- RJ11 cable with two RJ11 sockets to connect the Dec Motor
+- Dupont cables, a couple of momentary buttons and a 50µF Capacitor 
+- Arduino Nano
+
+![Hardware](https://imgur.com/zhQLEPC.png)
