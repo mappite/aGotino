@@ -4,9 +4,9 @@ A simple telescope Goto solution based on Arduino Nano (or Uno) that supports:
 - aGotino commands - an Android phone can do the job via an [USB OTG cable](https://www.amazon.com/s?k=usb+otg+cable) and a [Serial App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it)
 - basic Meade LX200 protocol - drive with Stellarium or any software that supports INDI
 
-Goal is to provide a simple&cheap to build, but high precision, solution for *augmented starhopping*: you point the scope to something you can  easily find and get help to reach a remote, low magnitude object.
+Goal is to build a simple & cheap (less than $100), but rather high precision, solution for tracking and *augmented starhopping*: you point the scope to something you can  easily find and get help to reach a remote, low magnitude object.
 
-Photos and hardware details on [CloudyNights (English)](https://www.cloudynights.com/topic/735800-agotino-a-simple-arduino-nano-goto/) or [Astronomia.com (Italian)](https://www.astronomia.com/forum/showthread.php?34605-aGotino-un-goto-con-Arduino).
+No additional boards needed, just an Arduino Nano and two Stepper Drivers do the job. Photos and hardware details on [CloudyNights (English)](https://www.cloudynights.com/topic/735800-agotino-a-simple-arduino-nano-goto/) or [Astronomia.com (Italian)](https://www.astronomia.com/forum/showthread.php?34605-aGotino-un-goto-con-Arduino).
 
 ![aGotino](https://www.cloudynights.com/uploads/gallery/album_14775/sml_gallery_329462_14775_4192.jpg)
 
@@ -98,16 +98,16 @@ Tested with Stellarium (direct) and INDI LX200 Basic driver (KStars, Cartes du C
                                     // = microseconds to advance a microstep
                                     // 86164 is the number of secs for earth 360deg rotation (23h56m04s)
                                   
-The above example is for an EQ5/Exos2 with 40T-16T pulleys which provides 53 microsteps/second or .281 arcsec/mstep.
+The above example is for an EQ5/Exos2 with 40T-16T pulleys which results in 53 microsteps/second or .281 arcsec/microstep.
 
 ### Hardware
 
-- Steppers Motor:  Nema 17 400 step per revolution is a good solution - for visual only you can select smaller ones
-  - Support to attach motor to the mount - depends on your mount, be creative
-- Motor Driver: at least 32 microstep. Cheap DRV8825 works, but better TMC or LV can be used of course
+- Steppers Motor:  Nema 17 400 step per revolution seems a great solution - for visual only you can select smaller ones
+  - Support to attach motor to the mount - depends on your mount, be creative and use a 3D printer if you have one ;)
+- Motor Driver: with at least 32 microstep. Cheap DRV8825 works, but better TMC or LV can be used of course
 - 4 Pulleys and 2 Belts (GT2). Size depends on your mount (see [Belt Calculator](https://www.bbman.com/belt-length-calculator/))
 - RJ11 cable with two RJ11 sockets to connect the Dec Motor
-- Dupont cables, a couple of momentary buttons and a 50µF Capacitor 
+- Dupont cables, a couple of momentary buttons and a 100µF Capacitor to protect the circuit.
 - Arduino Nano
 
 ![Hardware](https://imgur.com/zhQLEPC.png)
