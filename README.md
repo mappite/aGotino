@@ -40,7 +40,7 @@ Contains all α, β, γ constellation stars up to mag 4 and other stars up to ma
 
 #### Example 
 
-Point scope to Mizar in UMa (star 223 in aGotino Star List) and slew to M101 Pinwheel Galaxy, then point Altair in Aql (using coordinates) and slew to M11 Wild Duck
+Point scope to Mizar in UMa, set Star 223 in aGotino Star List, and slew to M101 Pinwheel Galaxy;  point Altair in Aql, set using coordinates, and slew to M11 Wild Duck
 
     19:06:34 aGotino: ready.
     > s S223
@@ -102,9 +102,9 @@ The above example is for an EQ5/Exos2 with 40T-16T pulleys which results in 53 m
 
 ### Hardware
 
-- Steppers Motor:  Nema 17 400 step per revolution seems a great solution - for visual only you can select smaller ones
-  - Support to attach motor to the mount - depends on your mount, be creative and use a 3D printer if you have one ;)
-- Motor Driver: with at least 32 microstep. Cheap DRV8825 works, but better TMC or LV can be used of course
+- 2 Stepper Motors:  Nema 17 400 step per revolution seems a great solution - for visual only you can select smaller ones
+  - Supports to attach motors to the mount - depends on your mount, be creative and use a 3D printer if you have one ;)
+- 2 Drivers: with at least 32 microsteps. Cheap DRV8825 works, but better TMC or LV can be used of course
 - 4 Pulleys and 2 Belts (GT2). Size depends on your mount (see [Belt Calculator](https://www.bbman.com/belt-length-calculator/))
 - RJ11 cable with two RJ11 sockets to connect the Dec Motor
 - Dupont cables, a couple of momentary buttons and a 100µF Capacitor to protect the circuit.
