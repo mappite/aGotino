@@ -68,14 +68,14 @@ Slew +1° Dec (North) and -1° in RA.
     21:23:12  *** done
     21:23:12 Current Position: 1h59'54" 43°19'47"
 
-[Here a video: look aGotino in action](https://www.youtube.com/watch?v=YF_J7_7lyB4)
+[Here a video: aGotino in action](https://www.youtube.com/watch?v=YF_J7_7lyB4)
 
 ### Meade LX200 Protocol Support
 
 Sync&Slew actions are supported, commands **`:GR :GD :Sr :Sd :MS :CM`**  
 Tested with Stellarium (direct) and INDI LX200 Basic driver (KStars, Cartes du Ciel, Stellarium, etc)
 
-[Here a video: Stellarium and aGotino](https://youtu.be/PdkoGX5PcDA)
+[Here a video: Stellarium with aGotino](https://youtu.be/PdkoGX5PcDA)
 
 ### Files
 
