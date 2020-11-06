@@ -4,7 +4,7 @@ A simple telescope Goto solution based on Arduino Nano (or Uno) that supports:
 - aGotino commands - an Android phone can do the job via an [USB OTG cable](https://www.amazon.com/s?k=usb+otg+cable) and a [Serial App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it)
 - basic Meade LX200 protocol - drive with Stellarium or any software that supports INDI
 
-Goal is to build a simple & cheap (less than $100), but rather high precision, solution for tracking and *augmented starhopping*: you point the scope to something you can  easily find and get help to reach a remote, low magnitude object.
+Goal is to build a simple & cheap, but good quality, solution for tracking and *augmented starhopping*: you point the scope to something you can  easily find and get help to reach a remote, low magnitude object.
 
 No additional boards needed, just an Arduino Nano and two Stepper Drivers do the job. Photos and hardware details on [CloudyNights (English)](https://www.cloudynights.com/topic/735800-agotino-a-simple-arduino-nano-goto/) or [Astronomia.com (Italian)](https://www.astronomia.com/forum/showthread.php?34605-aGotino-un-goto-con-Arduino).
 
@@ -68,12 +68,14 @@ Slew +1° Dec (North) and -1° in RA.
     21:23:12  *** done
     21:23:12 Current Position: 1h59'54" 43°19'47"
 
+[Here a video: look aGotino in action](https://www.youtube.com/watch?v=YF_J7_7lyB4)
+
 ### Meade LX200 Protocol Support
 
 Sync&Slew actions are supported, commands **`:GR :GD :Sr :Sd :MS :CM`**  
 Tested with Stellarium (direct) and INDI LX200 Basic driver (KStars, Cartes du Ciel, Stellarium, etc)
 
-[Here a short video!](https://youtu.be/PdkoGX5PcDA)
+[Here a video: Stellarium and aGotino](https://youtu.be/PdkoGX5PcDA)
 
 ### Files
 
