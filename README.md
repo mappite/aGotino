@@ -86,12 +86,12 @@ Tested with Stellarium (direct) and INDI LX200 Basic driver (KStars, Cartes du C
 
 ### AstroMath (i.e. adapt for your mount)
 
-    How to calculate STEP_DELAY to drive motor at right sidereal speed for your mount
+Below is how to calculate stepper motor pulse lenth to drive your mount at sidereal speed
     
     Worm Ratio                144   // 144 eq5/exos2, 135 heq5, 130 eq3-2
     Other (Pulley/Gear) Ratio   2.5 // depends on your pulley setup e.g. 40T/16T = 2.5
-    Steps per revolution      400   // or usually 200 depends on your motor
-    Microstep                  32   // depends on driver
+    Steps per revolution      400   // or 200 depends on stepper motor. The higher the better.
+    Microstep                  32   // depends on driver. The higher the better.
      
     MICROSTEPS_PER_DEGREE   12800   // = WormRatio*OtherRatio*StepsPerRevolution*Microsteps/360
                                     // = number of motor microsteps to rotate the scope by 1 degree
@@ -100,7 +100,7 @@ Tested with Stellarium (direct) and INDI LX200 Basic driver (KStars, Cartes du C
                                     // = microseconds to advance a microstep
                                     // 86164 is the number of secs for earth 360deg rotation (23h56m04s)
                                   
-The above example is for an EQ5/Exos2 with 40T-16T pulleys which results in 53 microsteps/second or .281 arcsec/microstep.
+The above example is for an EQ5/Exos2 with 40T-16T pulleys, this results in 53 microsteps/second or .281 arcsec/microstep.
 
 ### Hardware
 
