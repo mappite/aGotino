@@ -62,7 +62,7 @@ boolean DEBUG = false;                  // toggle with +debug on serial
 
 unsigned int RA_FAST_SPEED  = 8;  // speed at button press, times the sidereal speed
 unsigned int DEC_FAST_SPEED = 8;  // speed at button press
-unsigned long STEP_DELAY_SLEW = 1000;   // step timing in micros when slewing (slewing speed)
+unsigned long STEP_DELAY_SLEW = 1200;   // step timing in micros when slewing (slewing speed)
 // This assumes same gear ratios in AR&DEC
 const unsigned long MICROSTEPS_PER_HOUR  = MICROSTEPS_PER_DEGREE * 360 / 24;
 
