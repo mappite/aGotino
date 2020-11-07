@@ -92,7 +92,8 @@ boolean raStepPinStatus = false;  // true = HIGH, false = LOW
 boolean decStepPinStatus = false; // true = HIGH, false = LOW
 
 // default current DEC to North
-const long NORTH_DEC= 324000; // 90°
+const long NORTH_DEC   = 324000; // 90°
+const long DAY_SECONDS =  86400;
 
 // Current and input coords in Secs
 long currRA = 0;     
@@ -200,6 +201,13 @@ void decPlay(unsigned long stepDelay) {
  *   microstepping is disabled for fast movements and (re-)enabled for finer ones
  */
 int slewRaDecBySecs(long raSecs, long decSecs) {
+
+  // resolve meridian flip. If more than 12h turn from the opposite side
+  if (abs(raSecs) > DAY_SECONDS/2) { // reverse
+    printLog("Meridian Flip detected, new RA secs:");
+    raSecs = raSecs+(raSecs>0?-1:1)*DAY_SECONDS;
+    printLogUL(raSecs);
+  }
 
   // check if within max range
   if ( (abs(decSecs) > (MAX_RANGE*60)) || ( abs(raSecs) > (MAX_RANGE*4)) ) {
