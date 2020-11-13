@@ -59,7 +59,7 @@ Point scope to Mizar in UMa, set Star 223 in aGotino Star List, and slew to M101
     19:10:32  *** done
     19:10:32 Current Position: 18h51'06" ‑06°16'00"
 
-Slew +1° Dec (North) and -1° in RA.  
+Slew +1° Dec (North) and -1° in RA (West).  
 *Note:* 1° = 60' (arcmins) translates to 60*4 secs = 4 mins.
 
     19:22:28 Current Position: 02h03'54" 42°19'47
