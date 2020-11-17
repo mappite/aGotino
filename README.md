@@ -119,5 +119,5 @@ The above example is for an EQ5/Exos2 with 40T-16T pulleys, this results in 53 m
 ### Todo
 
 - Add more objects (NGCs)
-- Allow to lookup objects by constellations (i.e. avoid to remmeber Start List number)
-- Add pulse guide commands to allow guiding via phd2 / Add ST4 port
+- Lookup objects by constellation
+- Support pulse guide LX200-style commands to allow guiding via phd2 / or add ST4 port
