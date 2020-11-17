@@ -1,21 +1,23 @@
 # aGotino
 A simple telescope Goto solution based on Arduino Nano (or Uno) that supports:
 
-- aGotino commands - an Android phone can do the job via an [USB OTG cable](https://www.amazon.com/s?k=usb+otg+cable) and a [Serial App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it)
+- aGotino commands - any Android phone can act as a remote via an [USB OTG cable](https://www.amazon.com/s?k=usb+otg+cable) and a [Serial App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it)
 - basic Meade LX200 protocol - drive with Stellarium or any software that supports INDI
 
-Goal is to build a simple & cheap, but good quality, solution for tracking and *augmented starhopping*: you point the scope to something you can  easily find and get help to reach a remote, low magnitude object.
+aGotino is a simple & cheap, but rather good precision, solution for tracking and *augmented starhopping*: you point the scope to something you can  easily find and get help to reach a remote, low magnitude object.
 
-No additional boards needed, just an Arduino Nano and two Stepper Drivers do the job. Photos and hardware details on [CloudyNights (English)](https://www.cloudynights.com/topic/735800-agotino-a-simple-arduino-nano-goto/) or [Astronomia.com (Italian)](https://www.astronomia.com/forum/showthread.php?34605-aGotino-un-goto-con-Arduino).
+No additional boards needed, just wire an Arduino Nano and two Stepper Drivers to do the job. Photos and hardware details on [CloudyNights (English)](https://www.cloudynights.com/topic/735800-agotino-a-simple-arduino-nano-goto/) or [Astronomia.com (Italian)](https://www.astronomia.com/forum/showthread.php?34605-aGotino-un-goto-con-Arduino).
 
 ![aGotino](https://www.cloudynights.com/uploads/gallery/album_14775/sml_gallery_329462_14775_4192.jpg)
 
 ### Features
 
 - tracking - move Right Ascension at sidereal speed, 1x
-- a two button remote allows to cycle among forward and backward speeds (8x) on RA&Dec
+- two buttons remote to cycle among forward and backward speeds (8x) on RA&Dec
 - listen on serial port for basic LX200 commands
 - listen on serial port for aGotino commands
+  - 248 bright stars + Messier Objects in memory (pending to add more)
+  - sync&slew to objects in memory or to any RA/DEC coordinates
 
 ### aGotino Command set
 **x** can be **s (set)** or **g (goto)**:    
@@ -36,11 +38,11 @@ blanks are ignored and can be omitted.
 
 #### [aGotino Star List](https://github.com/mappite/aGotino/blob/main/aGotino-StarList.pdf)
 
-Contains all α, β, γ constellation stars up to mag 4 and other stars up to mag 3. The goal is to provide a quick lookup number reference for easy-to-point stars vs having to type coords. Credits to Nasa's [BSC5P - Bright Star Catalog](https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html) and KStars project for star names.
+aGotino contains all α, β, γ constellation stars up to mag 4 and other stars up to mag 3. The goal is to provide a quick lookup number reference for easy-to-point stars vs having to type coords. Credits to Nasa's [BSC5P - Bright Star Catalog](https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html) and KStars project for star names.
 
 #### Example 
 
-Point scope to Mizar in UMa, set Star 223 in aGotino Star List, and slew to M101 Pinwheel Galaxy;  point Altair in Aql, set using coordinates, and slew to M11 Wild Duck
+Point scope to Mizar in UMa, set (sync current position) Star 223 in aGotino Star List, and slew to M101 Pinwheel Galaxy;  point Altair in Aql, set using coordinates, and slew to M11 Wild Duck
 
     19:06:34 aGotino: ready.
     > s S223
@@ -113,3 +115,9 @@ The above example is for an EQ5/Exos2 with 40T-16T pulleys, this results in 53 m
 - Arduino Nano
 
 ![Hardware](https://imgur.com/zhQLEPC.png)
+
+### Todo
+
+- Add more objects (NGCs)
+- Allow to lookup objects by constellations (i.e. avoid to remmeber Start List number)
+- Add pulse guide commands to allow guiding via phd2 / Add ST4 port
