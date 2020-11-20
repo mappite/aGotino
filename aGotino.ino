@@ -95,6 +95,8 @@ boolean decStepPinStatus = false; // true = HIGH, false = LOW
 const long NORTH_DEC   = 324000; // 90°
 const long DAY_SECONDS =  86400;
 
+boolean SIDE_OF_PIER_WEST = true; // scope is west of the mount, pointing EAST. If Set position is on West reverse. But to know this... FIXME!!!
+
 // Current and input coords in Secs
 long currRA = 0;     
 long currDEC = NORTH_DEC;
@@ -202,9 +204,9 @@ void decPlay(unsigned long stepDelay) {
  */
 int slewRaDecBySecs(long raSecs, long decSecs) {
 
-  // resolve meridian flip. If more than 12h turn from the opposite side
+  // If more than 12h turn from the opposite side
   if (abs(raSecs) > DAY_SECONDS/2) { // reverse
-    printLog("Meridian Flip detected, new RA secs:");
+    printLog("RA reversed, new RA secs:");
     raSecs = raSecs+(raSecs>0?-1:1)*DAY_SECONDS;
     printLogUL(raSecs);
   }
@@ -216,7 +218,8 @@ int slewRaDecBySecs(long raSecs, long decSecs) {
   
   // set directions
   digitalWrite(raDirPin,  (raSecs > 0 ? HIGH : LOW));
-  digitalWrite(decDirPin, (decSecs > 0 ? HIGH : LOW));
+  digitalWrite(decDirPin, (decSecs > 0 ? (SIDE_OF_PIER_WEST?HIGH:LOW) : (SIDE_OF_PIER_WEST?LOW:HIGH)));
+
 
   // FIXME: detect if direction has changed and add back-slash steps
 
@@ -491,6 +494,10 @@ void agoto(String s) {
     } else {
       Serial.println("Can't set speed to zero");
     }
+  } else  if (s.substring(1,6).equals("side")) {
+    SIDE_OF_PIER_WEST = !SIDE_OF_PIER_WEST;
+    Serial.print("Side of pier: ");
+    Serial.println(SIDE_OF_PIER_WEST?"W":"E");
   } else { // Move, Set or Goto commands
 
     long deltaRaSecs  = 0; // secs to move RA 
@@ -614,8 +621,8 @@ void loop() {
     decPlay(STEP_DELAY / decSpeed);
   }
 
-  // raButton pressed: skip if within 500ms from last press
-  if ( (digitalRead(raButtonPin) == LOW)  && (micros() - raPressTime) > (500000) ) {
+  // raButton pressed: skip if within 300ms from last press
+  if ( (digitalRead(raButtonPin) == LOW)  && (micros() - raPressTime) > (300000) ) {
     raPressTime = micros();
     printLog("RA Speed: ");
     // 1x -> +RA_FAST_SPEED -> -(RA_FAST_SPEED-2)
@@ -634,7 +641,7 @@ void loop() {
   }
   
   // decButton pressed: skip if within 500ms from last press
-  if (digitalRead(decButtonPin) == LOW && (micros() - decPressTime) > (500000) ) {
+  if (digitalRead(decButtonPin) == LOW && (micros() - decPressTime) > (300000) ) {
     decPressTime = micros();  // time when button has been pressed
     printLog("Dec Speed: ");
     // 0x -> +DEC_FAST_SPEED -> -(DEC_FAST_SPEED-1)
