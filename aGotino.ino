@@ -170,7 +170,7 @@ void raPlay(unsigned long stepDelay) {
 /* DEC move */
 void decPlay(unsigned long stepDelay) {
   // Same logic as arPlay but with  STEP_DELAY_MIN/4 to make sure RA movement is not impacted
-  unsigned long halfStepDelay = stepDelay/2;
+  unsigned long halfStepDelay = stepDelay/2; // fixme implement accelleration
   unsigned long dt  = micros() - decLastTime;
 
   if ( (halfStepDelay - dt) < (STEP_DELAY_MIN / 4) ) { // time to hold and change pulse
@@ -287,13 +287,18 @@ void slewRaDecBySteps(unsigned long raSteps, unsigned long decSteps) {
   unsigned long delaySlew = 0; 
   unsigned long delayLX200Micros = 0; // delay introduced by LX200 polling reply
   in = 0; // reset the  input buffer read indec
-  
+
+  unsigned long MAX_DELAY = 16383; // limit of delayMicroseconds
   for (unsigned long i = 0; (i < raSteps || i < decSteps) ; i++) {
-    if ((i<100)||(i>raSteps-100 && i<raSteps)|| (i>decSteps-100 && i<decSteps)) {
-      delaySlew = STEP_DELAY_SLEW*2;// twice as slow
+    if ((i<100)) { // FIXME: start as slow as possible to avoid glitches
+      //delaySlew = (100-i)*STEP_DELAY_SLEW;    
+      delaySlew = MAX_DELAY-( (MAX_DELAY-STEP_DELAY_SLEW)/100*i);
+    } else if ( (i>raSteps-100 && i<raSteps)|| (i>decSteps-100 && i<decSteps)) {
+      delaySlew = STEP_DELAY_SLEW*2;// twice as slow when one motor stops...
     } else { 
       delaySlew = STEP_DELAY_SLEW;  // full speed
     } 
+    //if (delaySlew> 16383) delaySlew = 16383;
     
     if (i < raSteps)  { digitalWrite(raStepPin,  HIGH); }
     if (i < decSteps) { digitalWrite(decStepPin, HIGH); }
@@ -471,11 +476,11 @@ void agoto(String s) {
     DEBUG = (s.charAt(0) == '+')?true:false;
     if (DEBUG) Serial.println("Debug On"); 
           else Serial.println("Debug Off"); 
-  } else  if (s.substring(1,6).equals("sleep")) {
+  } else if (s.substring(1,6).equals("sleep")) {
     POWER_SAVING_ENABLED = (s.charAt(0) == '+')?true:false;
     if (POWER_SAVING_ENABLED) Serial.println("Power Saving Enabled");
                          else Serial.println("Power Saving Disabled");
-  } else  if (s.substring(1,6).equals("range")) {
+  } else if (s.substring(1,6).equals("range")) {
     int d = (s.charAt(0) == '+')?15:-15;
     if (MAX_RANGE+d > 0 ) {
       MAX_RANGE = MAX_RANGE+d*60;
@@ -484,7 +489,7 @@ void agoto(String s) {
     } else {
       Serial.println("Can't set range to zero");
     }
-  } else  if (s.substring(1,6).equals("speed")) {
+  } else if (s.substring(1,6).equals("speed")) {
     int d = (s.charAt(0) == '+')?4:-4;
     if (RA_FAST_SPEED+d > 0 ) {
       RA_FAST_SPEED  = RA_FAST_SPEED+d;
@@ -494,16 +499,16 @@ void agoto(String s) {
     } else {
       Serial.println("Can't set speed to zero");
     }
-  } else  if (s.substring(1,6).equals("side")) {
+  } else if (s.substring(1,5).equals("side")) {
     SIDE_OF_PIER_WEST = !SIDE_OF_PIER_WEST;
-    Serial.print("Side of pier: ");
+    Serial.print("Side of Pier: ");
     Serial.println(SIDE_OF_PIER_WEST?"W":"E");
   } else { // Move, Set or Goto commands
 
     long deltaRaSecs  = 0; // secs to move RA 
     long deltaDecSecs = 0; // secs to move Dec
 
-    if (s.charAt(5) == '+' || s.charAt(5) == '-') { // rRRRRdDDDD (r and d are signs) - Move by rRRRR and dDDDD deg mins
+    if ((s.charAt(0) == '+' || s.charAt(0) == '-') && (s.charAt(5) == '+' || s.charAt(5) == '-')) { // rRRRRdDDDD (r and d are signs) - Move by rRRRR and dDDDD deg mins
       // toInt() returns 0 if conversion fails, logic belows detects this
       if (!s.substring(1, 5).equals("0000")) {
         deltaRaSecs = s.substring(1, 5).toInt() * (s.charAt(0) == '+' ? +1 : -1) * 4;
@@ -686,7 +691,7 @@ void loop() {
         // since stellarium seems to send extra #'s
         if (in > 0) Serial.println("String unknown. Expected lx200 or aGoto commands");
       }
-      in = 0; // reset buffer
+      in = 0; // reset buffer // FIXME!!! the whole input buffer is passed anyway
     } else {
       if (in++>20) in = 0; // prepare for next char or reset buffer if max lenght reached
     }
