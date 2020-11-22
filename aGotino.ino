@@ -81,11 +81,13 @@ const int decSleepPin = 10;
 // Compare Match Register for RA interrupt (PRESCALER=8)
 const int CMR = (STEP_DELAY*16/8/2)-1; 
 
-unsigned long raPressTime  = 0;    // time when RA button is pressed
+unsigned long raPressTime  = 0;    // time since when RA  button is pressed
+unsigned long decPressTime = 0;    // time since when DEC button is pressed
+unsigned long bothPressTime= 0;    // time since when both buttons are pressed, used for change of pier
+
 unsigned long decLastTime  = 0;    // last time DEC pulse has changed status
-unsigned long decPressTime = 0;    // time when DEC button is pressed
 boolean raStepPinStatus  = false;  // true = HIGH, false = LOW
-boolean decStepPinStatus = false; // true = HIGH, false = LOW
+boolean decStepPinStatus = false;  // true = HIGH, false = LOW
 
 boolean SIDE_OF_PIER_WEST = true; // scope is west of the mount, pointing EAST. If Set position is on West reverse. But to know this... FIXME!!!
 
@@ -523,9 +525,7 @@ void agoto(String s) {
       Serial.println("Can't set speed to zero");
     }
   } else if (s.substring(1,5).equals("side")) {
-    SIDE_OF_PIER_WEST = !SIDE_OF_PIER_WEST;
-    Serial.print("Side of Pier: ");
-    Serial.println(SIDE_OF_PIER_WEST?"W":"E");
+    changeSideOfPier();
   } else { // Move, Set or Goto commands
 
     long deltaRaSecs  = 0; // secs to move RA 
@@ -636,6 +636,29 @@ void printCoord(long raSecs, long decSecs) {
   Serial.println("\"");
 }
 
+/* Change Side of Pier
+ *  invoked when both buttons are pressed for 1sec or with "+pier" command
+ *  Default Side of Pier is WEST, i.e. scope is West of mount pointing a target on East side
+ */
+void changeSideOfPier() {
+  SLEWING = true; // stop RA tracking hence give a "sound" feedback (motor stops)
+  SIDE_OF_PIER_WEST = !SIDE_OF_PIER_WEST;
+  Serial.print("Side of Pier: "); // FIXME: hope this does not create errors with LX200
+  Serial.println(SIDE_OF_PIER_WEST?"W":"E");
+  // visual feedback
+  if (SIDE_OF_PIER_WEST) { // turn on led 1sec
+    digitalWrite(LED_BUILTIN, HIGH); 
+    delay(3000);digitalWrite(LED_BUILTIN, LOW);
+  } else { // blink led twice
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(1000); digitalWrite(LED_BUILTIN, LOW);
+    delay(1000); digitalWrite(LED_BUILTIN, HIGH);
+    delay(1000); digitalWrite(LED_BUILTIN, LOW);
+  }
+  bothPressTime = 0; // force another full sec to change again
+  SLEWING = false;
+}
+
 void loop() {
   
   // Move Dec if needed
@@ -643,6 +666,15 @@ void loop() {
     decPlay(STEP_DELAY / decSpeed); // fixme, use a timer as per RA
   }
 
+  // when both buttons are pressed for 1sec, change side of pier
+  if ( (digitalRead(raButtonPin) == LOW) && digitalRead(decButtonPin) == LOW) {
+    if (bothPressTime == 0) bothPressTime = micros();
+    if ( (micros() - bothPressTime) > (1000000) ) { changeSideOfPier(); }
+  } else {
+    // if both buttons are pressed for less than 1 secs, reset timer to 0
+    bothPressTime = 0;  
+  }
+  
   // raButton pressed: skip if within 300ms from last press
   if ( (digitalRead(raButtonPin) == LOW)  && (micros() - raPressTime) > (300000) ) {
     raPressTime = micros();
@@ -670,11 +702,10 @@ void loop() {
     if (decSpeed == 0) {
       decSpeed = DEC_FAST_SPEED;
       decSleep(false); // awake it
-      digitalWrite(decDirPin, HIGH);
+      digitalWrite(decDirPin, (SIDE_OF_PIER_WEST?HIGH:LOW));
     } else if (decSpeed == DEC_FAST_SPEED) {
       decSpeed = (DEC_FAST_SPEED - 1);
-      digitalWrite(decDirPin, LOW); // change direction
-      // decSleep(false); // awake NOT NEEDED since it is already awake
+      digitalWrite(decDirPin, (SIDE_OF_PIER_WEST?LOW:HIGH));
     } else if  (decSpeed == (DEC_FAST_SPEED - 1)) {
       decSpeed = 0; // stop
       decSleep(true); // go to low power consumption
