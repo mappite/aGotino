@@ -63,7 +63,7 @@ Point scope to Mizar in UMa, set (sync current position) Star 223 in aGotino Sta
     19:10:32  *** done
     19:10:32 Current Position: 18h51'06" ‑06°16'00"
 
-Slew +1° Dec (North) and -1° in RA (West) - 1° = 60' (arcmins) translates to 60*4 secs = 4 mins.
+Slew +1° Dec (North) and -1° in RA (West). Note 1°=60' (arcmins) and translates to 60*4 secs = 4 mins.
 
     19:22:28 Current Position: 02h03'54" 42°19'47
     > -0060+0060
@@ -82,7 +82,7 @@ Tested with Stellarium (direct) and INDI LX200 Basic driver (KStars, Cartes du C
 
 ### Side of Pier
 
-Default value for *Side of Pier* is West, meaning your scope is supposed to be West of the mount, pointing East. If your scope is on East side of the mount, pointing West, you need to push both buttons for 1 sec or issue a **`+side`** command to let aGotino know that, since Declination movement has to invert direction. When setting East, motors pause for 3secs while onboard led turns on. When going back to West, onboard led blinks twice.
+Default value for *Side of Pier* is West, meaning your scope is supposed to be West of the mount, usually pointing East. If your scope is on East side of the mount, you need to push both buttons for 1 sec or issue a **`+side`** command to let aGotino know that, since Declination movement has to invert direction. When setting East, motors pause for 3secs while onboard led turns on. When going back to West, onboard led blinks twice.
 
 ### Files
 
