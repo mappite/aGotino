@@ -62,8 +62,7 @@ Point scope to Mizar in UMa, set (sync current position) Star 223 in aGotino Sta
     19:10:32  *** done
     19:10:32 Current Position: 18h51'06" ‑06°16'00"
 
-Slew +1° Dec (North) and -1° in RA (West).  
-*Note:* 1° = 60' (arcmins) translates to 60*4 secs = 4 mins.
+Slew +1° Dec (North) and -1° in RA (West) - 1° = 60' (arcmins) translates to 60*4 secs = 4 mins.
 
     19:22:28 Current Position: 02h03'54" 42°19'47
     > -0060+0060
@@ -73,7 +72,7 @@ Slew +1° Dec (North) and -1° in RA (West).
 
 [Here a video: aGotino in action](https://www.youtube.com/watch?v=YF_J7_7lyB4)
 
-**Note:** Default value for *Side of Pier* is West. If your scope is on East side of the mount, pointing West, you need to issue a **`+side`** command to let aGotino know that, since Declination movements have to invert directions. 
+**Note:** Default value for *Side of Pier* is West. If your scope is on East side of the mount, pointing West, you need to issue a **`+side`** command to let aGotino know that, since Declination movement has to invert direction. 
 
 ### Meade LX200 Protocol Support
 
