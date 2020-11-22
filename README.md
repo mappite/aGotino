@@ -13,7 +13,8 @@ No additional boards needed, just wire an Arduino Nano and two Stepper Drivers t
 ### Features
 
 - tracking - move Right Ascension at sidereal speed, 1x
-- two buttons remote to cycle among forward and backward speeds (8x) on RA&Dec
+- two buttons to cycle among forward and backward speeds (8x) on RA&Dec
+  - press both for 1sec to change side of pier (default West, see below).
 - listen on serial port for basic LX200 commands
 - listen on serial port for aGotino commands
   - 248 bright stars + Messier Objects in memory (pending to add more)
@@ -72,7 +73,9 @@ Slew +1° Dec (North) and -1° in RA (West) - 1° = 60' (arcmins) translates to 
 
 [Here a video: aGotino in action](https://www.youtube.com/watch?v=YF_J7_7lyB4)
 
-**Note:** Default value for *Side of Pier* is West. If your scope is on East side of the mount, pointing West, you need to issue a **`+side`** command to let aGotino know that, since Declination movement has to invert direction. 
+### Side of Pier
+
+Default value for *Side of Pier* is West, meaning your scope is West of the mount, pointing East. If your scope is on East side of the mount, pointing West, you need to push both buttons for 1 sec or issue a **`+side`** command to let aGotino know that, since Declination movement has to invert direction. When changing to East, motors pause for 3secs while onboard led stays on. When changin to West, onboard led blinks twice.
 
 ### Meade LX200 Protocol Support
 
