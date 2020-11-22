@@ -78,24 +78,22 @@ const int decButtonPin =  7;
 const int decEnableMicroStepsPin = 9;
 const int decSleepPin = 10;
 
-// Compare Match Register for RA interrupt
-int CMR = (STEP_DELAY*16/1024/2)-1; 
+// Compare Match Register for RA interrupt (PRESCALER=8)
+const int CMR = (STEP_DELAY*16/8/2)-1; 
 
-unsigned long raPressTime = 0;    // time when RA button is pressed
-unsigned long decLastTime = 0;    // last time DEC pulse has changed status
-unsigned long decPressTime = 0;   // time when DEC button is pressed
-boolean raStepPinStatus = false;  // true = HIGH, false = LOW
+unsigned long raPressTime  = 0;    // time when RA button is pressed
+unsigned long decLastTime  = 0;    // last time DEC pulse has changed status
+unsigned long decPressTime = 0;    // time when DEC button is pressed
+boolean raStepPinStatus  = false;  // true = HIGH, false = LOW
 boolean decStepPinStatus = false; // true = HIGH, false = LOW
-
-// default current DEC to North
-const long NORTH_DEC   = 324000; // 90°
-const long DAY_SECONDS =  86400;
 
 boolean SIDE_OF_PIER_WEST = true; // scope is west of the mount, pointing EAST. If Set position is on West reverse. But to know this... FIXME!!!
 
-boolean SLEWING = false; // true while it is slewing
+boolean SLEWING = false; // true while it is slewing to block AR tracking
 
 // Current and input coords in Secs
+const long DAY_SECONDS =  86400;
+const long NORTH_DEC   = 324000; // 90°
 long currRA = 0;     
 long currDEC = NORTH_DEC;
 long inRA  = 0;
@@ -103,14 +101,14 @@ long inDEC = 0;
 
 int raSpeed  = 1;    // default RA speed (start at 1x to follow stars)
 int decSpeed = 0;    // default DEC speed (don't move)
-unsigned long i = 0; // for debug&loops
 
+// Serial Input
 char input[20];     // stores serial input
 int  in = 0;        // current char in serial input
 
-String lx200RA = "00:00:00#"; // stores current RA in lx200 format 
-String lx200DEC= "+90*00:00#"; // stores current DEC in lx200 format
-
+// Meade lx200 current position, see updateLx200Coords()
+String lx200RA = "00:00:00#";
+String lx200DEC= "+90*00:00#";
 
 void setup() {
   Serial.begin(SERIAL_SPEED);
@@ -141,21 +139,23 @@ void setup() {
   digitalWrite(LED_BUILTIN, HIGH);
   delay(500);
   digitalWrite(LED_BUILTIN, LOW);
-  /* Interrupt for RA */
+  /* define interrupt for RA motor, start tracking: */
   initRaTimer(CMR);
-  
-  //raLastTime = micros(); // Resolution is 4microsecs on 16Mhz board
   lx200DEC[3] = char(223); // set correct char in string...
   Serial.println(" ready.");
-  Serial.println(CMR);
 }
 
+/* 
+ *  Init Timer to trigger RA driver pulse
+ *   invoked in setup() and when RA speed changes on button press
+ */
 void initRaTimer(int cmr) {
   /*  STEP_DELAY/2 = 9349 => 1000000/9349 =  106.9575Hz 
    *  CMR = 16000000/(prescaler*(1000000/(STEP_DELAY/2)))-1;
-   *  => CMR = 145
+   *  => CMR = 145.0959 with prescaler=1024, 18699  with prescaler=0
+   *  let's go for the finest one
    */
-  /*
+  /* Using 8-but Timer 2 (CMR less than 256)
   TCCR2A = 0;// set entire TCCR2A register to 0
   TCCR2B = 0;// same for TCCR2B
   TCNT2  = 0;//initialize counter value to 0
@@ -164,30 +164,35 @@ void initRaTimer(int cmr) {
   TCCR2B |= (1<<CS20)|(1<<CS21)|(1<<CS22); // 1024 prescaler
   TIMSK2 |= (1 << OCIE2A);  // enable timer compare interrupt
   */
-  cli();
-  TCCR1A = 0;// set entire TCCR1A register to 0
-  TCCR1B = 0;// same for TCCR1B
-  TCNT1  = 0;//initialize counter value to 0
-  // set compare match register for 1hz increments
+  cli(); // disable interrupts
+  // Set Timer1 (16-bit)
+  TCCR1A = 0; // reset register to 0
+  TCCR1B = 0; // 
+  TCNT1  = 0; // initialize counter
   OCR1A = cmr; // compare match register
   TCCR1B |= (1 << WGM12); // turn on CTC mode ( Clear Timer on Compare Match)
-  TCCR1B |= (1 << CS12) | (1 << CS10);  // 1024 prescaler
+  //TCCR1B |= (1 << CS12) | (1 << CS10);  // 1024 prescaler
+  //TCCR1B |= (1 << CS11) | (1 << CS10);  // 64 prescaler
+  TCCR1B |= (1 << CS11);   // 8 prescaler
   TIMSK1 |= (1 << OCIE1A); // enable timer compare interrupt 
-  sei();
+  sei(); // enable interrupts
 }
 
+/* 
+ * Change RA pulse (move RA)
+ *  Interrupt function invoked when timer register reaches cmr 
+ */
 ISR(TIMER1_COMPA_vect){
-  if (!SLEWING) {
-     // change pulse
+  if (!SLEWING) { // change pulse only if not slewing
     raStepPinStatus = !raStepPinStatus;
-    digitalWrite(raStepPin, (raStepPinStatus ? HIGH : LOW)); //change pin status   
+    digitalWrite(raStepPin, (raStepPinStatus ? HIGH : LOW));
   }
 }
 
 
 /* DEC move */
 void decPlay(unsigned long stepDelay) {
-  unsigned long halfStepDelay = stepDelay/2; // fixme implement accelleration
+  unsigned long halfStepDelay = stepDelay/2; // FIXME: implement accelleration to avoig glitch
   unsigned long dt  = micros() - decLastTime;
 
   if ( (halfStepDelay - dt) < (200) ) { // less than 200 micros, let's hold and change pulse
@@ -200,7 +205,6 @@ void decPlay(unsigned long stepDelay) {
     decLastTime = micros();
   }
 }
-
 
 /*
  *  Slew RA and Dec by seconds (Hours and Degree secs)
@@ -226,36 +230,40 @@ int slewRaDecBySecs(long raSecs, long decSecs) {
   digitalWrite(raDirPin,  (raSecs > 0 ? HIGH : LOW));
   digitalWrite(decDirPin, (decSecs > 0 ? (SIDE_OF_PIER_WEST?HIGH:LOW) : (SIDE_OF_PIER_WEST?LOW:HIGH)));
 
+  // FIXME: detect if direction has changed and add backlash steps
 
-  // FIXME: detect if direction has changed and add back-slash steps
-
-  // calculate how many (micro)steps are needed
+  // calculate how many micro-steps are needed
   unsigned long raSteps  = (abs(raSecs) * MICROSTEPS_PER_HOUR) / 3600;
   unsigned long decSteps = (abs(decSecs) * MICROSTEPS_PER_DEGREE) / 3600;
 
+  // calculate how many full&micro steps are needed
   unsigned long raFullSteps   = raSteps / MICROSTEPS;             // this will truncate the result...
   unsigned long raMicroSteps  = raSteps - raFullSteps * MICROSTEPS; // ...remaining microsteps
   unsigned long decFullSteps  = decSteps / MICROSTEPS;            // this will truncate the result...
   unsigned long decMicroSteps = decSteps - decFullSteps * MICROSTEPS; // ...remaining microsteps
 
-  // Fast Move - disable microstepping (enable full steps)
+  // Disable microstepping (enable full steps)
   printLog("Disabling Microstepping");
   digitalWrite(raEnableMicroStepsPin, LOW);
   digitalWrite(decEnableMicroStepsPin, LOW);
+
+  // Fast Move (full steps)
   printLog(" RA FullSteps:  ");
   printLogUL(raFullSteps);
   printLog(" DEC FullSteps: ");
   printLogUL(decFullSteps);
-  unsigned long slewTime = micros(); // record when slew code starts, RA 1x movement will be on hold hence we need to fix the gap later on
+  unsigned long slewTime = micros(); // record when slew code starts, RA 1x movement will be on hold hence we need to add the gap later on
   slewRaDecBySteps(raFullSteps, decFullSteps);
   printLog("FullSteps Slew Done");
 
-  // Final Adjustment - re-enable micro stepping
-  //    this is superflous since precision is 6.66 full steps per minute,
-  //    i.e. one full step is already less than a minute... 
+  // re-enable micro stepping
   printLog("Re-enabling Microstepping");
   digitalWrite(raEnableMicroStepsPin, HIGH);
   digitalWrite(decEnableMicroStepsPin, HIGH);
+
+  // Final Adjustment
+  // Note: this code is likley superflous since precision is 6.66 full steps per minute,
+  //       i.e. one full step is already less than 1/6', i.e. 10". Who cares for such small offset?
   printLog(" RA MicroSteps:");
   printLogUL(raMicroSteps);
   printLog(" DEC MicroSteps:");
@@ -263,7 +271,7 @@ int slewRaDecBySecs(long raSecs, long decSecs) {
   slewRaDecBySteps(raMicroSteps, decMicroSteps);
   printLog("MicroSteps Slew Done");
 
-  // if slewing took more than 5 secs, adjust RA
+  // If slewing took more than 5 secs, adjust RA
   slewTime = micros() - slewTime; // time elapsed for slewing
   if ( slewTime > (5 * 1000000) ) {
     printLog("*** adjusting Ra by secs: ");
@@ -272,10 +280,10 @@ int slewRaDecBySecs(long raSecs, long decSecs) {
     printLog("*** adjusting Ra done");
   }
 
-  // reset RA to right (1x) direction
+  // reset RA to right sidereal direction
   digitalWrite(raDirPin,  HIGH);
-  // reset RA time 
-  //raLastTime = micros();
+
+  // Success
   return 1;
 }
 
@@ -285,6 +293,8 @@ int slewRaDecBySecs(long raSecs, long decSecs) {
  *   . listen on serial port and reply to lx200 GR&GD
  *     commands with current (initial) position to avoid
  *     INDI timeouts during long slewings actions
+ *   . set SLEWING to true to hold RA tracking
+ *   . turn system led on 
  */
 void slewRaDecBySteps(unsigned long raSteps, unsigned long decSteps) {
   digitalWrite(LED_BUILTIN, HIGH);
@@ -295,27 +305,21 @@ void slewRaDecBySteps(unsigned long raSteps, unsigned long decSteps) {
     decSleep(false);
   }
 
-  // FIXME: implement better accelleration
-  // when step i is
-  //    i < 100 (first 100)
-  //    i > raStep-100  && i < raStep
-  //    i > decStep-100 && i < decStep
-  // move both motors at half speed
   unsigned long delaySlew = 0; 
-  unsigned long delayLX200Micros = 0; // delay introduced by LX200 polling reply
-  in = 0; // reset the  input buffer read indec
+  unsigned long delayLX200Micros = 0; // mesure delay introduced by LX200 polling reply
+  in = 0; // reset the  input buffer read index
 
-  unsigned long MAX_DELAY = 16383; // limit of delayMicroseconds
+  unsigned long MAX_DELAY = 16383; // limit of delayMicroseconds()
+  
   for (unsigned long i = 0; (i < raSteps || i < decSteps) ; i++) {
-    if ((i<100)) { // FIXME: start as slow as possible to avoid glitches
-      //delaySlew = (100-i)*STEP_DELAY_SLEW;    
+    if ((i<100)) { // Accellerate during inital 100 steps from MAX_DELAY to STEP_DELAY_SLEW
       delaySlew = MAX_DELAY-( (MAX_DELAY-STEP_DELAY_SLEW)/100*i);
     } else if ( (i>raSteps-100 && i<raSteps)|| (i>decSteps-100 && i<decSteps)) {
-      delaySlew = STEP_DELAY_SLEW*2;// twice as slow when one motor stops...
+      delaySlew = STEP_DELAY_SLEW*2;// twice as slow in last 100 steps before a motor is about to stop 
+      // FIXME: implement nice accelleration as in initial 100 steps
     } else { 
-      delaySlew = STEP_DELAY_SLEW;  // full speed
+      delaySlew = STEP_DELAY_SLEW; // full speed
     } 
-    //if (delaySlew> 16383) delaySlew = 16383;
     
     if (i < raSteps)  { digitalWrite(raStepPin,  HIGH); }
     if (i < decSteps) { digitalWrite(decStepPin, HIGH); }
@@ -359,12 +363,13 @@ void slewRaDecBySteps(unsigned long raSteps, unsigned long decSteps) {
           motor resets to home position (worst case 4 full steps, i.e. less than a minute)
     https://forum.pololu.com/t/sleep-reset-problem-on-drv8825-stepper-controller/7345
     https://forum.arduino.cc/index.php?topic=669304.0
+    it seems this gets solved by accellerating
  */
 void decSleep(boolean b) {
   if (POWER_SAVING_ENABLED) {
     if (b == false) { // wake up!
       digitalWrite(decSleepPin, HIGH);
-      // FIXME:for ST4 Support this need to be changed to avoid RA delays
+      // FIXME: blocking for 2millis, any better alternative?
       delayMicroseconds(2000); // as per DRV8825 specs drivers needs up to 1.7ms to wake up and stabilize
     } else {
       digitalWrite(decSleepPin, LOW); // HIGH = active (high power) LOW = sleep (low power consumption)
