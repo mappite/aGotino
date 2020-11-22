@@ -82,7 +82,7 @@ Tested with Stellarium (direct) and INDI LX200 Basic driver (KStars, Cartes du C
 
 ### Side of Pier
 
-Default value for *Side of Pier* is West, meaning your scope is West of the mount, pointing East. If your scope is on East side of the mount, pointing West, you need to push both buttons for 1 sec or issue a **`+side`** command to let aGotino know that, since Declination movement has to invert direction. When changing to East, motors pause for 3secs while onboard led stays on. When changin to West, onboard led blinks twice.
+Default value for *Side of Pier* is West, meaning your scope is supposed to be West of the mount, pointing East. If your scope is on East side of the mount, pointing West, you need to push both buttons for 1 sec or issue a **`+side`** command to let aGotino know that, since Declination movement has to invert direction. When setting East, motors pause for 3secs while onboard led turns on. When going back to West, onboard led blinks twice.
 
 ### Files
 
