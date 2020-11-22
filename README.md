@@ -25,6 +25,7 @@ No additional boards needed, just wire an Arduino Nano and two Stepper Drivers t
   - **`x Mn`**            set/goto Messier object n
   - **`x Sn`**            set/goto Star number n in aGotino Star List
   - **`±RRRR±DDDD`**     slew Ra&Dec by RRRR&DDDD primes (RRRRx4 corresponds to arcsecs)
+  - **`±side`**        change side of pier (default west, see below)
   - **`±debug`**       verbose output
   - **`±sleep`**       power saving on dec motor when unused
   - **`±speed`**       increase or decrease speed by 4x
@@ -71,6 +72,8 @@ Slew +1° Dec (North) and -1° in RA (West).
     21:23:12 Current Position: 1h59'54" 43°19'47"
 
 [Here a video: aGotino in action](https://www.youtube.com/watch?v=YF_J7_7lyB4)
+
+**Note:** Default value for *Side of Pier* is West. If your scope is on East side of the mount, pointing West, you need to issue a **`+side`** command to let aGotino know that, since Declination movements have to invert directions. 
 
 ### Meade LX200 Protocol Support
 
