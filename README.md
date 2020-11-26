@@ -1,20 +1,21 @@
 # aGotino
-A simple telescope Goto solution based on Arduino Nano (or Uno) that supports:
+A telescope Goto solution based on Arduino (Nano or up) that supports:
 
 - aGotino commands - any Android phone can act as a remote via an [USB OTG cable](https://www.amazon.com/s?k=usb+otg+cable) and a [Serial App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it)
 - basic Meade LX200 protocol - drive with Stellarium or any software that supports INDI
 
-aGotino is a simple & cheap, but rather good precision, solution for tracking and *augmented starhopping*: you point the scope to something you can  easily find and get help to reach a remote, low magnitude object.
+aGotino allows precise tracking and *augmented starhopping*: you point the scope to something you can easily find and get help to reach a remote, low magnitude object nearby - default *nearby* is 30° so you should always find some bright stars around! This *hybrid-goto* solution requires no star alignement procedure to work and you can move and rotate your scope freely until you need that extra help. Because no star alignement is required, goto functionality may not be as precise as other solutions however within the dafault 30° the hardware&software accuracy proved to point any object within 30' (a moon size). At the beneift of not having to be locked to always use goto.
 
-No additional boards needed, just wire an Arduino Nano and two Stepper Drivers to do the job. Photos and hardware details on [CloudyNights (English)](https://www.cloudynights.com/topic/735800-agotino-a-simple-arduino-nano-goto/) or [Astronomia.com (Italian)](https://www.astronomia.com/forum/showthread.php?34605-aGotino-un-goto-con-Arduino).
+No additional boards needed, just wire Arduino and two stepper Drivers to do the job. 
+Photos and hardware details on [CloudyNights (English)](https://www.cloudynights.com/topic/735800-agotino-a-simple-arduino-nano-goto/) or [Astronomia.com (Italian)](https://www.astronomia.com/forum/showthread.php?34605-aGotino-un-goto-con-Arduino).
 
 ![aGotino](https://www.cloudynights.com/uploads/gallery/album_14775/sml_gallery_329462_14775_4192.jpg)
 
 ### Features
 
 - tracking - move Right Ascension at sidereal speed, 1x
-- two buttons to cycle among forward and backward speeds (8x) on RA&Dec
-  - press both for 1sec to change side of pier (default West, see below).
+- two buttons to cycle among RA&Dec forward and backward speeds (8x) 
+  - press both buttons for 1sec to change side of pier (default West, see below).
 - listen on serial port for basic LX200 commands
 - listen on serial port for aGotino commands
   - 248 bright stars + Messier Objects in memory (pending to add more)
@@ -27,16 +28,16 @@ No additional boards needed, just wire an Arduino Nano and two Stepper Drivers t
   - **`x Sn`**            set/goto Star number n in aGotino Star List
   - **`±RRRR±DDDD`**     slew Ra&Dec by RRRR&DDDD primes (RRRRx4 corresponds to arcsecs)
   - **`±side`**        change side of pier (default west, see below)
-  - **`±debug`**       verbose output
-  - **`±sleep`**       power saving on dec motor when unused
+  - **`±sleep`**       power saving on dec motor when unused (default enable)
   - **`±speed`**       increase or decrease speed by 4x
   - **`±range`**       increase or decrease max slew range (default 30°)
+  - **`±debug`**       enable verbose output
 
 blanks are ignored and can be omitted.
 
 > WARNING: watch your scope while slewing!
-> There are no controls to avoid collisions with mount,
-> for this reason default maximum range for slew is 30°
+> There are no controls to avoid collision with mount,
+> default maximum range for slewing is 30°, pay extra attention if you increase it
 
 #### [aGotino Star List](https://github.com/mappite/aGotino/blob/main/aGotino-StarList.pdf)
 
