@@ -567,6 +567,19 @@ void agoto(String s) {
         inDEC= (long) pgm_read_dword(&(Stars[n].dec));
         Serial.print(s[0]=='s'?"Set ":"Goto ");
         Serial.print("Star ");Serial.println(n);
+      } else if (s.charAt(1) == 'N' || s.charAt(1) == 'n') { // NGC coords
+        int n = s.substring(2,6).toInt(); // toInt() returns 0 if conversion fails
+        if (n < 0 || n > 7840) { Serial.println("NGC number conversion error"); return; } 
+        int ngcElem = ngcLookup(n);
+        if (ngcElem>0) {
+          inRA  = (long) pgm_read_dword(&(NGCs[ngcElem].ra ));
+          inDEC = (long) pgm_read_dword(&(NGCs[ngcElem].dec));
+          Serial.print(s[0]=='s'?"Set ":"Goto ");
+          Serial.print("NGC");Serial.println(n);
+        } else {
+          Serial.println("NGC item not in list");
+          return;
+        }
       } else { // HHMMSSdDDMMSS coords
         inRA  = s.substring(1, 3).toInt() * 60 * 60 + s.substring(3, 5).toInt() * 60 + s.substring(5, 7).toInt();
         inDEC = (s.charAt(7) == '+' ? 1 : -1) * (s.substring(8, 10).toInt() * 60 * 60 + s.substring(10, 12).toInt() * 60 + s.substring(12, 14).toInt());
