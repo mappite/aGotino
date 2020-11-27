@@ -6,7 +6,8 @@ A telescope Goto solution based on Arduino (Nano or up) that supports:
 
 aGotino allows precise tracking and *hybrid goto&starhopping*: you point the scope to something you can easily find and then reach a remote, low magnitude object nearby - default *nearby* is 30° so you will always find some bright stars around. Star alignment procedures are _not_ required, you can move and rotate your scope freely, until you need that extra help. Within the default 30° the hardware&software accuracy proved to point any objects with an error below 15' (half moon size), more than enough to spot it using a mid-focal eyepiece. At the benefit of not being locked to always use goto.
 
-No additional boards needed, just wire Arduino and two stepper Drivers to do the job. While aGotino will grow in functionalities, you can  upgrade to other solutions, like [OnStep](https://onstep.groups.io/g/main), and re-use almost all of the hardware.  
+No additional boards needed, just wire Arduino and two stepper Drivers to do the job. While aGotino will grow in functionalities, you can  upgrade to other solutions, like [OnStep](https://onstep.groups.io/g/main), and re-use almost all of the hardware.
+
 Photos and hardware details on [CloudyNights (English)](https://www.cloudynights.com/topic/735800-agotino-a-simple-arduino-nano-goto/) or [Astronomia.com (Italian)](https://www.astronomia.com/forum/showthread.php?34605-aGotino-un-goto-con-Arduino).
 
 ![aGotino](https://www.cloudynights.com/uploads/gallery/album_14775/sml_gallery_329462_14775_4192.jpg)
@@ -18,8 +19,7 @@ Photos and hardware details on [CloudyNights (English)](https://www.cloudynights
   - press both buttons for 1sec to change side of pier (default West, see below).
 - listen on serial port for basic LX200 commands
 - listen on serial port for aGotino commands
-  - 248 bright stars + 110 (all) Messier + 768 NGC objects are in memory
-  - sync&slew to objects in memory or to any RA/DEC coordinates
+  - 248 bright stars, 110 Messier (all) and 768 NGC objects are in memory
 
 ### aGotino Command set
 **x** can be **s (set)** or **g (goto)**:    
@@ -42,7 +42,7 @@ blanks are ignored and can be omitted. 768 NGC objects up to mag 11 are in memor
 
 #### [aGotino Star List](https://github.com/mappite/aGotino/blob/main/aGotino-StarList.pdf)
 
-aGotino contains all α, β, γ constellation stars up to mag 4 and other stars up to mag 3. The goal is to provide a quick lookup number reference for easy-to-point stars vs having to type coords. Credits to Nasa's [BSC5P - Bright Star Catalog](https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html) and KStars project for star names.
+The list contains α, β, γ constellation stars up to mag 4 and all other stars up to mag 3. The goal is to provide a quick lookup number reference for all easy-to-point stars vs having to type coords. Credits to Nasa's [BSC5P - Bright Star Catalog](https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html) and KStars project for star names.
 
 #### Example 
 
