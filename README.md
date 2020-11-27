@@ -18,13 +18,14 @@ Photos and hardware details on [CloudyNights (English)](https://www.cloudynights
   - press both buttons for 1sec to change side of pier (default West, see below).
 - listen on serial port for basic LX200 commands
 - listen on serial port for aGotino commands
-  - 248 bright stars + Messier Objects in memory (pending to add more)
+  - 248 bright stars + 110 (all) Messier + 768 NGC objects are in memory
   - sync&slew to objects in memory or to any RA/DEC coordinates
 
 ### aGotino Command set
 **x** can be **s (set)** or **g (goto)**:    
   - **`x HHMMSS±DDMMSS`** set/goto coordinates
   - **`x Mn`**            set/goto Messier object n
+  - **`x Nn`**            set/goto NGC object n
   - **`x Sn`**            set/goto Star number n in aGotino Star List
   - **`±RRRR±DDDD`**     slew Ra&Dec by RRRR&DDDD primes (RRRRx4 corresponds to arcsecs)
   - **`±side`**        change side of pier (default west, see below)
@@ -33,7 +34,7 @@ Photos and hardware details on [CloudyNights (English)](https://www.cloudynights
   - **`±range`**       increase or decrease max slew range (default 30°)
   - **`±debug`**       enable verbose output
 
-blanks are ignored and can be omitted.
+blanks are ignored and can be omitted. 768 NGC objects up to mag 11 are in memory.
 
 > WARNING: watch your scope while slewing!
 > There are no controls to avoid collision with mount,
