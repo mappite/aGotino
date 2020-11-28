@@ -109,7 +109,7 @@ Below is how to calculate stepper motor pulse lenth to drive your mount at sider
                                     // = microseconds to advance a microstep
                                     // 86164 is the number of secs for earth 360deg rotation (23h56m04s)
                                   
-The above example is for an EQ5/Exos2 with 40T-16T pulleys, this results in 53 microsteps/second or .281 arcsec/microstep (which appears to be the same figures of ES/Losmandy G-11 mount)
+The above example is for an EQ5/Exos2 with 40T-16T pulleys, this results in tracking precision of 53 microsteps/second or 0.281 arcsec/microstep (which appears to be the same figures of ES/Losmandy G-11 mount). Goto accuracy within the default 30° is under 10-15'.
 
 ### Hardware
 
