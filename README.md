@@ -6,8 +6,6 @@ A telescope Goto solution based on Arduino (Nano or up) that supports:
 
 aGotino allows precise tracking and *hybrid goto&starhopping*: point the scope to something you can easily find and then reach a remote, low magnitude object nearby - default *nearby* is 30° so you will always find some bright stars around. Star alignment procedures are _not_ required, you can move and rotate your scope freely, until you need that extra help. 
 
-After mount polar alignment, within the default 30°, hardware&software accuracy proved to point objects with an error below 10-15' (half moon size), more than enough to spot it using a mid-focal eyepiece. At the benefit of not being locked to always use goto.
-
 No additional boards needed, just wire Arduino and two stepper Drivers to do the job. While aGotino will grow in functionalities, you can  upgrade to other solutions, like [OnStep](https://onstep.groups.io/g/main), and re-use almost all of the hardware.
 
 Photos and hardware details on [CloudyNights (English)](https://www.cloudynights.com/topic/735800-agotino-a-simple-arduino-nano-goto/) or [Astronomia.com (Italian)](https://www.astronomia.com/forum/showthread.php?34605-aGotino-un-goto-con-Arduino).
