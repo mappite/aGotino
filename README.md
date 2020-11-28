@@ -4,7 +4,9 @@ A telescope Goto solution based on Arduino (Nano or up) that supports:
 - aGotino commands - any Android phone can act as a remote via an [USB OTG cable](https://www.amazon.com/s?k=usb+otg+cable) and a [Serial App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it)
 - basic Meade LX200 protocol - drive with Stellarium or any software that supports INDI
 
-aGotino allows precise tracking and *hybrid goto&starhopping*: you point the scope to something you can easily find and then reach a remote, low magnitude object nearby - default *nearby* is 30° so you will always find some bright stars around. Star alignment procedures are _not_ required, you can move and rotate your scope freely, until you need that extra help. Within the default 30° the hardware&software accuracy proved to point any objects with an error below 15' (half moon size), more than enough to spot it using a mid-focal eyepiece. At the benefit of not being locked to always use goto.
+aGotino allows precise tracking and *hybrid goto&starhopping*: point the scope to something you can easily find and then reach a remote, low magnitude object nearby - default *nearby* is 30° so you will always find some bright stars around. Star alignment procedures are _not_ required, you can move and rotate your scope freely, until you need that extra help. 
+
+After mount polar alignment, within the default 30°, hardware&software accuracy proved to point objects with an error below 10-15' (half moon size), more than enough to spot it using a mid-focal eyepiece. At the benefit of not being locked to always use goto.
 
 No additional boards needed, just wire Arduino and two stepper Drivers to do the job. While aGotino will grow in functionalities, you can  upgrade to other solutions, like [OnStep](https://onstep.groups.io/g/main), and re-use almost all of the hardware.
 
