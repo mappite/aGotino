@@ -7,6 +7,7 @@
       * listen on serial port for aGotino commands:    
           xHHMMSSdDDMMSS set/go to position (d is Dec sign + or -)
           xMn            set/go to Messier object n
+          xNn            set/go to NGC object n
           xSn            set/go to Star number n in aGotino Star List
               x can be s (set) or g (goto)
           rRRRRdDDDD     slew by Ra&Dec by RRRR&DDDD degree mins
