@@ -493,11 +493,27 @@ void updateLx200Coords(long raSecs, long decSecs) {
   lx200DEC.concat(ss);lx200DEC.concat('#');
  } 
 
+/* 
+ * Print current state in serial  
+ */
+void printInfo() {
+  Serial.print("Current Position: ");
+  printCoord(currRA, currDEC);
+  Serial.print("Side of Pier: ");
+  Serial.println(SIDE_OF_PIER_WEST?"W":"E");
+  Serial.print("Micro Speed: ");
+  Serial.println(RA_FAST_SPEED);
+  Serial.print("Max Range: ");
+  Serial.println(MAX_RANGE);
+  Serial.print("Sleep: ");
+  Serial.println(POWER_SAVING_ENABLED?"enabled":"disabled");
+}
+
 /*
  * aGoto simple protocol
  */
 void agoto(String s) {
-  // keywords: debug, sleep, range, speed  
+  // keywords: debug, sleep, range, speed, side, info
   if (s.substring(1,6).equals("debug")) {
     DEBUG = (s.charAt(0) == '+')?true:false;
     if (DEBUG) Serial.println("Debug On"); 
@@ -527,6 +543,8 @@ void agoto(String s) {
     }
   } else if (s.substring(1,5).equals("side")) {
     changeSideOfPier();
+  } else if (s.substring(1,5).equals("info")) {
+    printInfo();
   } else { // Move, Set or Goto commands
 
     long deltaRaSecs  = 0; // secs to move RA 
