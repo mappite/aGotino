@@ -504,7 +504,7 @@ void printInfo() {
   Serial.print("Micro Speed: ");
   Serial.println(RA_FAST_SPEED);
   Serial.print("Max Range: ");
-  Serial.println(MAX_RANGE);
+  Serial.println(MAX_RANGE/60);
   Serial.print("Sleep: ");
   Serial.println(POWER_SAVING_ENABLED?"enabled":"disabled");
 }
@@ -527,7 +527,7 @@ void agoto(String s) {
     if (MAX_RANGE+d > 0 ) {
       MAX_RANGE = MAX_RANGE+d*60;
       Serial.println("New max range set to degrees:");
-      Serial.println(MAX_RANGE);
+      Serial.println(MAX_RANGE/60);
     } else {
       Serial.println("Can't set range to zero");
     }
