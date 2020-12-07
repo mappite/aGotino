@@ -18,6 +18,7 @@
           +/-speed       increase or decrease speed by 4x at button press (default 8x)
           +/-range       increase or decrease max slew range by 15°(default 30°)
           +/-side        change side of pier (default West)
+          +/-info        print current settings
           
         WARNING: watch your scope while slewing! 
                  There are no controls to avoid collisions with mount
@@ -43,7 +44,8 @@
                                    // = microseconds to advance a microstep at 1x
                                    // 86164 is the number of secs for earth 360deg rotation (23h56m04s)
 
- * Update the values below to match your mount/gear ratios and default values: * * * * * * */
+ * Update the values below to match your mount/gear ratios and default values: 
+ * * * * * * */
 
 const unsigned long MICROSTEPS_PER_DEGREE = 12800; // see above calculation
 const unsigned long STEP_DELAY = 18699; // RA 1x microstep timing in micros, see above
@@ -51,6 +53,9 @@ const unsigned long MICROSTEPS = 32;    // microstep per step, depends on driver
 
 const long SERIAL_SPEED = 9600;         // serial interface baud. Make sure your computer or phone match this
 long MAX_RANGE = 1800;                  // max allowed movement range in deg minutes (1800'=30°).
+
+int RA_DIR   = HIGH;   // HIGH is clockwise, set to LOW if you inverted motor position/cabling, or in Southern Hemisphere
+int DEC_DIR  = HIGH;   // HIGH is clockwise, set to LOW if you inverted motor position/cabling
 
 boolean POWER_SAVING_ENABLED = true;    // toggle with -sleep on serial, see decSleep()
 boolean DEBUG = false;                  // toggle with +debug on serial
@@ -65,7 +70,7 @@ boolean DEBUG = false;                  // toggle with +debug on serial
 unsigned int RA_FAST_SPEED  = 8;  // speed at button press, times the sidereal speed
 unsigned int DEC_FAST_SPEED = 8;  // speed at button press
 unsigned long STEP_DELAY_SLEW = 1200;   // step timing in micros when slewing (slewing speed)
-// This assumes same gear ratios in AR&DEC
+// This assumes same gear ratios in RA&DEC
 const unsigned long MICROSTEPS_PER_HOUR  = MICROSTEPS_PER_DEGREE * 360 / 24;
 
 // pin connections
@@ -109,7 +114,7 @@ int decSpeed = 0;    // default DEC speed (don't move)
 char input[20];     // stores serial input
 int  in = 0;        // current char in serial input
 
-// Meade lx200 current position, see updateLx200Coords()
+// Current position in Meade lx200 format, see updateLx200Coords()
 String lx200RA = "00:00:00#";
 String lx200DEC= "+90*00:00#";
 
@@ -126,8 +131,8 @@ void setup() {
   pinMode(decSleepPin, OUTPUT);
   // set Dec asleep:
   decSleep(true);
-  // set AR motor direction clockwise (HIGH)
-  digitalWrite(raDirPin, HIGH);
+  // set AR motor direction clockwise
+  digitalWrite(raDirPin, RA_DIR);
   // make sure no pulse signal is sent
   digitalWrite(raStepPin,  LOW);
   digitalWrite(decStepPin, LOW);
@@ -230,8 +235,8 @@ int slewRaDecBySecs(long raSecs, long decSecs) {
   }
   
   // set directions
-  digitalWrite(raDirPin,  (raSecs > 0 ? HIGH : LOW));
-  digitalWrite(decDirPin, (decSecs > 0 ? (SIDE_OF_PIER_WEST?HIGH:LOW) : (SIDE_OF_PIER_WEST?LOW:HIGH)));
+  digitalWrite(raDirPin,  (raSecs  > 0 ? RA_DIR :(RA_DIR ==HIGH?LOW:HIGH)));
+  digitalWrite(decDirPin, (decSecs > 0 ? DEC_DIR:(DEC_DIR==HIGH?LOW:HIGH)));
 
   // FIXME: detect if direction has changed and add backlash steps
 
@@ -284,7 +289,7 @@ int slewRaDecBySecs(long raSecs, long decSecs) {
   }
 
   // reset RA to right sidereal direction
-  digitalWrite(raDirPin,  HIGH);
+  digitalWrite(raDirPin,  RA_DIR);
 
   // Success
   return 1;
@@ -668,7 +673,7 @@ void printCoord(long raSecs, long decSecs) {
   Serial.println("\"");
 }
 
-/* Change Side of Pier
+/* Change Side of Pier - reverse Declination direction
  *  invoked when both buttons are pressed for 1sec or with "+pier" command
  *  Default Side of Pier is WEST, i.e. scope is West of mount pointing a target on East side
  */
@@ -677,6 +682,10 @@ void changeSideOfPier() {
   SIDE_OF_PIER_WEST = !SIDE_OF_PIER_WEST;
   Serial.print("Side of Pier: "); // FIXME: hope this does not create errors with LX200
   Serial.println(SIDE_OF_PIER_WEST?"W":"E");
+
+  // invert DEC direction
+  DEC_DIR = (DEC_DIR==HIGH?LOW:HIGH);
+  
   // visual feedback
   if (SIDE_OF_PIER_WEST) { // turn on led 1sec
     digitalWrite(LED_BUILTIN, HIGH); 
@@ -714,13 +723,13 @@ void loop() {
     // 1x -> +RA_FAST_SPEED -> -(RA_FAST_SPEED-2)
     if (raSpeed == 1) {
       raSpeed = RA_FAST_SPEED;
-      digitalWrite(raDirPin, HIGH);
+      digitalWrite(raDirPin, RA_DIR);
     } else if  (raSpeed == RA_FAST_SPEED) {
       raSpeed = (RA_FAST_SPEED - 2);
-      digitalWrite(raDirPin, LOW); // change direction
+      digitalWrite(raDirPin, (RA_DIR==HIGH?LOW:HIGH)); // change direction
     } else if  (raSpeed == (RA_FAST_SPEED - 2)) {
       raSpeed = 1;
-      digitalWrite(raDirPin, HIGH);
+      digitalWrite(raDirPin, RA_DIR);
     }
     initRaTimer(CMR/raSpeed);
     printLogUL(raSpeed);
@@ -734,10 +743,10 @@ void loop() {
     if (decSpeed == 0) {
       decSpeed = DEC_FAST_SPEED;
       decSleep(false); // awake it
-      digitalWrite(decDirPin, (SIDE_OF_PIER_WEST?HIGH:LOW));
+      digitalWrite(decDirPin, DEC_DIR);
     } else if (decSpeed == DEC_FAST_SPEED) {
       decSpeed = (DEC_FAST_SPEED - 1);
-      digitalWrite(decDirPin, (SIDE_OF_PIER_WEST?LOW:HIGH));
+      digitalWrite(decDirPin, (DEC_DIR==HIGH?LOW:HIGH));
     } else if  (decSpeed == (DEC_FAST_SPEED - 1)) {
       decSpeed = 0; // stop
       decSleep(true); // go to low power consumption
