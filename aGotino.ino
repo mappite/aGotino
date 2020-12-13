@@ -1,29 +1,12 @@
 /*
    aGotino a simple Goto with Arduino (Nano/Uno)
 
-      * move Right Ascension at 1x 
-      * at button1&2 press, cycle among forward and backward speeds on RA&Dec
+      * tracking 
+      * cycle among forward and backward speeds on RA&Dec at buttons press
       * listen on serial port for basic LX200 commands (INDI LX200 Basic)
-      * listen on serial port for aGotino commands:    
-          xHHMMSSdDDMMSS set/go to position (d is Dec sign + or -)
-          xMn            set/go to Messier object n
-          xNn            set/go to NGC object n
-          xSn            set/go to Star number n in aGotino Star List
-              x can be s (set) or g (goto)
-          rRRRRdDDDD     slew by Ra&Dec by RRRR&DDDD degree mins
-                           (RRRR*4 corresponds to seconds hours)
-                           r & d are signs  (r = + is clockwise)
-          +/-debug       verbose output
-          +/-sleep       disable power saving (default enabled, DEC is set to sleep)
-          +/-speed       increase or decrease speed by 4x at button press (default 8x)
-          +/-range       increase or decrease max slew range by 15°(default 30°)
-          +/-side        change side of pier (default West)
-          +/-info        print current settings
-          
-        WARNING: watch your scope while slewing! 
-                 There are no controls to avoid collisions with mount
+      * listen on serial port for aGotino commands
 
-    This code or newer versions at https://github.com/mappite/aGotino
+    Command set and new code versions at https://github.com/mappite/aGotino
     
     by gspeed @ astronomia.com / qde / cloudynights.com forum
     This code is free software under GPL v3 License use at your risk and fun ;)
@@ -44,21 +27,38 @@
                                    // = microseconds to advance a microstep at 1x
                                    // 86164 is the number of secs for earth 360deg rotation (23h56m04s)
 
- * Update the values below to match your mount/gear ratios and default values: 
+ * Update the values below to match your mount/gear ratios and your preferences: 
  * * * * * * */
 
 const unsigned long MICROSTEPS_PER_DEGREE = 12800; // see above calculation
-const unsigned long STEP_DELAY = 18699; // RA 1x microstep timing in micros, see above
-const unsigned long MICROSTEPS = 32;    // microstep per step, depends on driver
+const unsigned long STEP_DELAY = 18699;            // see above calculation
+const unsigned long MICROSTEPS = 32;    // Driver Microsteps per step
 
 const long SERIAL_SPEED = 9600;         // serial interface baud. Make sure your computer or phone match this
-long MAX_RANGE = 1800;                  // max allowed movement range in deg minutes (1800'=30°).
+long          MAX_RANGE = 1800;         // max allowed movement range in deg minutes (1800'=30°).
 
-int RA_DIR   = HIGH;   // HIGH is clockwise, set to LOW if you inverted motor position/cabling, or in Southern Hemisphere
-int DEC_DIR  = HIGH;   // HIGH is clockwise, set to LOW if you inverted motor position/cabling
+// Motor clockwise direction: HIGH is as per original design
+int RA_DIR   = HIGH;                    // set to LOW to reverse default direction
+int DEC_DIR  = HIGH;                    // set to LOW to reverse default direction
 
-boolean POWER_SAVING_ENABLED = true;    // toggle with -sleep on serial, see decSleep()
-boolean DEBUG = false;                  // toggle with +debug on serial
+unsigned int  RA_FAST_SPEED   = 8;      // RA  speed at button press, times the sidereal speed
+unsigned int  DEC_FAST_SPEED  = 8;      // DEC speed at button press
+unsigned long STEP_DELAY_SLEW = 1200;   // Step pulse timing in micros when slewing (the higher the slower)
+
+boolean SIDE_OF_PIER_WEST     = true;   // Default Telescope position is west of the mount. Press both buttons for 1sec to reverse
+boolean POWER_SAVING_ENABLED  = true;   // toggle with -sleep on serial, see decSleep()
+boolean DEBUG                 = false;  // toggle with +debug on serial
+
+// Arduino Pin Layout
+const int raDirPin    =  4;
+const int raStepPin   =  3;
+const int raButtonPin =  6;             // note this was 2 in ARto.ino
+const int raEnableMicroStepsPin  = 2;
+const int decDirPin   = 12;
+const int decStepPin  = 11;
+const int decButtonPin=  7;
+const int decEnableMicroStepsPin = 9;
+const int decSleepPin = 10;
 
 /*
  * It is safe to keep the below untouched
@@ -67,22 +67,8 @@ boolean DEBUG = false;                  // toggle with +debug on serial
 
 #include <catalogs.h> // load messier objects and others
 
-unsigned int RA_FAST_SPEED  = 8;  // speed at button press, times the sidereal speed
-unsigned int DEC_FAST_SPEED = 8;  // speed at button press
-unsigned long STEP_DELAY_SLEW = 1200;   // step timing in micros when slewing (slewing speed)
-// This assumes same gear ratios in RA&DEC
+// Number of Microsteps to move RA by 1hour
 const unsigned long MICROSTEPS_PER_HOUR  = MICROSTEPS_PER_DEGREE * 360 / 24;
-
-// pin connections
-const int raDirPin  = 4;
-const int raStepPin = 3;
-const int raButtonPin = 6; // note this was 2 in ARto.ino
-const int raEnableMicroStepsPin  = 2;
-const int decDirPin  = 12;
-const int decStepPin = 11;
-const int decButtonPin =  7;
-const int decEnableMicroStepsPin = 9;
-const int decSleepPin = 10;
 
 // Compare Match Register for RA interrupt (PRESCALER=8)
 const int CMR = (STEP_DELAY*16/8/2)-1; 
@@ -92,16 +78,15 @@ unsigned long decPressTime = 0;    // time since when DEC button is pressed
 unsigned long bothPressTime= 0;    // time since when both buttons are pressed, used for change of pier
 
 unsigned long decLastTime  = 0;    // last time DEC pulse has changed status
-boolean raStepPinStatus  = false;  // true = HIGH, false = LOW
-boolean decStepPinStatus = false;  // true = HIGH, false = LOW
-
-boolean SIDE_OF_PIER_WEST = true; // scope is west of the mount, pointing EAST. If Set position is on West reverse. But to know this... FIXME!!!
+boolean raStepPinStatus    = false;// true = HIGH, false = LOW
+boolean decStepPinStatus   = false;// true = HIGH, false = LOW
 
 boolean SLEWING = false; // true while it is slewing to block AR tracking
 
-// Current and input coords in Secs
-const long DAY_SECONDS =  86400;
+const long DAY_SECONDS =  86400; // secs in a day
 const long NORTH_DEC   = 324000; // 90°
+
+// Current and input coords in Secs
 long currRA = 0;     
 long currDEC = NORTH_DEC;
 long inRA  = 0;
