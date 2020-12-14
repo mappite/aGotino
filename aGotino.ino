@@ -15,23 +15,25 @@
 
    How to calculate STEP_DELAY to drive motor at right sidereal speed for your mount
 
-   Worm Ratio                144   // 144 eq5/exos2, 135 heq5, 130 eq3-2
-   Other (Pulley/Gear) Ratio   2.5 // depends on your pulley setup e.g. 40T/16T = 2.5
-   Steps per revolution      400   // or usually 200 depends on your motor
-   Microstep                  32   // depends on driver
+   Worm Ratio                  144   // 144 eq5/exos2, 135 heq5, 130 eq3-2
+   Other (Pulley/Gear) Ratio     2.5 // depends on your pulley setup e.g. 40T/16T = 2.5
+   Steps per revolution        400   // or usually 200 depends on your motor
+   Microstep                    32   // depends on driver
 
-   MICROSTEPS_PER_DEGREE   12800   // = WormRatio*OtherRatio*StepsPerRevolution*Microsteps/360
-                                   // = number of microsteps to rotate the scope by 1 degree
+   MICROSTEPS_PER_DEGREE_RA  12800   // = WormRatio*OtherRatio*StepsPerRevolution*Microsteps/360
+                                     // = number of microsteps to rotate the scope by 1 degree
 
-   STEP_DELAY              18699   // = (86164/360)/(MicroSteps per Degree)*1000000
-                                   // = microseconds to advance a microstep at 1x
-                                   // 86164 is the number of secs for earth 360deg rotation (23h56m04s)
+   STEP_DELAY                18699   // = (86164/360)/(MicroSteps per Degree)*1000000
+                                     // = microseconds to advance a microstep at 1x
+                                     // 86164 is the number of secs for earth 360deg rotation (23h56m04s)
 
  * Update the values below to match your mount/gear ratios and your preferences: 
  * * * * * * */
 
-const unsigned long MICROSTEPS_PER_DEGREE = 12800; // see above calculation
-const unsigned long STEP_DELAY = 18699;            // see above calculation
+const unsigned long MICROSTEPS_PER_DEGREE_RA = 12800; // see above calculation
+const unsigned long STEP_DELAY = 18699;               // see above calculation
+
+const unsigned long MICROSTEPS_PER_DEGREE_DEC = MICROSTEPS_PER_DEGREE_RA; // calculate correct value if DEC gears/worm/microsteps differs
 const unsigned long MICROSTEPS = 32;    // Driver Microsteps per step
 
 const long SERIAL_SPEED = 9600;         // serial interface baud. Make sure your computer or phone match this
@@ -68,7 +70,7 @@ const int decSleepPin = 10;
 #include <catalogs.h> // load messier objects and others
 
 // Number of Microsteps to move RA by 1hour
-const unsigned long MICROSTEPS_PER_HOUR  = MICROSTEPS_PER_DEGREE * 360 / 24;
+const unsigned long MICROSTEPS_PER_HOUR  = MICROSTEPS_PER_DEGREE_RA * 360 / 24;
 
 // Compare Match Register for RA interrupt (PRESCALER=8)
 const int CMR = (STEP_DELAY*16/8/2)-1; 
@@ -227,7 +229,7 @@ int slewRaDecBySecs(long raSecs, long decSecs) {
 
   // calculate how many micro-steps are needed
   unsigned long raSteps  = (abs(raSecs) * MICROSTEPS_PER_HOUR) / 3600;
-  unsigned long decSteps = (abs(decSecs) * MICROSTEPS_PER_DEGREE) / 3600;
+  unsigned long decSteps = (abs(decSecs) * MICROSTEPS_PER_DEGREE_DEC) / 3600;
 
   // calculate how many full&micro steps are needed
   unsigned long raFullSteps   = raSteps / MICROSTEPS;             // this will truncate the result...
