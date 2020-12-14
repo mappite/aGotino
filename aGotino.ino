@@ -684,6 +684,7 @@ void changeSideOfPier() {
     delay(1000); digitalWrite(LED_BUILTIN, LOW);
   }
   bothPressTime = 0; // force another full sec to change again
+  digitalWrite(raDirPin, RA_DIR); // set new direction 
   SLEWING = false;
 }
 
@@ -697,7 +698,14 @@ void loop() {
   // when both buttons are pressed for 1sec, change side of pier
   if ( (digitalRead(raButtonPin) == LOW) && digitalRead(decButtonPin) == LOW) {
     if (bothPressTime == 0) bothPressTime = micros();
-    if ( (micros() - bothPressTime) > (1000000) ) { changeSideOfPier(); }
+    if ( (micros() - bothPressTime) > (1000000) ) { 
+      changeSideOfPier();
+      // reset motors
+      raSpeed = 1;
+      initRaTimer(CMR/raSpeed); // reset ra
+      decSpeed = 0; // stop dec
+      decSleep(true);
+    }
   } else {
     // if both buttons are pressed for less than 1 secs, reset timer to 0
     bothPressTime = 0;  
@@ -722,7 +730,7 @@ void loop() {
     printLogUL(raSpeed);
   }
   
-  // decButton pressed: skip if within 500ms from last press
+  // decButton pressed: skip if within 300ms from last press
   if (digitalRead(decButtonPin) == LOW && (micros() - decPressTime) > (300000) ) {
     decPressTime = micros();  // time when button has been pressed
     printLog("Dec Speed: ");
