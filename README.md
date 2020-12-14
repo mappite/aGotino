@@ -1,7 +1,7 @@
 # aGotino
 A telescope Goto solution based on Arduino (Nano or up) that supports:
 
-- aGotino commands - any Android phone can act as a remote via an [USB OTG cable](https://www.amazon.com/s?k=usb+otg+cable) and a [Serial App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it)
+- aGotino commands - an Android phone can act as a remote via an [USB OTG cable](https://www.amazon.com/s?k=usb+otg+cable) and a [Serial App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it)
 - basic Meade LX200 protocol - drive with Stellarium or any software that supports INDI
 
 aGotino allows precise tracking and *hybrid goto&starhopping*: point the scope to something you can easily find and then reach a remote, low magnitude object nearby - default *nearby* is 30° so you will always find some bright stars around. Star alignment procedures are _not_ required, you can move and rotate your scope freely, until you need that extra help. 
@@ -27,11 +27,12 @@ Photos and hardware details on [CloudyNights (English)](https://www.cloudynights
   - **`x Mn`**            set/goto Messier object n
   - **`x Nn`**            set/goto NGC object n
   - **`x Sn`**            set/goto Star number n in aGotino Star List
-  - **`±RRRR±DDDD`**     slew Ra&Dec by RRRR&DDDD primes (RRRRx4 corresponds to arcsecs)
+  - **`±RRRR±DDDD`**     slew Ra&Dec by RRRR&DDDD primes (RRRR/15 corresponds to arcmins)
   - **`±side`**        change side of pier (default west, see below)
   - **`±sleep`**       power saving on dec motor when unused (default enable)
   - **`±speed`**       increase or decrease speed by 4x
   - **`±range`**       increase or decrease max slew range (default 30°)
+  - **`±info`**        display current settings
   - **`±debug`**       enable verbose output
 
 blanks are ignored and can be omitted. 768 NGC objects up to mag 11 are in memory.
@@ -65,7 +66,7 @@ Point scope to Mizar in UMa, set (sync current position) Star 223 in aGotino Sta
     19:10:32  *** done
     19:10:32 Current Position: 18h51'06" ‑06°16'00"
 
-Slew +1° Dec (North) and -1° in RA (West). Note 1°=60' (arcmins) and translates to 60*4 secs = 4 mins.
+Slew +1° Dec (North) and -1° in RA (i.e. +1° West). Note 1°=60' (arcmins) and translates to 60/15 = 4 minutes.
 
     19:22:28 Current Position: 02h03'54" 42°19'47
     > -0060+0060
@@ -84,7 +85,7 @@ Tested with Stellarium (direct) and INDI LX200 Basic driver (KStars, Cartes du C
 
 ### Side of Pier
 
-Default value for *Side of Pier* is West, meaning your scope is supposed to be West of the mount, usually pointing East. If your scope is on East side of the mount, you need to push both buttons for 1 sec or issue a **`+side`** command to let aGotino know that, since Declination movement has to invert direction. When setting East, motors pause for 3secs while onboard led turns on. When going back to West, onboard led blinks twice.
+Default value for *Side of Pier* is West, meaning your scope is supposed to be West of the mount, usually pointing East. If your scope is on East side of the mount, you need to push both buttons for 1 sec or issue a **`+side`** command to let aGotino know that, since Declination movement has to invert direction. When setting East, motors pause for 3secs while onboard led turns on. When going back to West, onboard led blinks twice. 
 
 ### Files
 
@@ -97,7 +98,7 @@ Default value for *Side of Pier* is West, meaning your scope is supposed to be W
 
 Below is how to calculate stepper motor pulse lenth to drive your mount at sidereal speed
     
-    Worm Ratio                144   // 144 eq5/exos2, 135 heq5, 130 eq3-2
+    Worm Ratio                144   // 144 eq5/exos2, 135 heq5, 130 eq3-2, 180 Eq6
     Other (Pulley/Gear) Ratio   2.5 // depends on your pulley setup e.g. 40T/16T = 2.5
     Steps per revolution      400   // or 200 depends on stepper motor. The higher the better.
     Microstep                  32   // depends on driver. The higher the better.
@@ -109,22 +110,22 @@ Below is how to calculate stepper motor pulse lenth to drive your mount at sider
                                     // = microseconds to advance a microstep
                                     // 86164 is the number of secs for earth 360deg rotation (23h56m04s)
                                   
-The above example is for an EQ5/Exos2 with 40T-16T pulleys, this results in tracking precision of 53 microsteps/second or 0.281 arcsec/microstep (which appears to be the same figures of ES/Losmandy G-11 mount). Goto accuracy within the default 30° is under 10-15'.
+The above example is for an EQ5/Exos2 with 40T-16T pulleys: it results in a tracking precision of 53 microsteps/second or 0.281 arcsec/microstep (which appears to be the same figures of ES/Losmandy G-11 mount). Goto accuracy within the default 30° is under 10'.
 
 ### Hardware
 
 - 2 Stepper Motors:  Nema 17 400 step per revolution seems a great solution - for visual only you can select smaller ones
   - Supports to attach motors to the mount - depends on your mount, be creative and use a 3D printer if you have one ;)
-- 2 Drivers: with at least 32 microsteps. Cheap DRV8825 works, but better TMC or LV can be used of course
+- 2 Drivers: with at least 32 microsteps. Cheap DRV8825 works, better TMC or LV can be used of course
 - 4 Pulleys and 2 Belts (GT2). Size depends on your mount (see [Belt Calculator](https://www.bbman.com/belt-length-calculator/))
 - RJ11 cable with two RJ11 sockets to connect the Dec Motor
 - Dupont cables, a couple of momentary buttons and a 100µF Capacitor to protect the circuit.
-- Arduino Nano
+- Arduino Nano (or any Arduino)
 
 ![Hardware](https://imgur.com/zhQLEPC.png)
 
 ### Todo
 
-- Add more objects (NGCs)
 - Lookup objects by constellation
 - Support pulse guide LX200-style commands to allow guiding via phd2 / or add ST4 port
+- Show Battery Level
