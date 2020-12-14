@@ -15,7 +15,7 @@ Photos and hardware details on [CloudyNights (English)](https://www.cloudynights
 ### Features
 
 - tracking - move Right Ascension at sidereal speed, 1x
-- two buttons to cycle among RA&Dec forward and backward speeds (8x) 
+- two buttons to cycle among RA&Dec forward and backward slow motion (8x) 
   - press both buttons for 1sec to change side of pier (default West, see below).
 - listen on serial port for basic LX200 commands
 - listen on serial port for aGotino commands
@@ -27,10 +27,10 @@ Photos and hardware details on [CloudyNights (English)](https://www.cloudynights
   - **`x Mn`**            set/goto Messier object n
   - **`x Nn`**            set/goto NGC object n
   - **`x Sn`**            set/goto Star number n in aGotino Star List
-  - **`±RRRR±DDDD`**     slew Ra&Dec by RRRR&DDDD primes (RRRR/15 corresponds to arcmins)
+  - **`±RRRR±DDDD`**     slew Ra&Dec by RRRR&DDDD arcmins (RRRR/15 corresponds to minutes)
   - **`±side`**        change side of pier (default west, see below)
   - **`±sleep`**       power saving on dec motor when unused (default enable)
-  - **`±speed`**       increase or decrease speed by 4x
+  - **`±speed`**       increase or decrease slow motion speed by 4x
   - **`±range`**       increase or decrease max slew range (default 30°)
   - **`±info`**        display current settings
   - **`±debug`**       enable verbose output
