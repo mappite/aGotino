@@ -30,16 +30,17 @@
  * Update the values below to match your mount/gear ratios and your preferences: 
  * * * * * * */
 
-const unsigned long MICROSTEPS_PER_DEGREE_RA = 12800; // see above calculation
-const unsigned long STEP_DELAY = 18699;               // see above calculation
+const unsigned long STEP_DELAY = 18699;                // see above calculation
+const unsigned long MICROSTEPS_PER_DEGREE_RA  = 12800; // see above calculation
+const unsigned long MICROSTEPS_PER_DEGREE_DEC = MICROSTEPS_PER_DEGREE_RA; // calculate correct value if DEC gears/worm/microsteps differs from RA ones
 
-const unsigned long MICROSTEPS_PER_DEGREE_DEC = MICROSTEPS_PER_DEGREE_RA; // calculate correct value if DEC gears/worm/microsteps differs
-const unsigned long MICROSTEPS = 32;    // Driver Microsteps per step
+const unsigned long MICROSTEPS_RA  = 32;              // Driver Microsteps in RA
+const unsigned long MICROSTEPS_DEC = MICROSTEPS_RA;   // Driver Microsteps in DEC
 
-const long SERIAL_SPEED = 9600;         // serial interface baud. Make sure your computer or phone match this
-long          MAX_RANGE = 1800;         // max allowed movement range in deg minutes (1800'=30°).
+const long SERIAL_SPEED = 9600;         // serial interface baud. Make sure your computer or phone matches this
+long MAX_RANGE = 1800;                  // default max range in deg minutes (1800'=30°). See +range command
 
-// Motor clockwise direction: HIGH is as per original design
+// Motor clockwise direction: HIGH is as per original design (change RA to LOW in southern hemisphere)
 int RA_DIR   = HIGH;                    // set to LOW to reverse default direction
 int DEC_DIR  = HIGH;                    // set to LOW to reverse default direction
 
@@ -67,7 +68,7 @@ const int decSleepPin = 10;
  * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <catalogs.h> // load messier objects and others
+#include <catalogs.h> // load objects
 
 // Number of Microsteps to move RA by 1hour
 const unsigned long MICROSTEPS_PER_HOUR  = MICROSTEPS_PER_DEGREE_RA * 360 / 24;
@@ -88,18 +89,19 @@ boolean SLEWING = false; // true while it is slewing to block AR tracking
 const long DAY_SECONDS =  86400; // secs in a day
 const long NORTH_DEC   = 324000; // 90°
 
-// Current and input coords in Secs
-long currRA = 0;     
+// Current coords in Secs (default to true north)
+long currRA  = 0;     
 long currDEC = NORTH_DEC;
-long inRA  = 0;
-long inDEC = 0;
 
-int raSpeed  = 1;    // default RA speed (start at 1x to follow stars)
-int decSpeed = 0;    // default DEC speed (don't move)
+int raSpeed  = 1;   // default RA  speed (start at 1x to follow stars)
+int decSpeed = 0;   // default DEC speed (don't move)
 
 // Serial Input
 char input[20];     // stores serial input
 int  in = 0;        // current char in serial input
+// Serial Input (New) coords
+long inRA    = 0;
+long inDEC   = 0;
 
 // Current position in Meade lx200 format, see updateLx200Coords()
 String lx200RA = "00:00:00#";
@@ -136,7 +138,7 @@ void setup() {
   digitalWrite(LED_BUILTIN, LOW);
   /* define interrupt for RA motor, start tracking: */
   initRaTimer(CMR);
-  lx200DEC[3] = char(223); // set correct char in string...
+  lx200DEC[3] = char(223); // set correct char in string as per earlier specs...
   Serial.println(" ready.");
 }
 
@@ -173,43 +175,44 @@ void initRaTimer(int cmr) {
   sei(); // enable interrupts
 }
 
-/* 
- * Change RA pulse (move RA)
- *  Interrupt function invoked when timer register reaches cmr 
+/* Move RA motor (change pulse)
+ *   invoked by Interrupt when timer register reaches CMR 
  */
 ISR(TIMER1_COMPA_vect){
-  if (!SLEWING) { // change pulse only if not slewing
+  if (!SLEWING) { // change pulse only when not slewing
     raStepPinStatus = !raStepPinStatus;
     digitalWrite(raStepPin, (raStepPinStatus ? HIGH : LOW));
   }
 }
 
 
-/* DEC move */
+/* Move DEC motor (change pulse)
+ *   invoked from main loop() if Dec speed is not zero (Dec button has been pressed) 
+ */
 void decPlay(unsigned long stepDelay) {
   unsigned long halfStepDelay = stepDelay/2; // FIXME: implement accelleration to avoig glitch
   unsigned long dt  = micros() - decLastTime;
 
-  if ( (halfStepDelay - dt) < (200) ) { // less than 200 micros, let's hold and change pulse
+  if ( (halfStepDelay - dt) < (200) ) { // less than 200 micros to change pulse, let's hold and change pulse
     delayMicroseconds(halfStepDelay - dt);
     decStepPinStatus = !decStepPinStatus;
     digitalWrite(decStepPin, (decStepPinStatus ? HIGH : LOW));
     decLastTime = micros(); // reset time
   } else if ( dt > halfStepDelay ) { // too late!
-    // reset time but don't output any error message in serial
+    // reset time
     decLastTime = micros();
   }
 }
 
 /*
- *  Slew RA and Dec by seconds (Hours and Degree secs)
+ *  Slew RA and Dec by seconds/arceconds (ra/dec)
  *   motors direction is set according to sign
- *   RA 1x direction is reset at the end
+ *   RA 1x direction is re-set at the end
  *   microstepping is disabled for fast movements and (re-)enabled for finer ones
  */
 int slewRaDecBySecs(long raSecs, long decSecs) {
 
-  // If more than 12h turn from the opposite side
+  // If more than 12h, turn from the opposite side
   if (abs(raSecs) > DAY_SECONDS/2) { // reverse
     printLog("RA reversed, new RA secs:");
     raSecs = raSecs+(raSecs>0?-1:1)*DAY_SECONDS;
@@ -232,12 +235,12 @@ int slewRaDecBySecs(long raSecs, long decSecs) {
   unsigned long decSteps = (abs(decSecs) * MICROSTEPS_PER_DEGREE_DEC) / 3600;
 
   // calculate how many full&micro steps are needed
-  unsigned long raFullSteps   = raSteps / MICROSTEPS;             // this will truncate the result...
-  unsigned long raMicroSteps  = raSteps - raFullSteps * MICROSTEPS; // ...remaining microsteps
-  unsigned long decFullSteps  = decSteps / MICROSTEPS;            // this will truncate the result...
-  unsigned long decMicroSteps = decSteps - decFullSteps * MICROSTEPS; // ...remaining microsteps
+  unsigned long raFullSteps   = raSteps / MICROSTEPS_RA;             // this will truncate the result...
+  unsigned long raMicroSteps  = raSteps - raFullSteps * MICROSTEPS_RA; // ...remaining microsteps
+  unsigned long decFullSteps  = decSteps / MICROSTEPS_DEC;            // this will truncate the result...
+  unsigned long decMicroSteps = decSteps - decFullSteps * MICROSTEPS_DEC; // ...remaining microsteps
 
-  // Disable microstepping (enable full steps)
+  // Disable microstepping (i.e. enable full steps)
   printLog("Disabling Microstepping");
   digitalWrite(raEnableMicroStepsPin, LOW);
   digitalWrite(decEnableMicroStepsPin, LOW);
@@ -285,11 +288,11 @@ int slewRaDecBySecs(long raSecs, long decSecs) {
 /*
  *  Slew RA and Dec by steps
  *   . assume direction and microstepping is set
- *   . listen on serial port and reply to lx200 GR&GD
- *     commands with current (initial) position to avoid
- *     INDI timeouts during long slewings actions
- *   . set SLEWING to true to hold RA tracking
  *   . turn system led on 
+ *   . set SLEWING to true to hold RA interrupt tracking
+ *   . while slewing, listen on serial port and reply to lx200 GR&GD
+ *      commands with current (initial) position to avoid
+ *      INDI timeouts during long slewings actions
  */
 void slewRaDecBySteps(unsigned long raSteps, unsigned long decSteps) {
   digitalWrite(LED_BUILTIN, HIGH);
