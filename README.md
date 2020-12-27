@@ -114,9 +114,8 @@ The above example is for an EQ5/Exos2 with 40T-16T pulleys: it results in a trac
 
 ### Implementation
 
-- Copy _aGotino.ino_ in Arduino/aGotino/ and _catalogs.h_ in Arduino/libraries/aGotino/  
-- Open _aGotino.ino_ in Arduino IDE
-- Edit _aGotino.ino_ header to set the correct MICROSTEPS_PER_DEGREE_AR & STEP_DELAY values for your mount and (optional) change any other default values to fit your preferences or PIN setup. Note: if DEC gears or driver microsteps differs from RA ones, calculate and set appropriate MICROSTEPS_PER_DEGREE_DEC as well (for example on EQ3-2 mount).
+- Copy _catalogs.h_ in Arduino/libraries/aGotino/ and _aGotino.ino_ in Arduino/aGotino/ 
+- Open _aGotino.ino_ in Arduino IDE and edit header to set MICROSTEPS_PER_DEGREE_AR & STEP_DELAY values for your mount and (optional) change any other default values to fit your preferences.
 - Compile and upload to your Arduino device.
 
 ### Hardware
