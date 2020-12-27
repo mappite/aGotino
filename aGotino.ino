@@ -37,7 +37,7 @@ const unsigned long MICROSTEPS_PER_DEGREE_DEC = MICROSTEPS_PER_DEGREE_RA; // cal
 const unsigned long MICROSTEPS_RA  = 32;              // Driver Microsteps in RA
 const unsigned long MICROSTEPS_DEC = MICROSTEPS_RA;   // Driver Microsteps in DEC
 
-const long SERIAL_SPEED = 9600;         // serial interface baud. Make sure your computer or phone matches this
+const long SERIAL_SPEED = 9600;         // serial interface baud. Make sure your computer or phone matches this.
 long MAX_RANGE = 1800;                  // default max range in deg minutes (1800'=30°). See +range command
 
 // Motor clockwise direction: HIGH is as per original design (change RA to LOW in southern hemisphere)
@@ -74,6 +74,7 @@ const int decSleepPin = 10;
 const unsigned long MICROSTEPS_PER_HOUR  = MICROSTEPS_PER_DEGREE_RA * 360 / 24;
 
 // Compare Match Register for RA interrupt (PRESCALER=8)
+//  to match with given STEP_DELAY
 const int CMR = (STEP_DELAY*16/8/2)-1; 
 
 unsigned long raPressTime  = 0;    // time since when RA  button is pressed
@@ -107,6 +108,12 @@ long inDEC   = 0;
 String lx200RA = "00:00:00#";
 String lx200DEC= "+90*00:00#";
 
+// Vars to implement accelleration
+unsigned long MAX_DELAY = 16383; // limit of delayMicroseconds()
+unsigned long decStepDelay   = MAX_DELAY; // initial pulse lenght (slow, to start accelleration)
+unsigned long decTargetDelay = STEP_DELAY/DEC_FAST_SPEED; // pulse length to reach when Dec button is pressed
+unsigned int  decPlayIdx = 0;
+
 void setup() {
   Serial.begin(SERIAL_SPEED);
   Serial.print("aGotino:");
@@ -136,17 +143,17 @@ void setup() {
   digitalWrite(LED_BUILTIN, HIGH);
   delay(500);
   digitalWrite(LED_BUILTIN, LOW);
-  /* define interrupt for RA motor, start tracking: */
-  initRaTimer(CMR);
+  /* set interrupt for RA motor and start tracking */
+  setRaTimer(CMR);
   lx200DEC[3] = char(223); // set correct char in string as per earlier specs...
   Serial.println(" ready.");
 }
 
 /* 
- *  Init Timer to trigger RA driver pulse
+ *  Timer to trigger RA driver pulse
  *   invoked in setup() and when RA speed changes on button press
  */
-void initRaTimer(int cmr) {
+void setRaTimer(int cmr) {
   /*  STEP_DELAY/2 = 9349 => 1000000/9349 =  106.9575Hz 
    *  CMR = 16000000/(prescaler*(1000000/(STEP_DELAY/2)))-1;
    *  => CMR = 145.0959 with prescaler=1024, 18699  with prescaler=0
@@ -175,7 +182,7 @@ void initRaTimer(int cmr) {
   sei(); // enable interrupts
 }
 
-/* Move RA motor (change pulse)
+/* Move RA motor (change pulse) - slow motion
  *   invoked by Interrupt when timer register reaches CMR 
  */
 ISR(TIMER1_COMPA_vect){
@@ -185,21 +192,27 @@ ISR(TIMER1_COMPA_vect){
   }
 }
 
-
-/* Move DEC motor (change pulse)
- *   invoked from main loop() if Dec speed is not zero (Dec button has been pressed) 
+/* Move DEC motor (change pulse) - slow motion
+ *   invoked from main loop() when Dec speed is not zero 
  */
-void decPlay(unsigned long stepDelay) {
-  unsigned long halfStepDelay = stepDelay/2; // FIXME: implement accelleration to avoig glitch
-  unsigned long dt  = micros() - decLastTime;
+void decPlay() {
 
-  if ( (halfStepDelay - dt) < (200) ) { // less than 200 micros to change pulse, let's hold and change pulse
-    delayMicroseconds(halfStepDelay - dt);
+  unsigned long dt  = micros() - decLastTime; // time elapsed since last pulse change
+  long rttcp = (decStepDelay/2) - dt;         // remaining time to change pulse
+
+  if ( rttcp < 200 && rttcp > 0 ) { // less than 200 micros to change pulse
+    delayMicroseconds(rttcp); // hold for the remaining millis (<200)
     decStepPinStatus = !decStepPinStatus;
     digitalWrite(decStepPin, (decStepPinStatus ? HIGH : LOW));
     decLastTime = micros(); // reset time
-  } else if ( dt > halfStepDelay ) { // too late!
-    // reset time
+    if ( decStepPinStatus == LOW && decPlayIdx<=50) { // a step happened, accellerate
+      // decrease the pulse from MAX_DELAY to decTargetDelay = STEP_DELAY/DEC_FAST_SPEED
+      decStepDelay = MAX_DELAY-( (MAX_DELAY-decTargetDelay)/50*decPlayIdx); 
+      decPlayIdx++; 
+    }
+  } else if ( rttcp < 0 ) { // too late!
+    // something happenedd that causes the time elapsed to be too high
+    printLog("Dec: tool late!");
     decLastTime = micros();
   }
 }
@@ -306,8 +319,6 @@ void slewRaDecBySteps(unsigned long raSteps, unsigned long decSteps) {
   unsigned long delaySlew = 0; 
   unsigned long delayLX200Micros = 0; // mesure delay introduced by LX200 polling reply
   in = 0; // reset the  input buffer read index
-
-  unsigned long MAX_DELAY = 16383; // limit of delayMicroseconds()
   
   for (unsigned long i = 0; (i < raSteps || i < decSteps) ; i++) {
     if ((i<100)) { // Accellerate during inital 100 steps from MAX_DELAY to STEP_DELAY_SLEW
@@ -378,30 +389,9 @@ void decSleep(boolean b) {
 }
 
 /* 
- *  Basic Meade LX200 Protocol support:
- *    reply to #:GR# and #:GD# with current RA (currRA) and DEC (currDEC) position
- *    get #:Q#:Sr... to set input RA (inRA) and :Sd... to set input DEC (inDEC)
- *    if currDEC is NORTH, 
- *       assume this is the very first set operation and set current DEC&RA to input DEC&RA
- *    else 
- *       calculate deltas and slew to inRA and inDEC
- *     
- *  An lx200 session with Stellarium is (> = from Stellarium to Arduino)
-> #:GR#
-< 02:31:49#
-> #:GD#
-< +89ß15:51#
-> #:Q#:Sr 11:22:33#
-< 1
-> :Sd +66*55:44#
-< 1
-> :MS#
-> #:GR#
-< 05:04:21#
-> #:GD#
-< +81ß11:39#
-*/
-void lx200(String s) { // all :.*# commands are passed 
+ *  Basic Meade LX200 protocol
+ */
+void lx200(String s) { // all :.*# commands are passed here 
   if (s.substring(1,3).equals("GR")) { // :GR# 
     printLog("GR");
     // send current RA to computer
@@ -417,7 +407,7 @@ void lx200(String s) { // all :.*# commands are passed
     long mi = s.substring(6,8).toInt();
     long ss = s.substring(9,11).toInt();
     inRA = hh*3600+mi*60+ss;
-    Serial.print(1);
+    Serial.print(1); // FIXME: input is not validated
   } else if (s.substring(1,3).equals("Sd")) { // :SdsDD*MM:SS# // blanks after :Sd
     printLog("Sd");
     // this is the FINAL step of setting a pos (DEC) 
@@ -425,23 +415,24 @@ void lx200(String s) { // all :.*# commands are passed
     long mi = s.substring(7,9).toInt();
     long ss = s.substring(10,12).toInt();
     inDEC = dd*3600+mi*60+ss;
+    // FIXME: the below should not be needed anymore since :CM# command is honored
     if (currDEC == NORTH_DEC) { // if currDEC is still the initial default position (North)
       // assume this is to sync current position to new input
       currRA  = inRA;
       currDEC = inDEC;
       updateLx200Coords(currRA, currDEC); // recompute strings
     } 
-    Serial.print(1);
+    Serial.print(1); // FIXME: input is not validated
   } else if (s.substring(1,3).equals("MS")) { // :MS# move
     printLog("MS");
-    // assumes Sr and Sd have been processed
+    // assumes Sr and Sd have been processed hence
     // inRA and inDEC have been set, now it's time to move
     long deltaRaSecs  = currRA-inRA;
     long deltaDecSecs = currDEC-inDEC;
-    // FIXME: need to implement checks, can't wait for slewRaDecBySecs
+    // FIXME: need to implement checks, but can't wait for slewRaDecBySecs
     //        reply since it may takes several seconds:
     Serial.print(0); // slew is possible 
-    // slewRaDecBySecs reply to lx200 polling with current position until slew ends:
+    // slewRaDecBySecs replies to lx200 polling with current position until slew ends:
     if (slewRaDecBySecs(deltaRaSecs, deltaDecSecs) == 1) { // success         
       currRA  = inRA;
       currDEC = inDEC;
@@ -505,7 +496,7 @@ void printInfo() {
 }
 
 /*
- * aGoto simple protocol
+ * aGotino protocol
  */
 void agoto(String s) {
   // keywords: debug, sleep, range, speed, side, info
@@ -664,8 +655,8 @@ void printCoord(long raSecs, long decSecs) {
 }
 
 /* Change Side of Pier - reverse Declination direction
- *  invoked when both buttons are pressed for 1sec or with "+pier" command
- *  Default Side of Pier is WEST, i.e. scope is West of mount pointing a target on East side
+ *  invoked when both buttons are pressed for 1 sec or with "+pier" command
+ *  Default Side of Pier is WEST, i.e. scope is West of mount
  */
 void changeSideOfPier() {
   SLEWING = true; // stop RA tracking hence give a "sound" feedback (motor stops)
@@ -677,40 +668,44 @@ void changeSideOfPier() {
   DEC_DIR = (DEC_DIR==HIGH?LOW:HIGH);
   
   // visual feedback
-  if (SIDE_OF_PIER_WEST) { // turn on led 1sec
+  if (SIDE_OF_PIER_WEST) { // turn on led for 3 secs
     digitalWrite(LED_BUILTIN, HIGH); 
     delay(3000);digitalWrite(LED_BUILTIN, LOW);
-  } else { // blink led twice
+  } else { // blink led twice for 1 sec
     digitalWrite(LED_BUILTIN, HIGH);
     delay(1000); digitalWrite(LED_BUILTIN, LOW);
     delay(1000); digitalWrite(LED_BUILTIN, HIGH);
     delay(1000); digitalWrite(LED_BUILTIN, LOW);
   }
-  bothPressTime = 0; // force another full sec to change again
-  digitalWrite(raDirPin, RA_DIR); // set new direction 
+  bothPressTime = 0; // this is to force another full sec to change again
+  digitalWrite(raDirPin, RA_DIR); // set default RA direction
   SLEWING = false;
 }
 
+/*
+ * main loop
+ */
+ 
 void loop() {
   
   // Move Dec if needed
   if (decSpeed != 0) {
-    decPlay(STEP_DELAY / decSpeed); // fixme, use a timer as per RA
+    decPlay();
   }
 
-  // when both buttons are pressed for 1sec, change side of pier
+  // when both buttons are pressed for 1 sec, change side of pier
   if ( (digitalRead(raButtonPin) == LOW) && digitalRead(decButtonPin) == LOW) {
-    if (bothPressTime == 0) bothPressTime = micros();
+    if (bothPressTime == 0) { bothPressTime = micros(); }
     if ( (micros() - bothPressTime) > (1000000) ) { 
       changeSideOfPier();
       // reset motors
       raSpeed = 1;
-      initRaTimer(CMR/raSpeed); // reset ra
+      setRaTimer(CMR/raSpeed); // reset ra to 1x
       decSpeed = 0; // stop dec
       decSleep(true);
     }
   } else {
-    // if both buttons are pressed for less than 1 secs, reset timer to 0
+    // if both buttons are not pressed, reset timer to 0
     bothPressTime = 0;  
   }
   
@@ -729,7 +724,7 @@ void loop() {
       raSpeed = 1;
       digitalWrite(raDirPin, RA_DIR);
     }
-    initRaTimer(CMR/raSpeed);
+    setRaTimer(CMR/raSpeed); // set interrupt
     printLogUL(raSpeed);
   }
   
@@ -747,10 +742,12 @@ void loop() {
       digitalWrite(decDirPin, (DEC_DIR==HIGH?LOW:HIGH));
     } else if  (decSpeed == (DEC_FAST_SPEED - 1)) {
       decSpeed = 0; // stop
-      decSleep(true); // go to low power consumption
+      decSleep(true); // sleep
     }
     printLogUL(decSpeed);
-    decLastTime = micros(); // reset Dec time
+    decStepDelay = MAX_DELAY; // initial pulse length
+    decPlayIdx = 0; // initial pulse index, used for accelleration
+    decLastTime = micros();
   }
 
   // Check if message on serial input
@@ -758,8 +755,8 @@ void loop() {
     input[in] = Serial.read(); 
 
     // discard blanks. Meade LX200 specs states :Sd and :Sr are
-    // not followed by a blank but some implementation do...
-    // also this allows aGoto commands to be typed with blanks in
+    // not followed by a blank but some implementation does include it.
+    // also this allows aGoto commands to be typed with blanks
     if (input[in] == ' ') return; 
     
     if (input[in] == '#' || input[in] == '\n') { // time to check what is in the buffer
@@ -773,15 +770,13 @@ void loop() {
         // unknown command, print message only
         // if buffer contains more than one char
         // since stellarium seems to send extra #'s
-        if (in > 0) Serial.println("String unknown. Expected lx200 or aGoto commands");
+        if (in > 0) Serial.println("String unknown. Expected lx200 or aGotino commands");
       }
       in = 0; // reset buffer // FIXME!!! the whole input buffer is passed anyway
     } else {
       if (in++>20) in = 0; // prepare for next char or reset buffer if max lenght reached
-    }
-    
+    } 
   }
-
 }
 
 // Helpers to write on serial when DEBUG is active
