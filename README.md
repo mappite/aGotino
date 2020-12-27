@@ -89,28 +89,33 @@ Default value for *Side of Pier* is West, meaning your scope is supposed to be W
 
 ### Files
 
-    aGotino.ino           C Source
-    catalogs.h            Contains catalogues (Messier and aGotino Star List in J2000.0)
+    aGotino.ino           Arduino C Source
+    catalogs.h            Object Catalogues (J2000.0)
     aGotino-StarList.pdf  Star list in PDF
     aGotino-wiring.png    wirings 
 
 ### AstroMath (i.e. adapt for your mount)
 
-Below is how to calculate stepper motor pulse lenth to drive your mount at sidereal speed
+Below is how to calculate stepper motor pulse length to drive your mount at sidereal speed
     
-    Worm Ratio                144   // 144 eq5/exos2, 135 heq5, 130 eq3-2, 180 Eq6
-    Other (Pulley/Gear) Ratio   2.5 // depends on your pulley setup e.g. 40T/16T = 2.5
-    Steps per revolution      400   // or 200 depends on stepper motor. The higher the better.
-    Microstep                  32   // depends on driver. The higher the better.
+    Worm Ratio                 144   // 180 Eq6, 144 eq5&exos2, 135 heq5, 130 AR 65 DEC eq3-2
+    Other (Pulley or Gear) Ratio 2.5 // depends on your pulleys setup e.g. 40T/16T = 2.5
+    Steps per revolution       400   // or 200, depends on stepper motor. The higher the better.
+    Microstep                   32   // depends on driver. The higher the better.
      
-    MICROSTEPS_PER_DEGREE   12800   // = WormRatio*OtherRatio*StepsPerRevolution*Microsteps/360
-                                    // = number of motor microsteps to rotate the scope by 1 degree
+    MICROSTEPS_PER_DEGREE_AR 12800   // = WormRatio*OtherRatio*StepsPerRevolution*Microsteps/360
+                                     // = number of motor microsteps to rotate the scope by 1 degree
      
-    STEP_DELAY              18699   // = (86164/360)/(MicroSteps per Degree)*1000000
-                                    // = microseconds to advance a microstep
-                                    // 86164 is the number of secs for earth 360deg rotation (23h56m04s)
+    STEP_DELAY               18699   // = (86164/360)/(MICROSTEPS_PER_DEGREE_AR)*1000000
+                                     // = microseconds to advance a microstep
+                                     // 86164 is earth 360deg rotation time in secs (23h56m04s)
                                   
-The above example is for an EQ5/Exos2 with 40T-16T pulleys: it results in a tracking precision of 53 microsteps/second or 0.281 arcsec/microstep (which appears to be the same figures of ES/Losmandy G-11 mount). Goto accuracy within the default 30° is under 10'.
+The above example is for an EQ5/Exos2 with 40T-16T pulleys: it results in a tracking precision of 53 microsteps/second or 0.281 arcsec/microstep - which appears to be the same figures of ES/Losmandy G-11 mount. Goto accuracy within the default 30° is under 10'.
+
+### Implementation
+
+Copy _aGotino.ino_ in Arduino/aGotino/ _catalogs.h_ file in Arduino/libraries/aGotino/  
+Edit _aGotino.ino_ header to set the correct MICROSTEPS_PER_DEGREE_AR & STEP_DELAY values for your mount and (optional) change any other default values to fit your preferences or PIN setup. Note: if DEC gears or driver microsteps differs from RA ones, calculate and set appropriate MICROSTEPS_PER_DEGREE_DEC as well (for example on EQ3-2 mount).
 
 ### Hardware
 
