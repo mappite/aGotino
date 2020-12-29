@@ -37,16 +37,18 @@ const unsigned long MICROSTEPS_PER_DEGREE_DEC = MICROSTEPS_PER_DEGREE_RA; // cal
 const unsigned long MICROSTEPS_RA  = 32;              // Driver Microsteps in RA
 const unsigned long MICROSTEPS_DEC = MICROSTEPS_RA;   // Driver Microsteps in DEC
 
-const long SERIAL_SPEED = 9600;         // serial interface baud. Make sure your computer or phone matches this.
+const long SERIAL_SPEED = 9600;         // serial interface baud. Make sure your computer or phone matches this (or change it)
 long MAX_RANGE = 1800;                  // default max range in deg minutes (1800'=30°). See +range command
 
 // Motor clockwise direction: HIGH is as per original design (change RA to LOW in southern hemisphere)
 int RA_DIR   = HIGH;                    // set to LOW to reverse default direction
 int DEC_DIR  = HIGH;                    // set to LOW to reverse default direction
 
-unsigned int  RA_FAST_SPEED   = 8;      // RA  speed at button press, times the sidereal speed
-unsigned int  DEC_FAST_SPEED  = 8;      // DEC speed at button press
-unsigned long STEP_DELAY_SLEW = 1200;   // Step pulse timing in micros when slewing (the higher the slower)
+unsigned int  RA_SLOW_SPEED   = 8;      // RA  slow motion speed (button press) - times the sidereal speed
+unsigned int  DEC_SLOW_SPEED  = 8;      // DEC slow motion speed (button press)
+const    int  SLOW_SPEED_INC  = 4;      // Slow motion speed increment at +speed command
+
+unsigned long STEP_DELAY_SLEW = 1200;   // Slewing Pulse timing in micros (the higher the pulse, the slower the speed)
 
 boolean SIDE_OF_PIER_WEST     = true;   // Default Telescope position is west of the mount. Press both buttons for 1sec to reverse
 boolean POWER_SAVING_ENABLED  = true;   // toggle with -sleep on serial, see decSleep()
@@ -111,7 +113,7 @@ String lx200DEC= "+90*00:00#";
 // Vars to implement accelleration
 unsigned long MAX_DELAY = 16383; // limit of delayMicroseconds()
 unsigned long decStepDelay   = MAX_DELAY; // initial pulse lenght (slow, to start accelleration)
-unsigned long decTargetDelay = STEP_DELAY/DEC_FAST_SPEED; // pulse length to reach when Dec button is pressed
+unsigned long decTargetDelay = STEP_DELAY/DEC_SLOW_SPEED; // pulse length to reach when Dec button is pressed
 unsigned int  decPlayIdx = 0;
 
 void setup() {
@@ -206,7 +208,7 @@ void decPlay() {
     digitalWrite(decStepPin, (decStepPinStatus ? HIGH : LOW));
     decLastTime = micros(); // reset time
     if ( decStepPinStatus == LOW && decPlayIdx<=50) { // a step happened, accellerate
-      // decrease the pulse from MAX_DELAY to decTargetDelay = STEP_DELAY/DEC_FAST_SPEED
+      // decrease the pulse from MAX_DELAY to decTargetDelay = STEP_DELAY/DEC_SLOW_SPEED
       decStepDelay = MAX_DELAY-( (MAX_DELAY-decTargetDelay)/50*decPlayIdx); 
       decPlayIdx++; 
     }
@@ -488,7 +490,7 @@ void printInfo() {
   Serial.print("Side of Pier: ");
   Serial.println(SIDE_OF_PIER_WEST?"W":"E");
   Serial.print("Micro Speed: ");
-  Serial.println(RA_FAST_SPEED);
+  Serial.println(RA_SLOW_SPEED);
   Serial.print("Max Range: ");
   Serial.println(MAX_RANGE/60);
   Serial.print("Sleep: ");
@@ -518,12 +520,13 @@ void agoto(String s) {
       Serial.println("Can't set range to zero");
     }
   } else if (s.substring(1,6).equals("speed")) {
-    int d = (s.charAt(0) == '+')?4:-4;
-    if (RA_FAST_SPEED+d > 0 ) {
-      RA_FAST_SPEED  = RA_FAST_SPEED+d;
-      DEC_FAST_SPEED = DEC_FAST_SPEED+d;
+    int d = (s.charAt(0) == '+')?(SLOW_SPEED_INC):(-SLOW_SPEED_INC);
+    if (RA_SLOW_SPEED+d > 0 ) {
+      RA_SLOW_SPEED  = RA_SLOW_SPEED+d;
+      DEC_SLOW_SPEED = DEC_SLOW_SPEED+d;
+      decTargetDelay = STEP_DELAY/DEC_SLOW_SPEED; 
       Serial.println("New fast RA&Dec speed set to");
-      Serial.println(RA_FAST_SPEED);
+      Serial.println(RA_SLOW_SPEED);
     } else {
       Serial.println("Can't set speed to zero");
     }
@@ -713,14 +716,14 @@ void loop() {
   if ( (digitalRead(raButtonPin) == LOW)  && (micros() - raPressTime) > (300000) ) {
     raPressTime = micros();
     printLog("RA Speed: ");
-    // 1x -> +RA_FAST_SPEED -> -(RA_FAST_SPEED-2)
+    // 1x -> +RA_SLOW_SPEED -> -(RA_SLOW_SPEED-2)
     if (raSpeed == 1) {
-      raSpeed = RA_FAST_SPEED;
+      raSpeed = RA_SLOW_SPEED;
       digitalWrite(raDirPin, RA_DIR);
-    } else if  (raSpeed == RA_FAST_SPEED) {
-      raSpeed = (RA_FAST_SPEED - 2);
+    } else if  (raSpeed == RA_SLOW_SPEED) {
+      raSpeed = (RA_SLOW_SPEED - 2);
       digitalWrite(raDirPin, (RA_DIR==HIGH?LOW:HIGH)); // change direction
-    } else if  (raSpeed == (RA_FAST_SPEED - 2)) {
+    } else if  (raSpeed == (RA_SLOW_SPEED - 2)) {
       raSpeed = 1;
       digitalWrite(raDirPin, RA_DIR);
     }
@@ -732,15 +735,15 @@ void loop() {
   if (digitalRead(decButtonPin) == LOW && (micros() - decPressTime) > (300000) ) {
     decPressTime = micros();  // time when button has been pressed
     printLog("Dec Speed: ");
-    // 0x -> +DEC_FAST_SPEED -> -(DEC_FAST_SPEED-1)
+    // 0x -> +DEC_SLOW_SPEED -> -(DEC_SLOW_SPEED-1)
     if (decSpeed == 0) {
-      decSpeed = DEC_FAST_SPEED;
+      decSpeed = DEC_SLOW_SPEED;
       decSleep(false); // awake it
       digitalWrite(decDirPin, DEC_DIR);
-    } else if (decSpeed == DEC_FAST_SPEED) {
-      decSpeed = (DEC_FAST_SPEED - 1);
+    } else if (decSpeed == DEC_SLOW_SPEED) {
+      decSpeed = (DEC_SLOW_SPEED - 1);
       digitalWrite(decDirPin, (DEC_DIR==HIGH?LOW:HIGH));
-    } else if  (decSpeed == (DEC_FAST_SPEED - 1)) {
+    } else if  (decSpeed == (DEC_SLOW_SPEED - 1)) {
       decSpeed = 0; // stop
       decSleep(true); // sleep
     }
