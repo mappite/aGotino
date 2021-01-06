@@ -141,244 +141,244 @@ const RaDec Messier[] PROGMEM = {
 
 const RaDec Stars[] PROGMEM = {		
 {0,324000},     // True North
-{503,104726},	  // (1) And Alp	Alpheratz
-{4184,128234},	// (2) And Bet	Mirach
-{7434,152387},	// (3) And Gam	Almach
-{53272,-284239},// (4) Aps Alp	
-{59607,-277570},// (5) Aps Gam	
-{71447,31926},	// (6) Aql Alp	Altair
-{71719,23064},	// (7) Aql Bet	Alshain
-{71176,38208},	// (8) Aql Gam	Tarazed
-{68725,49908},	// (9) Aql Zet	
-{79547,1151},	  // (10) Aqr Alp	Sadalmelik
-{77494,-15944},	// (11) Aqr Bet	Sadalsud
-{80499,-2206},	// (12) Aqr Gam	Sadachbia
-{63111,-173246},// (13) Ara Alp	Tchou
-{62718,-196092},// (14) Ara Bet	
-{62724,-200241},// (15) Ara Gam	
-{7630,84465},	  // (16) Ari Alp	Hamal
-{6878,74909},	  // (17) Ari Bet	Sheratan
-{19001,165593},	// (18) Aur Alp	Capella
-{21572,161811},	// (19) Aur Bet	Menkalinan
-{18118,157764},	// (20) Aur Eps	Maaz
-{17820,119398},	// (21) Aur Iot	Kabdhilinan
-{21583,133965},	// (22) Aur The	
-{51340,69057},	// (23) Boo Alp	Arcturus
-{54117,145406},	// (24) Boo Bet	Nekkar
-{53099,97467},	// (25) Boo Eps	Pulcherrima
-{50081,66232},	// (26) Boo Eta	Muphrid
-{52325,137910},	// (27) Boo Gam	Seginus
-{73083,-41239},	// (28) Cap Alp	Al Giedi
-{73261,-47587},	// (29) Cap Bet	Dabih
-{78422,-57142},	// (30) Cap Del	Deneb Algiedi
-{78006,-55216},	// (31) Cap Gam	Nashira
-{23037,-184695},// (32) Car Alp	Canopus
-{33192,-245818},// (33) Car Bet	Miaplacidus
-{30151,-210565},// (34) Car Eps	Avior
-{33425,-211409},// (35) Car Iot	Aspidiske
-{38577,-228980},// (36) Car The	
-{2431,203534},	// (37) Cas Alp	Schedar
-{551,212939},	  // (38) Cas Bet	Caph
-{5149,216847},	// (39) Cas Del	Ruchbah
-{3403,218580},	// (40) Cas Gam	Navi
-{52776,-212993},// (41) Cen Alp	Rigel Kentaurus
-{50629,-214657},// (42) Cen Bet	Hadar
-{43702,-177399},// (43) Cen Del	
-{49193,-189121},// (44) Cen Eps	
-{52530,-150632},// (45) Cen Eta	
-{45691,-169345},// (46) Cen Gam	
-{48036,-127036},// (47) Cen Iot	
-{50801,-128268},// (48) Cen The	Menkent
-{50132,-168162},// (49) Cen Zet	
-{76715,225308},	// (50) Cep Alp	Alderamin
-{77320,254019},	// (51) Cep Bet	Alphirk
-{85161,279477},	// (52) Cep Gam	Er Rai
-{10937,14723},  // (53) Cet Alp	Menkab
-{2615,-57648},	// (54) Cet Bet	Diphda
-{9798,11649},	  // (55) Cet Gam	
-{52950,-226889},// (56) Cir Alp	
-{24309,-55022},	// (57) CMa Alp	Sirius
-{22962,-57759},	// (58) CMa Bet	Mirzam
-{25704,-92184},	// (59) CMa Del	Wezen
-{25118,-97300},	// (60) CMa Eps	Adhara
-{26646,-103309},// (61) CMa Eta	Aludra
-{27558,18810},  // (62) CMi Alp	Procyon
-{26829,29842},  // (63) CMi Bet	Gomeisa
-{29791,33068},	// (64) Cnc Bet	Tarf
-{20379,-122133},// (65) Col Alp	Phakt
-{21058,-123234},// (66) Col Bet	Wazn
-{56081,96173},	// (67) CrB Alp	Alphecca
-{55670,104781},	// (68) CrB Bet	Nusakan
-{56565,94664},	// (69) CrB Gam	
-{44796,-226443},// (70) Cru Alp	Acrux
-{46063,-209921},// (71) Cru Bet	Mimosa
-{44109,-206104},// (72) Cru Del	
-{45070,-204792},// (73) Cru Gam	Gacrux
-{45263,-81372},	// (74) Crv Bet	Kraz
-{44992,-55744},	// (75) Crv Del	Algorab
-{44148,-59249},	// (76) Crv Gam	Gienah Corvi
-{46562,137946},	// (77) CVn Alp	Cor Caroli
-{74486,163009},	// (78) Cyg Alp	Deneb
-{70243,100655},	// (79) Cyg Bet	Albireo
-{71099,162471},	// (80) Cyg Del	
-{74773,122293},	// (81) Cyg Eps	Gienah
-{73334,144924},	// (82) Cyg Gam	Sadr
-{74378,57283},	// (83) Del Alp	Svalocin
-{74253,52543},	// (84) Del Bet	Rotanev
-{16440,-197838},// (85) Dor Alp	
-{20018,-221437},// (86) Dor Bet	
-{50663,231753},	// (87) Dra Alp	Thuban
-{63026,188285},	// (88) Dra Bet	Rastaban
-{59040,221451},	// (89) Dra Eta	
-{64596,185360},	// (90) Dra Gam	Eltanin
-{76549,18892},	// (91) Equ Alp	Kitalpha
-{5863,-204348},	// (92) Eri Alp	Achernar
-{18471,-17689},	// (93) Eri Bet	Cursa
-{14282,-44969},	// (94) Eri Gam	Zaurak
-{11524,-97247},	// (95) For Alp	
-{27276,114798},	// (96) Gem Alp	Castor
-{27919,100894},	// (97) Gem Bet	Pollux
-{24236,90472},	// (98) Gem Eps	Mebsuta
-{23863,59037},	// (99) Gem Gam	Alhena
-{22978,81049},	// (100) Gem Mu 	Tejat
-{79694,-162140},// (101) Gru Alp	Al Na'ir
-{81760,-162415},// (102) Gru Bet	
-{78836,-131886},// (103) Gru Gam	Al Dhanab
-{62079,51805},	// (104) Her Alp	Ras Algethi
-{59413,77363},	// (105) Her Bet	Kornephoros
-{58915,68951},	// (106) Her Gam	
-{60077,113771},	// (107) Her Zet	
-{15240,-150140},// (108) Hor Alp	
-{34055,-26429},	// (109) Hya Alp	Alphard
-{47935,-82182},	// (110) Hya Gam	
-{7126,-217549},	// (111) Hyi Alp	
-{1545,-276285},	// (112) Hyi Bet	
-{13634,-265540},// (113) Hyi Gam	
-{74254,-168151},// (114) Ind Alp	Al Nair
-{75289,-207165},// (115) Ind Bet	
-{81078,181017},	// (116) Lac Alp	
-{36502,43082},	// (117) Leo Alp	Regulus
-{42544,52459},	// (118) Leo Bet	Denebola
-{40447,73885},	// (119) Leo Del	Zozma
-{35151,85587},	// (120) Leo Eps	
-{37198,71430},	// (121) Leo Gam	Al Gieba
-{19964,-58240},	// (122) Lep Alp	Arneb
-{19695,-69266},	// (123) Lep Bet	Nihal
-{20668,-77586},	// (124) Lep Gam	
-{53453,-57450},	// (125) Lib Alp	Zuben El Genubi
-{55020,-31021},	// (126) Lib Bet	Zuben el Chamal
-{56132,-47558},	// (127) Lib Gam	Zuben el Hakrab
-{52916,-167802},// (128) Lup Alp	Men
-{53912,-154318},// (129) Lup Bet	
-{56109,-146999},// (130) Lup Gam	
-{33663,123813},	// (131) Lyn Alp	
-{67016,139621},	// (132) Lyr Alp	Vega
-{67805,120106},	// (133) Lyr Bet	Sheliak
-{68337,117682},	// (134) Lyr Gam	Sulaphat
-{27675,-30416},	// (135) Mon Alp	
-{22491,-20611},	// (136) Mon Gam	
-{45431,-247912},// (137) Mus Alp	
-{45977,-244411},// (138) Mus Bet	
-{45148,-258721},// (139) Mus Gam	
-{63296,45216},	// (140) Oph Alp	Rasalhague
-{63808,16442},	// (141) Oph Bet	Kelb al Rai
-{58461,-8300},	// (142) Oph Del	Yed Prior
-{61823,-51391},	// (143) Oph Eta	
-{64074,9746},	  // (144) Oph Gam	
-{59830,-33958},	// (145) Oph Zet	
-{21310,26665},	// (146) Ori Alp	Betelgeuse
-{18872,-28074},	// (147) Ori Bet	Rigel
-{19920,1077},	  // (148) Ori Del	Mintaka
-{20173,-2873},	// (149) Ori Eps	Alnilam
-{19508,22859},	// (150) Ori Gam	Bellatrix
-{20126,-14724},	// (151) Ori Iot	Na'ir al Saif
-{20865,-29989},	// (152) Ori Kap	Saiph
-{20446,-206},	  // (153) Ori Zet	Alnitak
-{73539,-198954},// (154) Pav Alp	Peacock
-{74698,-236869},// (155) Pav Bet	
-{83086,54739},	// (156) Peg Alp	Markab
-{83027,101098},	// (157) Peg Bet	Scheat
-{78251,35550},	// (158) Peg Eps	Enif
-{81780,108797},	// (159) Peg Eta	Matar
-{794,54661},	  // (160) Peg Gam	Algenib
-{12259,179500},	// (161) Per Alp	Mirfak
-{11290,147440},	// (162) Per Bet	Algol
-{14271,144037},	// (163) Per Eps	
-{11088,192623},	// (164) Per Gam	
-{14048,114781},	// (165) Per Zet	Atik
-{1577,-150098},	// (166) Phe Alp	Ankaa
-{3965,-163013},	// (167) Phe Bet	
-{5302,-153654},	// (168) Phe Gam	
-{24491,-216211},// (169) Pic Alp	
-{20837,-183361},// (170) Pic Bet	
-{82659,-102160},// (171) PsA Alp	Fomalhaut
-{83830,11816},	// (172) Psc Gam	
-{26229,-132849},// (173) Pup Pi 	
-{29253,-85305},	// (174) Pup Rho	
-{24596,-177787},// (175) Pup Tau	
-{29015,-143988},// (176) Pup Zet	Naos
-{31416,-118129},// (177) Pyx Alp	
-{31206,-124890},// (178) Pyx Bet	
-{15266,-221494},// (179) Ret Alp	
-{13452,-227495},// (180) Ret Bet	
-{59364,-92045},	// (181) Sco Alp	Antares
-{57926,-65500},	// (182) Sco Bet	Graffias
-{57620,-76962},	// (183) Sco Del	Dschubba
-{60610,-121344},// (184) Sco Eps	
-{63749,-140292},// (185) Sco Kap	
-{63217,-132826},// (186) Sco Lam	Shaula
-{57531,-93189},	// (187) Sco Pi 	
-{58871,-87866},	// (188) Sco Sig	Al Niyat
-{59753,-100022},// (189) Sco Tau	
-{63439,-147608},// (190) Sco The	Sargas
-{63046,-132135},// (191) Sco Ups	Lesath
-{66912,-27921},	// (192) Sct Alp	
-{56656,23132},	// (193) Ser Alp	Unukalhai
-{56771,55519},	// (194) Ser Bet	Chow
-{57387,56382},	// (195) Ser Gam	
-{71925,70172},	// (196) Sge Gam	
-{69833,-141782},// (197) Sgr Alp	
-{66060,-101419},// (198) Sgr Del	Kaus Media
-{66250,-121015},// (199) Sgr Eps	Kaus Australis
-{65149,-106473},// (200) Sgr Gam	Al Nasl
-{66478,-88482},	// (201) Sgr Lam	Kaus Borealis
-{68986,-75515},	// (202) Sgr Pi 	
-{68116,-92532},	// (203) Sgr Sig	Nunki
-{68557,-101231},// (204) Sgr Zet	
-{16555,59433},	// (205) Tau Alp	Aldebaran
-{19578,102987},	// (206) Tau Bet	Alnath
-{13649,86778},	// (207) Tau Eta	Alcyone
-{15588,56259},	// (208) Tau Gam	Primus Hyadum
-{66418,-158514},// (209) Tel Alp	
-{60520,-248300},// (210) TrA Alp	
-{57309,-225250},// (211) TrA Bet	
-{55135,-242354},// (212) TrA Gam	
-{6785,106484},	// (213) Tri Alp	Mothallah
-{7773,125954},	// (214) Tri Bet	
-{1446,-258907},	// (215) Tuc 47, yep not a star
-{80310,-215065},// (216) Tuc Alp	
-{83846,-207951},// (217) Tuc Gam	
-{39824,222303},	// (218) UMa Alp	Dubhe
-{39711,202977},	// (219) UMa Bet	Merak
-{46442,201455},	// (220) UMa Eps	Alioth
-{49652,177528},	// (221) UMa Eta	Alkaid
-{42830,193301},	// (222) UMa Gam	Phecda
-{48236,197731},	// (223) UMa Zet	Mizar
-{9109,321351},	// (224) UMi Alp	Polaris
-{53442,266960},	// (225) UMi Bet	Kocab
-{55244,258602},	// (226) UMi Gam	Pherkab
-{31482,-191850},// (227) Vel Del	
-{29372,-167988},// (228) Vel Gam	Regor
-{33727,-197961},// (229) Vel Kap	Merkab
-{32880,-153243},// (230) Vel Lam	Suhail
-{38806,-174888},// (231) Vel Mu 	
-{48312,-39019},	// (232) Vir Alp	Spica
-{42642,6353},	  // (233) Vir Bet	Zawijah
-{46931,39453},	// (234) Vir Eps	Vindemiatrix
-{45700,-1982},	// (235) Vir Gam	
-{32547,-236174},// (236) Vol Alp	
-{30344,-237107},// (237) Vol Bet
-{25725,-250204}	// (238) Vol Gam	
+{503,104726},  // (1) And Alp  Alpheratz
+{4184,128234},  // (2) And Bet  Mirach
+{7434,152387},  // (3) And Gam  Almach
+{53272,-284561},  // (4) Aps Alp  
+{59607,-284030},  // (5) Aps Gam  
+{71447,31926},  // (6) Aql Alp  Altair
+{71719,23064},  // (7) Aql Bet  Alshain
+{71176,38208},  // (8) Aql Gam  Tarazed
+{68725,49908},  // (9) Aql Zet  
+{79547,1151}, // (10) Aqr Alp Sadalmelik
+{77494,-20056}, // (11) Aqr Bet Sadalsud
+{80499,-4994},  // (12) Aqr Gam Sadachbia
+{63111,-179554},  // (13) Ara Alp Tchou
+{62718,-199908},  // (14) Ara Bet 
+{62724,-202959},  // (15) Ara Gam 
+{7630,84465}, // (16) Ari Alp Hamal
+{6878,74909}, // (17) Ari Bet Sheratan
+{19001,165593}, // (18) Aur Alp Capella
+{21572,161811}, // (19) Aur Bet Menkalinan
+{18118,157764}, // (20) Aur Eps Maaz
+{17820,119398}, // (21) Aur Iot Kabdhilinan
+{21583,133965}, // (22) Aur The 
+{51340,69057},  // (23) Boo Alp Arcturus
+{54117,145406}, // (24) Boo Bet Nekkar
+{53099,97467},  // (25) Boo Eps Pulcherrima
+{50081,66232},  // (26) Boo Eta Muphrid
+{52325,137910}, // (27) Boo Gam Seginus
+{73083,-45161}, // (28) Cap Alp Al Giedi
+{73261,-53213}, // (29) Cap Bet Dabih
+{78422,-58058}, // (30) Cap Del Deneb Algiedi
+{78006,-59984}, // (31) Cap Gam Nashira
+{23037,-189705},  // (32) Car Alp Canopus
+{33192,-250982},  // (33) Car Bet Miaplacidus
+{30151,-214235},  // (34) Car Eps Avior
+{33425,-213391},  // (35) Car Iot Aspidiske
+{38577,-231820},  // (36) Car The 
+{2431,203534},  // (37) Cas Alp Schedar
+{551,212939}, // (38) Cas Bet Caph
+{5149,216847},  // (39) Cas Del Ruchbah
+{3403,218580},  // (40) Cas Gam Navi
+{52776,-219007},  // (41) Cen Alp Rigel Kentaurus
+{50629,-217343},  // (42) Cen Bet Hadar
+{43702,-182601},  // (43) Cen Del 
+{49193,-192479},  // (44) Cen Eps 
+{52530,-151768},  // (45) Cen Eta 
+{45691,-176255},  // (46) Cen Gam 
+{48036,-132164},  // (47) Cen Iot 
+{50801,-130932},  // (48) Cen The Menkent
+{50132,-170238},  // (49) Cen Zet 
+{76715,225308}, // (50) Cep Alp Alderamin
+{77320,254019}, // (51) Cep Bet Alphirk
+{85161,279477}, // (52) Cep Gam Er Rai
+{10937,14723},  // (53) Cet Alp Menkab
+{2615,-64752},  // (54) Cet Bet Diphda
+{9798,11649}, // (55) Cet Gam 
+{52950,-233911},  // (56) Cir Alp 
+{24309,-60178}, // (57) CMa Alp Sirius
+{22962,-64641}, // (58) CMa Bet Mirzam
+{25704,-95016}, // (59) CMa Del Wezen
+{25118,-104300},  // (60) CMa Eps Adhara
+{26646,-105491},  // (61) CMa Eta Aludra
+{27558,18810},  // (62) CMi Alp Procyon
+{26829,29842},  // (63) CMi Bet Gomeisa
+{29791,33068},  // (64) Cnc Bet Tarf
+{20379,-122667},  // (65) Col Alp Phakt
+{21058,-128766},  // (66) Col Bet Wazn
+{56081,96173},  // (67) CrB Alp Alphecca
+{55670,104781}, // (68) CrB Bet Nusakan
+{56565,94664},  // (69) CrB Gam 
+{44796,-227157},  // (70) Cru Alp Acrux
+{46063,-214879},  // (71) Cru Bet Mimosa
+{44109,-211496},  // (72) Cru Del 
+{45070,-205608},  // (73) Cru Gam Gacrux
+{45263,-84228}, // (74) Crv Bet Kraz
+{44992,-59456}, // (75) Crv Del Algorab
+{44148,-63151}, // (76) Crv Gam Gienah Corvi
+{46562,137946}, // (77) CVn Alp Cor Caroli
+{74486,163009}, // (78) Cyg Alp Deneb
+{70243,100655}, // (79) Cyg Bet Albireo
+{71099,162471}, // (80) Cyg Del 
+{74773,122293}, // (81) Cyg Eps Gienah
+{73334,144924}, // (82) Cyg Gam Sadr
+{74378,57283},  // (83) Del Alp Svalocin
+{74253,52543},  // (84) Del Bet Rotanev
+{16440,-198162},  // (85) Dor Alp 
+{20018,-224963},  // (86) Dor Bet 
+{50663,231753}, // (87) Dra Alp Thuban
+{63026,188285}, // (88) Dra Bet Rastaban
+{59040,221451}, // (89) Dra Eta 
+{64596,185360}, // (90) Dra Gam Eltanin
+{76549,18892},  // (91) Equ Alp Kitalpha
+{5863,-206052}, // (92) Eri Alp Achernar
+{18471,-18311}, // (93) Eri Bet Cursa
+{14282,-48631}, // (94) Eri Gam Zaurak
+{11524,-104353},  // (95) For Alp 
+{27276,114798}, // (96) Gem Alp Castor
+{27919,100894}, // (97) Gem Bet Pollux
+{24236,90472},  // (98) Gem Eps Mebsuta
+{23863,59037},  // (99) Gem Gam Alhena
+{22978,81049},  // (100) Gem Mu   Tejat
+{79694,-169060},  // (101) Gru Alp  Al Na'ir
+{81760,-168785},  // (102) Gru Bet  
+{78836,-134514},  // (103) Gru Gam  Al Dhanab
+{62079,51805},  // (104) Her Alp  Ras Algethi
+{59413,77363},  // (105) Her Bet  Kornephoros
+{58915,68951},  // (106) Her Gam  
+{60077,113771}, // (107) Her Zet  
+{15240,-152260},  // (108) Hor Alp  
+{34055,-31171}, // (109) Hya Alp  Alphard
+{47935,-83418}, // (110) Hya Gam  
+{7126,-221651}, // (111) Hyi Alp  
+{1545,-278115}, // (112) Hyi Bet  
+{13634,-267260},  // (113) Hyi Gam  
+{74254,-170249},  // (114) Ind Alp  Al Nair
+{75289,-210435},  // (115) Ind Bet  
+{81078,181017}, // (116) Lac Alp  
+{36502,43082},  // (117) Leo Alp  Regulus
+{42544,52459},  // (118) Leo Bet  Denebola
+{40447,73885},  // (119) Leo Del  Zozma
+{35151,85587},  // (120) Leo Eps  
+{37198,71430},  // (121) Leo Gam  Al Gieba
+{19964,-64160}, // (122) Lep Alp  Arneb
+{19695,-74734}, // (123) Lep Bet  Nihal
+{20668,-80814}, // (124) Lep Gam  
+{53453,-57750}, // (125) Lib Alp  Zuben El Genubi
+{55020,-33779}, // (126) Lib Bet  Zuben el Chamal
+{56132,-53242}, // (127) Lib Gam  Zuben el Hakrab
+{52916,-170598},  // (128) Lup Alp  Men
+{53912,-155282},  // (129) Lup Bet  
+{56109,-148201},  // (130) Lup Gam  
+{33663,123813}, // (131) Lyn Alp  
+{67016,139621}, // (132) Lyr Alp  Vega
+{67805,120106}, // (133) Lyr Bet  Sheliak
+{68337,117682}, // (134) Lyr Gam  Sulaphat
+{27675,-34384}, // (135) Mon Alp  
+{22491,-22589}, // (136) Mon Gam  
+{45431,-248888},  // (137) Mus Alp  
+{45977,-245189},  // (138) Mus Bet  
+{45148,-259679},  // (139) Mus Gam  
+{63296,45216},  // (140) Oph Alp  Rasalhague
+{63808,16442},  // (141) Oph Bet  Kelb al Rai
+{58461,-13300}, // (142) Oph Del  Yed Prior
+{61823,-56609}, // (143) Oph Eta  
+{64074,9746}, // (144) Oph Gam  
+{59830,-38042}, // (145) Oph Zet  
+{21310,26665},  // (146) Ori Alp  Betelgeuse
+{18872,-29526}, // (147) Ori Bet  Rigel
+{19920,1077}, // (148) Ori Del  Mintaka
+{20173,-4327},  // (149) Ori Eps  Alnilam
+{19508,22859},  // (150) Ori Gam  Bellatrix
+{20126,-21276}, // (151) Ori Iot  Na'ir al Saif
+{20865,-34811}, // (152) Ori Kap  Saiph
+{20446,-6994},  // (153) Ori Zet  Alnitak
+{73539,-204246},  // (154) Pav Alp  Peacock
+{74698,-238331},  // (155) Pav Bet  
+{83086,54739},  // (156) Peg Alp  Markab
+{83027,101098}, // (157) Peg Bet  Scheat
+{78251,35550},  // (158) Peg Eps  Enif
+{81780,108797}, // (159) Peg Eta  Matar
+{794,54661},  // (160) Peg Gam  Algenib
+{12259,179500}, // (161) Per Alp  Mirfak
+{11290,147440}, // (162) Per Bet  Algol
+{14271,144037}, // (163) Per Eps  
+{11088,192623}, // (164) Per Gam  
+{14048,114781}, // (165) Per Zet  Atik
+{1577,-152302}, // (166) Phe Alp  Ankaa
+{3965,-168187}, // (167) Phe Bet  
+{5302,-155946}, // (168) Phe Gam  
+{24491,-222989},  // (169) Pic Alp  
+{20837,-183839},  // (170) Pic Bet  
+{82659,-106640},  // (171) PsA Alp  Fomalhaut
+{83830,11816},  // (172) Psc Gam  
+{26229,-133551},  // (173) Pup Pi   
+{29253,-87495}, // (174) Pup Rho  
+{24596,-182213},  // (175) Pup Tau  
+{29015,-144012},  // (176) Pup Zet  Naos
+{31416,-119471},  // (177) Pyx Alp  
+{31206,-127110},  // (178) Pyx Bet  
+{15266,-224906},  // (179) Ret Alp  
+{13452,-233305},  // (180) Ret Bet  
+{59364,-95155}, // (181) Sco Alp  Antares
+{57926,-71300}, // (182) Sco Bet  Graffias
+{57620,-81438}, // (183) Sco Del  Dschubba
+{60610,-123456},  // (184) Sco Eps  
+{63749,-140508},  // (185) Sco Kap  
+{63217,-133574},  // (186) Sco Lam  Shaula
+{57531,-94011}, // (187) Sco Pi   
+{58871,-92134}, // (188) Sco Sig  Al Niyat
+{59753,-101578},  // (189) Sco Tau  
+{63439,-154792},  // (190) Sco The  Sargas
+{63046,-134265},  // (191) Sco Ups  Lesath
+{66912,-29679}, // (192) Sct Alp  
+{56656,23132},  // (193) Ser Alp  Unukalhai
+{56771,55519},  // (194) Ser Bet  Chow
+{57387,56382},  // (195) Ser Gam  
+{71925,70172},  // (196) Sge Gam  
+{69833,-146218},  // (197) Sgr Alp  
+{66060,-107381},  // (198) Sgr Del  Kaus Media
+{66250,-123785},  // (199) Sgr Eps  Kaus Australis
+{65149,-109527},  // (200) Sgr Gam  Al Nasl
+{66478,-91518}, // (201) Sgr Lam  Kaus Borealis
+{68986,-75685}, // (202) Sgr Pi   
+{68116,-94668}, // (203) Sgr Sig  Nunki
+{68557,-107569},  // (204) Sgr Zet  
+{16555,59433},  // (205) Tau Alp  Aldebaran
+{19578,102987}, // (206) Tau Bet  Alnath
+{13649,86778},  // (207) Tau Eta  Alcyone
+{15588,56259},  // (208) Tau Gam  Primus Hyadum
+{66418,-165486},  // (209) Tel Alp  
+{60520,-248500},  // (210) TrA Alp  
+{57309,-228350},  // (211) TrA Bet  
+{55135,-247246},  // (212) TrA Gam  
+{6785,106484},  // (213) Tri Alp  Mothallah
+{7773,125954},  // (214) Tri Bet  
+{1446,-259493}, // (215) Tuc 47 
+{80310,-216935},  // (216) Tuc Alp  
+{83846,-209649},  // (217) Tuc Gam  
+{39824,222303}, // (218) UMa Alp  Dubhe
+{39711,202977}, // (219) UMa Bet  Merak
+{46442,201455}, // (220) UMa Eps  Alioth
+{49652,177528}, // (221) UMa Eta  Alkaid
+{42830,193301}, // (222) UMa Gam  Phecda
+{48236,197731}, // (223) UMa Zet  Mizar
+{9109,321351},  // (224) UMi Alp  Polaris
+{53442,266960}, // (225) UMi Bet  Kocab
+{55244,258602}, // (226) UMi Gam  Pherkab
+{31482,-196950},  // (227) Vel Del  
+{29372,-170412},  // (228) Vel Gam  Regor
+{33727,-198039},  // (229) Vel Kap  Merkab
+{32880,-156357},  // (230) Vel Lam  Suhail
+{38806,-177912},  // (231) Vel Mu   
+{48312,-40181}, // (232) Vir Alp  Spica
+{42642,6353}, // (233) Vir Bet  Zawijah
+{46931,39453},  // (234) Vir Eps  Vindemiatrix
+{45700,-5218},  // (235) Vir Gam  
+{32547,-239026},  // (236) Vol Alp  
+{30344,-238093},  // (237) Vol Bet  
+{25725,-253796},  // (238) Vol Gam  
 };
 
 

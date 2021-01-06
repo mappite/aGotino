@@ -195,7 +195,7 @@ ISR(TIMER1_COMPA_vect){
 }
 
 /* Move DEC motor (change pulse) - slow motion
- *   invoked from main loop() when Dec speed is not zero 
+ *   invoked from main loop() if Dec speed is not zero 
  */
 void decPlay() {
 
@@ -313,7 +313,8 @@ void slewRaDecBySteps(unsigned long raSteps, unsigned long decSteps) {
   digitalWrite(LED_BUILTIN, HIGH);
   SLEWING = true;
 
-  // wake up Dec motor if needed
+  // wake up Dec motor if needed 
+  // FIXME: shoud this be moved to slewRaDecBySecs to avoid glitches? This pauses 2millis every time
   if (decSteps != 0) {
     decSleep(false);
   }
@@ -327,7 +328,6 @@ void slewRaDecBySteps(unsigned long raSteps, unsigned long decSteps) {
       delaySlew = MAX_DELAY-( (MAX_DELAY-STEP_DELAY_SLEW)/100*i);
     } else if ( (i>raSteps-100 && i<raSteps)|| (i>decSteps-100 && i<decSteps)) {
       delaySlew = STEP_DELAY_SLEW*2;// twice as slow in last 100 steps before a motor is about to stop 
-      // FIXME: implement nice accelleration as in initial 100 steps
     } else { 
       delaySlew = STEP_DELAY_SLEW; // full speed
     } 
@@ -772,7 +772,10 @@ void loop() {
         // unknown command, print message only
         // if buffer contains more than one char
         // since stellarium seems to send extra #'s
-        if (in > 0) Serial.println("String unknown. Expected lx200 or aGotino commands");
+        if (in > 0) {
+          Serial.print(input);
+          Serial.println(" unknown. Expected lx200 or aGotino commands");
+        }
       }
       in = 0; // reset buffer // FIXME!!! the whole input buffer is passed anyway
     } else {
