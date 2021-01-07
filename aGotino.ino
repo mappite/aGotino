@@ -773,7 +773,8 @@ void loop() {
         // if buffer contains more than one char
         // since stellarium seems to send extra #'s
         if (in > 0) {
-          Serial.print(input);
+          String s = input;
+          Serial.print(s.substring(0,in));
           Serial.println(" unknown. Expected lx200 or aGotino commands");
         }
       }
