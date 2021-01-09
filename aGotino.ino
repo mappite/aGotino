@@ -410,13 +410,13 @@ void lx200(String s) { // all :.*# commands are passed here
     long ss = s.substring(9,11).toInt();
     inRA = hh*3600+mi*60+ss;
     Serial.print(1); // FIXME: input is not validated
-  } else if (s.substring(1,3).equals("Sd")) { // :SdsDD*MM:SS# // blanks after :Sd
+  } else if (s.substring(1,3).equals("Sd")) { // :SdsDD*MM:SS#
     printLog("Sd");
     // this is the FINAL step of setting a pos (DEC) 
-    long dd = s.substring(4,6).toInt()*(s.charAt(3)=='-'?-1:1);
+    long dd = s.substring(4,6).toInt();
     long mi = s.substring(7,9).toInt();
     long ss = s.substring(10,12).toInt();
-    inDEC = dd*3600+mi*60+ss;
+    inDEC = (dd*3600+mi*60+ss)*(s.charAt(3)=='-'?-1:1);
     // FIXME: the below should not be needed anymore since :CM# command is honored
     if (currDEC == NORTH_DEC) { // if currDEC is still the initial default position (North)
       // assume this is to sync current position to new input
