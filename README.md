@@ -132,7 +132,7 @@ The above example is for an EQ5/Exos2 with 40T-16T pulleys: it results in a trac
 ![Hardware](https://imgur.com/zhQLEPC.png)
 
 ### Bluetooth
-(experimental) Tested with HC-05 and HC-08/10 modules - just wire BT module RX&TX pin to Arduino TX&RX (note: when BT adapter is wired to TX&RX the USB port is not functional). 
+_(experimental)_ Tested with HC-05 and HC-08/10 modules - just wire BT module RX&TX pin to Arduino TX&RX (note: when BT adapter is wired to TX&RX the USB port is not functional). 
 
 You can then connect from an Android device using [Serial Bluetooth Terminal App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_bluetooth_terminal&hl=it&gl=US) or configure the bluetooth connection as a serial device in your computer and connect via Stellarium/Indi (on Linux, setup /dev/rfcomm0 or for BLE devices see [BLE-Serial](https://github.com/Jakeler/ble-serial)).
 
