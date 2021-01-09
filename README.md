@@ -1,7 +1,7 @@
 # aGotino
 A telescope Goto solution based on Arduino (Nano or up) that supports:
 
-- aGotino commands - an Android phone can act as a remote via an [USB OTG cable](https://www.amazon.com/s?k=usb+otg+cable) and a [Serial App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it)
+- aGotino commands - an Android phone can act as a remote via an [USB OTG cable](https://www.amazon.com/s?k=usb+otg+cable) and a [Serial App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it) or (optional) via Bluetooth
 - basic Meade LX200 protocol - drive with Stellarium or any software that supports INDI
 
 aGotino provides tracking and **hybrid goto&starhopping**: point the scope to something you can easily find and then reach a remote, low magnitude object nearby - default *nearby* is 30° so you will always find some bright stars around. Star alignment procedures are _not_ required, you can move and rotate your scope freely, until you need that extra help. 
@@ -127,8 +127,14 @@ The above example is for an EQ5/Exos2 with 40T-16T pulleys: it results in a trac
 - RJ11 cable with two RJ11 sockets to connect the Dec Motor
 - Dupont cables, a couple of momentary buttons and a 100µF Capacitor to protect the circuit.
 - Arduino Nano (or any Arduino)
+- (optional) Bluetooth Adapter, see below
 
 ![Hardware](https://imgur.com/zhQLEPC.png)
+
+### Bluetooth
+(experimental) Tested with HC-05 and HC-08/10 - just wire BT module RX&TX pin to Arduino TX&RX (note: when BT adapter is wired to TX&RX the USB port is not functional). 
+
+You can then connect from an Android device using [Serial Bluetooth Terminal App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_bluetooth_terminal&hl=it&gl=US) or configure the bluetooth connection as a serial device in your computer and connect via Stellarium/Indi (on Linux, setup /dev/rfcomm0 or for BLE devices see [BLE-Serial](https://github.com/Jakeler/ble-serial)).
 
 ### Todo
 
