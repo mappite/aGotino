@@ -53,7 +53,7 @@ unsigned long STEP_DELAY_SLEW = 1200;   // Slewing Pulse timing in micros (the h
 unsigned int ST4_PULSE_FACTOR = 2;      // dive speed of st4 pulse:  1 => 1x  // 2 => 0.5x // 3 => 0.33x // 4 => 0.25x
 
 boolean SIDE_OF_PIER_WEST     = true;   // Default Telescope position is west of the mount. Press both buttons for 1sec to reverse
-boolean POWER_SAVING_ENABLED  = true;   // toggle with -sleep on serial, see decSleep(). Set to false if using ST4 port or pulse guide
+boolean POWER_SAVING_ENABLED  = false;   // toggle with -sleep on serial, see decSleep(). Set to false if using ST4 port or pulse guide
 boolean DEBUG                 = false;  // toggle with +debug on serial
 
 // Arduino Pin Layout
