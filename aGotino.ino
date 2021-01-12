@@ -50,8 +50,10 @@ const    int  SLOW_SPEED_INC  = 4;      // Slow motion speed increment at +speed
 
 unsigned long STEP_DELAY_SLEW = 1200;   // Slewing Pulse timing in micros (the higher the pulse, the slower the speed)
 
+unsigned int ST4_PULSE_FACTOR = 2;      // dive speed of st4 pulse:  1 => 1x  // 2 => 0.5x // 3 => 0.33x // 4 => 0.25x
+
 boolean SIDE_OF_PIER_WEST     = true;   // Default Telescope position is west of the mount. Press both buttons for 1sec to reverse
-boolean POWER_SAVING_ENABLED  = true;   // toggle with -sleep on serial, see decSleep()
+boolean POWER_SAVING_ENABLED  = true;   // toggle with -sleep on serial, see decSleep(). Set to false if using ST4 port or pulse guide
 boolean DEBUG                 = false;  // toggle with +debug on serial
 
 // Arduino Pin Layout
@@ -64,6 +66,10 @@ const int decStepPin  = 11;
 const int decButtonPin=  7;
 const int decEnableMicroStepsPin = 9;
 const int decSleepPin = 10;
+const int st4NorthPin = A0;
+const int st4SouthPin = A1;
+const int st4EastPin  = A2;
+const int st4WestPin = A3;
 
 /*
  * It is safe to keep the below untouched
@@ -87,7 +93,10 @@ unsigned long decLastTime  = 0;    // last time DEC pulse has changed status
 boolean raStepPinStatus    = false;// true = HIGH, false = LOW
 boolean decStepPinStatus   = false;// true = HIGH, false = LOW
 
-boolean SLEWING = false; // true while it is slewing to block AR tracking
+boolean SLEWING = false;  // true while it is slewing to block AR tracking
+
+boolean st4PulseRA  = false; // true while ST4 port RA pulse is ongoing
+boolean st4PulseDEC = false; // true while ST4 port DEC pulse is ongoing
 
 const long DAY_SECONDS =  86400; // secs in a day
 const long NORTH_DEC   = 324000; // 90°
@@ -143,6 +152,11 @@ void setup() {
   // init Button pins as Input Pullup so no need resistor
   pinMode(raButtonPin,  INPUT_PULLUP);
   pinMode(decButtonPin, INPUT_PULLUP);
+  // init ST4 port pins as well
+  pinMode(st4NorthPin, INPUT_PULLUP);
+  pinMode(st4SouthPin, INPUT_PULLUP);
+  pinMode(st4EastPin,  INPUT_PULLUP);
+  pinMode(st4WestPin,  INPUT_PULLUP);
   // init led and turn on for 0.5 sec
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
@@ -780,6 +794,54 @@ void loop() {
     decPlayIdx = 0; // initial pulse index, used for accelleration
     decLastTime = micros();
   }
+
+  // st4
+  if (digitalRead(st4NorthPin) == LOW || digitalRead(st4SouthPin) == LOW) { // Pulse in DEC - N or S direction
+    if (!st4PulseDEC) { // if pulse is not ongoing
+      boolean isNorth = (digitalRead(st4NorthPin) == LOW )?true:false;
+      digitalWrite(decDirPin, isNorth?DEC_DIR: (DEC_DIR==HIGH?LOW:HIGH));
+      decSpeed = 1;     // FIXME: to allow loop to call decPlay
+      decStepDelay = STEP_DELAY*ST4_PULSE_FACTOR; // 2 => 0.5x 
+      decPlayIdx = 100; // trick to disable accelleration
+      st4PulseDEC = true;
+      printLog("ST4: DEC Pulse Start, new Pulse:");
+      printLogUL(decStepDelay);
+      if (isNorth) {printLog("ST4: North");} else {printLog("ST4: South");}
+    }
+  } else { // no ST4 DEC pulse
+    if (st4PulseDEC) {
+      st4PulseDEC = false;
+      // reset DEC
+      decSpeed = 0;
+      decPlayIdx = 0;
+      decStepDelay = MAX_DELAY; // FIXME: maybe not needed
+      printLog("ST4: Dec Pulse Stop");
+    }
+  }
+  if (digitalRead(st4EastPin) == LOW || digitalRead(st4WestPin) == LOW) { // Pulse in RA - W or E direction
+    if (!st4PulseRA) { // if pulse is not ongoing
+      boolean isWest = (digitalRead(st4WestPin) == LOW)?true:false;
+      unsigned int pulseCMR = 0;
+      if (isWest) {
+        pulseCMR = CMR/ST4_PULSE_FACTOR;; // 2 => *0.5 decrease by 0.5x
+      } else {
+        pulseCMR = CMR+CMR/ST4_PULSE_FACTOR; // 2 => *1.5, i.e. increase  by 0.5x
+      }
+      setRaTimer(pulseCMR); 
+      st4PulseRA = true;
+      printLog("ST4: RA Pulse Start, new CRM:");
+      printLogUL(pulseCMR);
+      if (isWest) {printLog("ST4: West");} else {printLog("ST4: East");}
+    }
+  } else { 
+    if (st4PulseRA) {
+      st4PulseRA = false;
+      // reset RA
+      setRaTimer(CMR);  
+      printLog("ST4: RA Pulse Stop");
+    }
+  }
+
 
   // Check if message on serial input
   if (Serial.available() > 0) {
