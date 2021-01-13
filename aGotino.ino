@@ -402,20 +402,26 @@ void lx200(String s) { // all :.*# commands are passed here
     printLog("GD");
     // send current DEC to computer
     Serial.print(lx200DEC);
-  } else if (s.substring(1,3).equals("Sr")) { // :SrHH:MM:SS# // no blanks after :Sr as per Meade specs
+  } else if (s.substring(1,3).equals("Sr")) { // :SrHH:MM:SS# or :SrHH:MM.T# // no blanks after :Sr as per Meade specs
     printLog("Sr");
     // this is INITAL step for setting position (RA)
     long hh = s.substring(3,5).toInt();
     long mi = s.substring(6,8).toInt();
-    long ss = s.substring(9,11).toInt();
+    long ss = 0;
+    if (s.charAt(8) == '.') { // :SrHH:MM.T#
+      ss = (s.substring(9,10).toInt())*60/10;
+    } else {
+      ss = s.substring(9,11).toInt();
+    }
     inRA = hh*3600+mi*60+ss;
     Serial.print(1); // FIXME: input is not validated
-  } else if (s.substring(1,3).equals("Sd")) { // :SdsDD*MM:SS#
+  } else if (s.substring(1,3).equals("Sd")) { // :SdsDD*MM:SS# or :SdsDD*MM#
     printLog("Sd");
     // this is the FINAL step of setting a pos (DEC) 
     long dd = s.substring(4,6).toInt();
     long mi = s.substring(7,9).toInt();
-    long ss = s.substring(10,12).toInt();
+    long ss = 0;
+    if (s.charAt(9) == ':') { ss = s.substring(10,12).toInt(); }
     inDEC = (dd*3600+mi*60+ss)*(s.charAt(3)=='-'?-1:1);
     // FIXME: the below should not be needed anymore since :CM# command is honored
     if (currDEC == NORTH_DEC) { // if currDEC is still the initial default position (North)
@@ -423,7 +429,7 @@ void lx200(String s) { // all :.*# commands are passed here
       currRA  = inRA;
       currDEC = inDEC;
       updateLx200Coords(currRA, currDEC); // recompute strings
-    } 
+    }
     Serial.print(1); // FIXME: input is not validated
   } else if (s.substring(1,3).equals("MS")) { // :MS# move
     printLog("MS");
