@@ -207,9 +207,10 @@ void decPlay() {
     decStepPinStatus = !decStepPinStatus;
     digitalWrite(decStepPin, (decStepPinStatus ? HIGH : LOW));
     decLastTime = micros(); // reset time
-    if ( decStepPinStatus == LOW && decPlayIdx<=50) { // a step happened, accellerate
+    if (decPlayIdx<=100) { // accellerate for first 50 steps (100 pulses)
       // decrease the pulse from MAX_DELAY to decTargetDelay = STEP_DELAY/SLOW_SPEED
-      decStepDelay = MAX_DELAY-( (MAX_DELAY-decTargetDelay)/50*decPlayIdx); 
+      unsigned int i = decPlayIdx/2; // 0, 0, 1,1,2,2,3,3,..., 50, 50
+      decStepDelay = MAX_DELAY-( (MAX_DELAY-decTargetDelay)*i/50); 
       decPlayIdx++; 
     }
   } else if ( rttcp < 0 ) { // too late!
@@ -766,7 +767,9 @@ void loop() {
     // not followed by a blank but some implementation does include it.
     // also this allows aGoto commands to be typed with blanks
     if (input[in] == ' ') return; 
-    
+    // acknowledge ACK signal (char(6)) for software that tries to autodetect protocol (i.e. Stellarium Plus)
+    if (input[in] == char(6)) {Serial.print("P"); return;}
+
     if (input[in] == '#' || input[in] == '\n') { // time to check what is in the buffer
       if ((input[0] == '+' || input[0] == '-' 
         || input[0] == 's' || input[0] == 'g')) { // agoto
