@@ -78,8 +78,8 @@ Slew -1° in RA (i.e. +1° West) and +1° Dec (North). Note 1°=60' (arcmins) wh
 
 ### Meade LX200 Protocol Support
 
-Sync&Slew actions are supported, commands **`:GR :GD :Sr :Sd :MS :CM`**  
-Tested with Stellarium (direct) and INDI LX200 Basic driver (KStars, Cartes du Ciel, Stellarium, etc)
+Sync&Slew actions are supported, commands **`:GR :GD :Sr :Sd :MS :CM :Q :GVO :GVN ACK`**  
+Tested with Stellarium (direct), INDI LX200 Basic driver (KStars, Cartes du Ciel, Stellarium, etc), SkySafari Plus (mobile)
 
 [Here a video: Stellarium with aGotino](https://youtu.be/PdkoGX5PcDA)
 
@@ -132,9 +132,9 @@ The above example is for an EQ5/Exos2 with 40T-16T pulleys: it results in a trac
 ![Hardware](https://imgur.com/zhQLEPC.png)
 
 ### Bluetooth
-_(experimental)_ Tested with HC-05 and HC-08/10 modules - just wire BT module RX&TX pin to Arduino TX&RX (note: when BT adapter is wired to TX&RX the USB port is not functional). 
+Tested with HC-05 and HC-08/10 BT modules - just wire BT module RX&TX pin to Arduino TX&RX (note: when BT adapter is wired to TX&RX the USB port is not functional, also BT module RX pin is rated 3.3v so you should use a couple of resistors to GND to lower Arduino 5v). 
 
-You can then connect from an Android device using [Serial Bluetooth Terminal App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_bluetooth_terminal&hl=it&gl=US) or configure the bluetooth connection as a serial device in your computer and connect via Stellarium/Indi (on Linux, setup /dev/rfcomm0 or for BLE devices see [BLE-Serial](https://github.com/Jakeler/ble-serial)).
+You can then connect from an Android device using [Serial Bluetooth Terminal App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_bluetooth_terminal&hl=it&gl=US) or configure the bluetooth connection as a serial device in your computer and connect via Stellarium/Indi (on Linux, setup /dev/rfcomm0 or for BLE devices see [BLE-Serial](https://github.com/Jakeler/ble-serial)). 
 
 ### Todo
 
