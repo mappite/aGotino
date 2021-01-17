@@ -22,9 +22,9 @@ Photos and hardware details on [CloudyNights (English)](https://www.cloudynights
   - 248 bright stars, Messier (all) and 768 NGC objects (up to mag 11) are in memory
 
 ### aGotino Command set
-From an Android device you can use [Serial USB Terminal](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it) or [Serial Bluetooth Terminal](https://play.google.com/store/apps/details?id=de.kai_morich.serial_bluetooth_terminal&hl=it&gl=US) apps. From a PC any terminal emulator shoudl work. 
+From an Android device you can use [Serial USB Terminal](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it) or [Serial Bluetooth Terminal](https://play.google.com/store/apps/details?id=de.kai_morich.serial_bluetooth_terminal&hl=it&gl=US) apps. From a PC any terminal emulator should work. 
 
-a **x** can be **s (set)** or **g (goto)**:    
+**x** can be **s (set)** or **g (goto)**:    
   - **`x HHMMSS±DDMMSS`** set/goto coordinates
   - **`x Mn`**            set/goto Messier object n
   - **`x Nn`**            set/goto NGC object n
