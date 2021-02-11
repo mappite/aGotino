@@ -50,7 +50,7 @@ const    int  SLOW_SPEED_INC  = 4;      // Slow motion speed increment at +speed
 
 unsigned long STEP_DELAY_SLEW = 1200;   // Slewing Pulse timing in micros (the higher the pulse, the slower the speed)
 
-unsigned int ST4_PULSE_FACTOR = 2;      // dive speed of st4 pulse:  1 => 1x  // 2 => 0.5x // 3 => 0.33x // 4 => 0.25x
+unsigned int ST4_PULSE_FACTOR = 20;      // drive speed of st4 pulse, increase to decrease speed. Range 10-30
 
 boolean SIDE_OF_PIER_WEST     = true;   // Default Telescope position is west of the mount. Press both buttons for 1sec to reverse
 boolean POWER_SAVING_ENABLED  = false;   // toggle with -sleep on serial, see decSleep(). Set to false if using ST4 port or pulse guide
@@ -83,7 +83,7 @@ const unsigned long MICROSTEPS_PER_HOUR  = MICROSTEPS_PER_DEGREE_RA * 360 / 24;
 
 // Compare Match Register for RA interrupt (PRESCALER=8)
 //  to match with given STEP_DELAY
-const int CMR = (STEP_DELAY*16/8/2)-1; 
+const unsigned int CMR = (STEP_DELAY*16/8/2)-1; 
 
 unsigned long raPressTime  = 0;    // time since when RA  button is pressed
 unsigned long decPressTime = 0;    // time since when DEC button is pressed
@@ -163,13 +163,14 @@ void setup() {
   setRaTimer(CMR);
   lx200DEC[3] = char(223); // set correct char in string as per earlier specs...
   Serial.println(" ready.");
+  Serial.println(CMR);
 }
 
 /* 
  *  Timer to trigger RA driver pulse
  *   invoked in setup() and when RA speed changes on button press
  */
-void setRaTimer(int cmr) {
+void setRaTimer(unsigned int cmr) {
   /*  STEP_DELAY/2 = 9349 => 1000000/9349 =  106.9575Hz 
    *  CMR = 16000000/(prescaler*(1000000/(STEP_DELAY/2)))-1;
    *  => CMR = 145.0959 with prescaler=1024, 18699  with prescaler=0
@@ -509,6 +510,7 @@ void printInfo() {
   Serial.println(MAX_RANGE/60);
   Serial.print("Sleep: ");
   Serial.println(POWER_SAVING_ENABLED?"enabled":"disabled");
+  Serial.print("ST4");
 }
 
 /*
@@ -772,7 +774,7 @@ void loop() {
       boolean isNorth = (digitalRead(st4NorthPin) == LOW )?true:false;
       digitalWrite(decDirPin, isNorth?DEC_DIR: (DEC_DIR==HIGH?LOW:HIGH));
       decSpeed = 1;     // FIXME: to allow loop to call decPlay
-      decStepDelay = STEP_DELAY*ST4_PULSE_FACTOR; // 2 => 0.5x 
+      decStepDelay = STEP_DELAY*ST4_PULSE_FACTOR/10; // factor up, period increase, freq decrese (slower)
       decPlayIdx = 100; // trick to disable accelleration
       st4PulseDEC = true;
       printLog("ST4: DEC Pulse Start, new Pulse:");
@@ -793,10 +795,11 @@ void loop() {
     if (!st4PulseRA) { // if pulse is not ongoing
       boolean isWest = (digitalRead(st4WestPin) == LOW)?true:false;
       unsigned int pulseCMR = 0;
-      if (isWest) {
-        pulseCMR = CMR/ST4_PULSE_FACTOR;; // 2 => *0.5 decrease by 0.5x
+
+     if (isWest) { 
+        pulseCMR = (unsigned long) CMR*ST4_PULSE_FACTOR/(ST4_PULSE_FACTOR+10); // decreases pulseCRM, freq increases => increase tracking speed ("move" west)
       } else {
-        pulseCMR = CMR+CMR/ST4_PULSE_FACTOR; // 2 => *1.5, i.e. increase  by 0.5x
+        pulseCMR = CMR+(unsigned long)2*CMR*10/ST4_PULSE_FACTOR; // increases pulseCRM, freq decreases => decrease tracking speed ("move" east)
       }
       setRaTimer(pulseCMR); 
       st4PulseRA = true;
