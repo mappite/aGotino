@@ -50,10 +50,10 @@ const    int  SLOW_SPEED_INC  = 4;      // Slow motion speed increment at +speed
 
 unsigned long STEP_DELAY_SLEW = 1200;   // Slewing Pulse timing in micros (the higher the pulse, the slower the speed)
 
-unsigned int ST4_PULSE_FACTOR = 20;      // drive speed of st4 pulse, increase to decrease speed. Range 10-30
+unsigned int ST4_PULSE_FACTOR = 20;     // drive speed of st4 pulse, increase to increase period lenght (i.e. decrease speed). Range 10-30
 
 boolean SIDE_OF_PIER_WEST     = true;   // Default Telescope position is west of the mount. Press both buttons for 1sec to reverse
-boolean POWER_SAVING_ENABLED  = false;   // toggle with -sleep on serial, see decSleep(). Set to false if using ST4 port or pulse guide
+boolean POWER_SAVING_ENABLED  = false;  // toggle with -sleep on serial, see decSleep(). Set to false if using ST4 port or pulse guide
 boolean DEBUG                 = false;  // toggle with +debug on serial
 
 // Arduino Pin Layout
@@ -69,7 +69,7 @@ const int decSleepPin = 10;
 const int st4NorthPin = A0;
 const int st4SouthPin = A1;
 const int st4EastPin  = A2;
-const int st4WestPin = A3;
+const int st4WestPin  = A3;
 
 /*
  * It is safe to keep the below untouched
@@ -125,9 +125,12 @@ unsigned long decStepDelay   = MAX_DELAY; // initial pulse lenght (slow, to star
 unsigned long decTargetDelay = STEP_DELAY/SLOW_SPEED; // pulse length to reach when Dec button is pressed
 unsigned int  decPlayIdx = 0;
 
+String _aGotino = "aGotino";
+const unsigned long _ver = 210116;
+
 void setup() {
   Serial.begin(SERIAL_SPEED);
-  Serial.print("aGotino:");
+  Serial.print(_aGotino);
   // init Arduino->Driver Motors pins as Outputs
   pinMode(raStepPin, OUTPUT);
   pinMode(raDirPin,  OUTPUT);
@@ -222,9 +225,10 @@ void decPlay() {
     decStepPinStatus = !decStepPinStatus;
     digitalWrite(decStepPin, (decStepPinStatus ? HIGH : LOW));
     decLastTime = micros(); // reset time
-    if ( decStepPinStatus == LOW && decPlayIdx<=50) { // a step happened, accellerate
+    if (decPlayIdx<=100) { // accellerate for first 50 steps (100 pulses)
       // decrease the pulse from MAX_DELAY to decTargetDelay = STEP_DELAY/SLOW_SPEED
-      decStepDelay = MAX_DELAY-( (MAX_DELAY-decTargetDelay)/50*decPlayIdx); 
+      unsigned int i = decPlayIdx/2; // 0, 0, 1,1,2,2,3,3,..., 50, 50
+      decStepDelay = MAX_DELAY-( (MAX_DELAY-decTargetDelay)*i/50); 
       decPlayIdx++; 
     }
   } else if ( rttcp < 0 ) { // too late!
@@ -359,11 +363,14 @@ void slewRaDecBySteps(unsigned long raSteps, unsigned long decSteps) {
     if (Serial.available() > 0) {
       delayLX200Micros = micros();
       input[in] = Serial.read();
-      if (input[in] == '#' ) {
-        if (in>1 && input[in-1] == 'R') { // :GR#
+      if (input[in] == '#' && in > 1 ) {
+        if (input[in-1] == 'R') { // :GR#
           Serial.print(lx200RA);
-        } else if (in>2 && input[in-1] == 'D') { // :GD#
+        } else if (input[in-1] == 'D') { // :GD#
           Serial.print(lx200DEC);
+        } else if (input[in-1] == 'Q') { // :Q# stop FIXME: motors stops but current coordinates are set to new target...
+          printLog("Slew Stop");
+          break;
         }
         in = 0;
       } else {
@@ -417,20 +424,33 @@ void lx200(String s) { // all :.*# commands are passed here
     printLog("GD");
     // send current DEC to computer
     Serial.print(lx200DEC);
-  } else if (s.substring(1,3).equals("Sr")) { // :SrHH:MM:SS# // no blanks after :Sr as per Meade specs
+  } else if (s.substring(1,3).equals("GV")) { // :GV*# Get Version *
+    char c = s.charAt(3); 
+    if ( c == 'P') {// GVP - Product name
+       Serial.print(_aGotino);  
+    } else if (c == 'N') { // GVN - firmware version
+       Serial.print(_ver);  
+    }
+  } else if (s.substring(1,3).equals("Sr")) { // :SrHH:MM:SS# or :SrHH:MM.T# // no blanks after :Sr as per Meade specs
     printLog("Sr");
     // this is INITAL step for setting position (RA)
     long hh = s.substring(3,5).toInt();
     long mi = s.substring(6,8).toInt();
-    long ss = s.substring(9,11).toInt();
+    long ss = 0;
+    if (s.charAt(8) == '.') { // :SrHH:MM.T#
+      ss = (s.substring(9,10).toInt())*60/10;
+    } else {
+      ss = s.substring(9,11).toInt();
+    }
     inRA = hh*3600+mi*60+ss;
     Serial.print(1); // FIXME: input is not validated
-  } else if (s.substring(1,3).equals("Sd")) { // :SdsDD*MM:SS#
+  } else if (s.substring(1,3).equals("Sd")) { // :SdsDD*MM:SS# or :SdsDD*MM#
     printLog("Sd");
     // this is the FINAL step of setting a pos (DEC) 
     long dd = s.substring(4,6).toInt();
     long mi = s.substring(7,9).toInt();
-    long ss = s.substring(10,12).toInt();
+    long ss = 0;
+    if (s.charAt(9) == ':') { ss = s.substring(10,12).toInt(); }
     inDEC = (dd*3600+mi*60+ss)*(s.charAt(3)=='-'?-1:1);
     // FIXME: the below should not be needed anymore since :CM# command is honored
     if (currDEC == NORTH_DEC) { // if currDEC is still the initial default position (North)
@@ -438,7 +458,7 @@ void lx200(String s) { // all :.*# commands are passed here
       currRA  = inRA;
       currDEC = inDEC;
       updateLx200Coords(currRA, currDEC); // recompute strings
-    } 
+    }
     Serial.print(1); // FIXME: input is not validated
   } else if (s.substring(1,3).equals("MS")) { // :MS# move
     printLog("MS");
@@ -504,13 +524,15 @@ void printInfo() {
   printCoord(currRA, currDEC);
   Serial.print("Side of Pier: ");
   Serial.println(SIDE_OF_PIER_WEST?"W":"E");
-  Serial.print("Micro Speed: ");
+  Serial.print("Slow Motion Speed: ");
   Serial.println(SLOW_SPEED);
   Serial.print("Max Range: ");
   Serial.println(MAX_RANGE/60);
-  Serial.print("Sleep: ");
+  Serial.print("Dec Power Saving: ");
   Serial.println(POWER_SAVING_ENABLED?"enabled":"disabled");
   Serial.print("ST4");
+  Serial.print("Version: ");
+  Serial.println(_ver);
 }
 
 /*
@@ -524,8 +546,14 @@ void agoto(String s) {
           else Serial.println("Debug Off"); 
   } else if (s.substring(1,6).equals("sleep")) {
     POWER_SAVING_ENABLED = (s.charAt(0) == '+')?true:false;
-    if (POWER_SAVING_ENABLED) Serial.println("Power Saving Enabled");
-                         else Serial.println("Power Saving Disabled");
+    if (POWER_SAVING_ENABLED) {
+      Serial.println("Power Saving Enabled");
+      digitalWrite(decSleepPin, LOW); // sleep (goto or button dec movement will awake it for just the time of the movement)
+    } else {
+      Serial.println("Power Saving Disabled");
+      digitalWrite(decSleepPin, HIGH); // wake up
+    }
+                         
   } else if (s.substring(1,6).equals("range")) {
     int d = (s.charAt(0) == '+')?15:-15;
     if (MAX_RANGE+d > 0 ) {
@@ -826,6 +854,9 @@ void loop() {
     // also this allows aGoto commands to be typed with blanks
     if (input[in] == ' ') return; 
     
+    // acknowledge LX200 ACK signal (char(6)) for software that tries to autodetect protocol (i.e. Stellarium Plus)
+    if (input[in] == char(6)) { Serial.print("P"); return; } // P = Polar
+
     if (input[in] == '#' || input[in] == '\n') { // time to check what is in the buffer
       if ((input[0] == '+' || input[0] == '-' 
         || input[0] == 's' || input[0] == 'g')) { // agoto
