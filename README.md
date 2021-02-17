@@ -14,12 +14,14 @@ Photos and hardware details on [CloudyNights (English)](https://www.cloudynights
 
 ### Features
 
+- **ST4** this is the branch with ST4 port support, use a RJ6 cable to wire pins A0,A1,A2,A3,GND to camera N,S,E,W,GND. You can use ST4_PULSE_FACTOR variable to drive speed of pulse, increase to increase period lenght (i.e. decrease speed). Range 10-30. Default 20 corrects at 0.5x
 - tracking - move Right Ascension at sidereal speed, 1x
 - two buttons to cycle among RA&Dec forward and backward slow motion (8x) 
   - press both buttons for 1sec to change side of pier (default West, see below).
 - listen on serial port for basic LX200 commands
 - listen on serial port for aGotino commands
   - 248 bright stars, Messier (all) and 768 NGC objects (up to mag 11) are in memory
+  
 
 ### aGotino Command set
 **x** can be **s (set)** or **g (goto)**:    
