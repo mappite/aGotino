@@ -117,7 +117,7 @@ unsigned long decTargetDelay = STEP_DELAY/SLOW_SPEED; // pulse length to reach w
 unsigned int  decPlayIdx = 0;
 
 String _aGotino = "aGotino";
-const unsigned long _ver = 210116;
+const unsigned long _ver = 210220;
 
 void setup() {
   Serial.begin(SERIAL_SPEED);
@@ -416,6 +416,7 @@ void lx200(String s) { // all :.*# commands are passed here
     } else if (c == 'N') { // GVN - firmware version
        Serial.print(_ver);  
     }
+    Serial.print('#');
   } else if (s.substring(1,3).equals("Sr")) { // :SrHH:MM:SS# or :SrHH:MM.T# // no blanks after :Sr as per Meade specs
     printLog("Sr");
     // this is INITAL step for setting position (RA)
