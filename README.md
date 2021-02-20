@@ -1,8 +1,8 @@
 # aGotino
 A telescope Goto solution based on Arduino (Nano or up) that supports:
 
-- aGotino commands - an Android phone can act as a remote via an [USB OTG cable](https://www.amazon.com/s?k=usb+otg+cable) and a [Serial App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it) or (optional) via Bluetooth
-- basic Meade LX200 protocol - drive with Stellarium or any software that supports INDI
+- aGotino commands - an Android phone can act as a remote via an [USB OTG cable](https://www.amazon.com/s?k=usb+otg+cable) or via Bluetooth
+- basic Meade LX200 protocol - drive with Stellarium, SkySafari Plus/Pro(mobile), Kstars, Carte du Ciel or any software that supports INDI
 
 aGotino provides tracking and **hybrid goto&starhopping**: point the scope to something you can easily find and then reach a remote, low magnitude object nearby - default *nearby* is 30° so you will always find some bright stars around. Star alignment procedures are _not_ required, you can move and rotate your scope freely, until you need that extra help. 
 
@@ -22,6 +22,8 @@ Photos and hardware details on [CloudyNights (English)](https://www.cloudynights
   - 248 bright stars, Messier (all) and 768 NGC objects (up to mag 11) are in memory
 
 ### aGotino Command set
+From an Android device you can use [Serial USB Terminal](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it) or [Serial Bluetooth Terminal](https://play.google.com/store/apps/details?id=de.kai_morich.serial_bluetooth_terminal&hl=it&gl=US) apps. From a PC any terminal emulator should work. 
+
 **x** can be **s (set)** or **g (goto)**:    
   - **`x HHMMSS±DDMMSS`** set/goto coordinates
   - **`x Mn`**            set/goto Messier object n
@@ -76,12 +78,14 @@ Slew -1° in RA (i.e. +1° West) and +1° Dec (North). Note 1°=60' (arcmins) wh
 
 [Here a video: aGotino in action](https://www.youtube.com/watch?v=YF_J7_7lyB4)
 
-### Meade LX200 Protocol Support
+### LX200 Protocol Support
 
-Sync&Slew actions are supported, commands **`:GR :GD :Sr :Sd :MS :CM`**  
-Tested with Stellarium (direct) and INDI LX200 Basic driver (KStars, Cartes du Ciel, Stellarium, etc)
+Sync&Slew actions are supported, commands **`:GR :GD :Sr :Sd :MS :CM :Q :GVO :GVN ACK`**  
+Tested with Stellarium (direct), INDI LX200 Basic driver (KStars, Cartes du Ciel, Stellarium, etc), SkySafari Plus and Stellarium Plus (mobile)
 
-[Here a video: Stellarium with aGotino](https://youtu.be/PdkoGX5PcDA)
+[Video: Stellarium from a PC with aGotino](https://youtu.be/PdkoGX5PcDA)
+
+[Video: SkySafari Mobile with aGotino](https://www.youtube.com/watch?v=fBjxpKKCwJc)
 
 ### Side of Pier
 
@@ -132,9 +136,11 @@ The above example is for an EQ5/Exos2 with 40T-16T pulleys: it results in a trac
 ![Hardware](https://imgur.com/zhQLEPC.png)
 
 ### Bluetooth
-_(experimental)_ Tested with HC-05 and HC-08/10 modules - just wire BT module RX&TX pin to Arduino TX&RX (note: when BT adapter is wired to TX&RX the USB port is not functional). 
+Tested with HC-05 (Bluetooth Classic) and HC-08/10 (BLE) BT modules - just wire BT module RX&TX pins to Arduino TX&RX, BT module RX pin is rated 3.3v so you should use a couple of resistors as voltage divider to lower Arduino TX voltage.  You can then connect using [Serial Bluetooth Terminal App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_bluetooth_terminal&hl=it&gl=US). Note: when BT adapter is wired to TX&RX the USB port is not functional.
 
-You can then connect from an Android device using [Serial Bluetooth Terminal App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_bluetooth_terminal&hl=it&gl=US) or configure the bluetooth connection as a serial device in your computer and connect via Stellarium/Indi (on Linux, setup /dev/rfcomm0 or for BLE devices see [BLE-Serial](https://github.com/Jakeler/ble-serial)).
+SkySafari Plus/Pro or Stellarium Plus work directly with Bluetooth Classic (2.0), while with BLE you need a bridge. Note: You don't need bluetooth to use these mobile apps, you can wire via USB and use a [USB/WIFI/BT Bridge App](https://play.google.com/store/apps/details?id=masar.bluetoothbridge.pro&hl=en_US&gl=US) - see SkySafari video posted above.
+
+You can of course configure the bluetooth connection as a serial device in your computer and connect via Stellarium/Indi (on Linux, setup /dev/rfcomm0 or for BLE devices see [BLE-Serial](https://github.com/Jakeler/ble-serial)). 
 
 ### Todo
 
