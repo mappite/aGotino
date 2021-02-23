@@ -144,7 +144,7 @@ SkySafari Plus/Pro or Stellarium Plus work directly with Bluetooth Classic (2.0)
 You can of course configure the bluetooth connection as a serial device in your computer and connect via Stellarium/Indi (on Linux, setup /dev/rfcomm0 or for BLE devices see [BLE-Serial](https://github.com/Jakeler/ble-serial)). 
 
 ### ST4
-ST4 port is available in ST4 branch - Arduino pins A0,A1,A2,A3 (North, South, East, West) can be connected directly to your camera ST4 port via a RJ cable (6 wires - one is for GND). The variable ST4_FACTOR can be used to decrease/increase speed - default value (20) guides at 0.5x,  range goes from 10 (faster) to 30 (slower).
+ST4 port is available in [ST4 branch](https://github.com/mappite/aGotino/blob/ST4/README.md) - Arduino pins A0,A1,A2,A3 (North, South, East, West) can be connected directly to your camera ST4 port via a RJ cable (6 wires - one is for GND). The variable ST4_FACTOR can be used to decrease/increase speed - default value (20) guides at 0.5x,  range goes from 10 (faster) to 30 (slower).
 
 ### Todo
 
