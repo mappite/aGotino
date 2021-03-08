@@ -50,10 +50,10 @@ const    int  SLOW_SPEED_INC  = 4;      // Slow motion speed increment at +speed
 
 unsigned long STEP_DELAY_SLEW = 1200;   // Slewing Pulse timing in micros (the higher the pulse, the slower the speed)
 
-unsigned int ST4_PULSE_FACTOR = 20;      // drive speed of st4 pulse, increase to decrease speed. Range 10-30
+unsigned int ST4_PULSE_FACTOR = 20;     // drive speed of st4 pulse, increase to increase period lenght (i.e. decrease speed). Range 10-30
 
 boolean SIDE_OF_PIER_WEST     = true;   // Default Telescope position is west of the mount. Press both buttons for 1sec to reverse
-boolean POWER_SAVING_ENABLED  = false;   // toggle with -sleep on serial, see decSleep(). Set to false if using ST4 port or pulse guide
+boolean POWER_SAVING_ENABLED  = false;  // toggle with -sleep on serial, see decSleep(). Set to false if using ST4 port or pulse guide
 boolean DEBUG                 = false;  // toggle with +debug on serial
 
 // Arduino Pin Layout
@@ -69,7 +69,7 @@ const int decSleepPin = 10;
 const int st4NorthPin = A0;
 const int st4SouthPin = A1;
 const int st4EastPin  = A2;
-const int st4WestPin = A3;
+const int st4WestPin  = A3;
 
 /*
  * It is safe to keep the below untouched
@@ -531,6 +531,7 @@ void printInfo() {
   Serial.println(MAX_RANGE/60);
   Serial.print("Dec Power Saving: ");
   Serial.println(POWER_SAVING_ENABLED?"enabled":"disabled");
+  Serial.print("ST4");
   Serial.print("Version: ");
   Serial.println(_ver);
   Serial.print("ST4");
