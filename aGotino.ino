@@ -801,12 +801,12 @@ void loop() {
   // st4
   if (digitalRead(st4NorthPin) == LOW || digitalRead(st4SouthPin) == LOW) { // Pulse in DEC - N or S direction
     if (!st4PulseDEC) { // if pulse is not ongoing
+      st4PulseDEC = true; // pulse is ongoing
       boolean isNorth = (digitalRead(st4NorthPin) == LOW )?true:false;
       digitalWrite(decDirPin, isNorth?DEC_DIR: (DEC_DIR==HIGH?LOW:HIGH));
       decSpeed = 1;     // FIXME: to allow loop to call decPlay
       decStepDelay = STEP_DELAY*ST4_PULSE_FACTOR/10; // factor up, period increase, freq decrese (slower)
-      decPlayIdx = 100; // trick to disable accelleration
-      st4PulseDEC = true;
+      decPlayIdx = 101; // disable accelleration that would happen in the first 100 steps
       printLog("ST4: DEC Pulse Start, new Pulse:");
       printLogUL(decStepDelay);
       if (isNorth) {printLog("ST4: North");} else {printLog("ST4: South");}
@@ -817,7 +817,6 @@ void loop() {
       // reset DEC
       decSpeed = 0;
       decPlayIdx = 0;
-      decStepDelay = MAX_DELAY; // FIXME: maybe not needed
       printLog("ST4: Dec Pulse Stop");
     }
   }
