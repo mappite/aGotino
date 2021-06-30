@@ -3,6 +3,7 @@ A telescope Goto solution based on Arduino (Nano or up) that supports:
 
 - aGotino commands - an Android phone can act as a remote via an [USB OTG cable](https://www.amazon.com/s?k=usb+otg+cable) or via Bluetooth
 - basic Meade LX200 protocol - drive with Stellarium, SkySafari Plus/Pro(mobile), Kstars, Carte du Ciel or any software that supports INDI
+- ST4 port for guiding (see ST4 branch)
 
 aGotino provides tracking and **hybrid goto&starhopping**: point the scope to something you can easily find and then reach a remote, low magnitude object nearby - default *nearby* is 30° so you will always find some bright stars around. Star alignment procedures are _not_ required, you can move and rotate your scope freely, until you need that extra help. 
 
@@ -141,6 +142,9 @@ Tested with HC-05 (Bluetooth Classic) and HC-08/10 (BLE) BT modules - just wire 
 SkySafari Plus/Pro or Stellarium Plus work directly with Bluetooth Classic (2.0), while with BLE you need a bridge. Note: You don't need bluetooth to use these mobile apps, you can wire via USB and use a [USB/WIFI/BT Bridge App](https://play.google.com/store/apps/details?id=masar.bluetoothbridge.pro&hl=en_US&gl=US) - see SkySafari video posted above.
 
 You can of course configure the bluetooth connection as a serial device in your computer and connect via Stellarium/Indi (on Linux, setup /dev/rfcomm0 or for BLE devices see [BLE-Serial](https://github.com/Jakeler/ble-serial)). 
+
+### ST4
+ST4 port is available in [ST4 branch](https://github.com/mappite/aGotino/blob/ST4/README.md) - Arduino pins A0,A1,A2,A3 (North, South, East, West) can be connected directly to your camera ST4 port via a RJ cable (6 wires - one is for GND). The variable ST4_FACTOR can be used to decrease/increase speed - default value (20) guides at 0.5x,  range goes from 10 (faster) to 30 (slower).
 
 ### Todo
 
