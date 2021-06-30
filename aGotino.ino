@@ -150,7 +150,7 @@ void setup() {
   digitalWrite(LED_BUILTIN, LOW);
   /* set interrupt for RA motor and start tracking */
   setRaTimer(CMR);
-  lx200DEC[3] = char(223); // set correct char in string as per earlier specs...
+  lx200DEC[3] = char(223); // set correct char in string as per earlier specs - FIXME: this should not be needed anymore
   Serial.println(" ready.");
 }
 
@@ -217,7 +217,7 @@ void decPlay() {
       decPlayIdx++; 
     }
   } else if ( rttcp < 0 ) { // too late!
-    // something happenedd that causes the time elapsed to be too high
+    // something happened that causes the time elapsed to be too high, this should never happen
     printLog("Dec: tool late!");
     decLastTime = micros();
   }
@@ -279,8 +279,8 @@ int slewRaDecBySecs(long raSecs, long decSecs) {
   digitalWrite(decEnableMicroStepsPin, HIGH);
 
   // Final Adjustment
-  // Note: this code is likley superflous since precision is 6.66 full steps per minute,
-  //       i.e. one full step is already less than 1/6', i.e. 10". Who cares for such small offset?
+  // Note: we need 6.66 full steps per minute (with the defualt gears settings)
+  //       i.e. one full step is  less than 1/6', i.e. 10". Who cares of fixing such small offset? Well, we do.
   printLog(" RA MicroSteps:");
   printLogUL(raMicroSteps);
   printLog(" DEC MicroSteps:");
@@ -362,7 +362,14 @@ void slewRaDecBySteps(unsigned long raSteps, unsigned long decSteps) {
         if (in++ >5) in = 0;
       }
       delayLX200Micros = micros()-delayLX200Micros;
-      if (delayLX200Micros>delaySlew) Serial.println("LX200 polling slows too much!");
+      if (delayLX200Micros>delaySlew) {
+        Serial.println("LX200 polling slows too much!"); // this should never happen. But it happens if we'd use SoftwareSerial
+        /* reset position to north and exit
+        inRA  = 0;     
+        inDEC = NORTH_DEC;
+        break; */
+      }
+
     } 
     delayMicroseconds(delaySlew-delayLX200Micros);
   }
@@ -377,11 +384,11 @@ void slewRaDecBySteps(unsigned long raSteps, unsigned long decSteps) {
 /*
  * Put DEC motor Driver to sleep to save power or wake it up
  *
-   FIXME: issue with glitces at wake up with DRV8825
+   FIXME: issue with glitces at wake up with cheap driver DRV8825
           motor resets to home position (worst case 4 full steps, i.e. less than a minute)
-    https://forum.pololu.com/t/sleep-reset-problem-on-drv8825-stepper-controller/7345
-    https://forum.arduino.cc/index.php?topic=669304.0
-    it seems this gets solved by accellerating
+          https://forum.pololu.com/t/sleep-reset-problem-on-drv8825-stepper-controller/7345
+          https://forum.arduino.cc/index.php?topic=669304.0
+          use better drivers, like TMC ones, to avoid the issue (which is not such big actually)
  */
 void decSleep(boolean b) {
   if (POWER_SAVING_ENABLED) {
@@ -719,7 +726,7 @@ void changeSideOfPier() {
  
 void loop() {
   
-  // Move Dec if needed
+  // move Dec if needed
   if (decSpeed != 0) {
     decPlay();
   }
@@ -747,21 +754,21 @@ void loop() {
     // 1x -> +SLOW_SPEED -> -(SLOW_SPEED-2)
     if (raSpeed == 1) {
       raSpeed = SLOW_SPEED;
-      digitalWrite(raDirPin, RA_DIR);
+      digitalWrite(raDirPin, (RA_DIR==HIGH?LOW:HIGH)); // reverse direction at first push ...
     } else if  (raSpeed == SLOW_SPEED) {
       raSpeed = (SLOW_SPEED - 2);
-      digitalWrite(raDirPin, (RA_DIR==HIGH?LOW:HIGH)); // change direction
+      digitalWrite(raDirPin, RA_DIR); // ... back to RA_DIR so if any backlash exist...
     } else if  (raSpeed == (SLOW_SPEED - 2)) {
       raSpeed = 1;
-      digitalWrite(raDirPin, RA_DIR);
+      digitalWrite(raDirPin, RA_DIR); // ... direction stays RA_DIR and no impact if backlash
     }
-    setRaTimer(CMR/raSpeed); // set interrupt
+    setRaTimer(CMR/raSpeed); // re-set interrupt to change speed
     printLogUL(raSpeed);
   }
   
   // decButton pressed: skip if within 300ms from last press
   if (digitalRead(decButtonPin) == LOW && (micros() - decPressTime) > (300000) ) {
-    decPressTime = micros();  // time when button has been pressed
+    decPressTime = micros();
     printLog("Dec Speed: ");
     // 0x -> +SLOW_SPEED -> -(SLOW_SPEED-1)
     if (decSpeed == 0) {
@@ -776,8 +783,8 @@ void loop() {
       decSleep(true); // sleep
     }
     printLogUL(SLOW_SPEED);
-    decStepDelay = MAX_DELAY; // initial pulse length
-    decPlayIdx = 0; // initial pulse index, used for accelleration
+    decStepDelay = MAX_DELAY; // set initial pulse length (max possible to then accellerate)
+    decPlayIdx = 0;           // set initial pulse index  (used for accelleration in the first steps)
     decLastTime = micros();
   }
 
