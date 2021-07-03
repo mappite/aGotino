@@ -34,24 +34,25 @@ const unsigned long STEP_DELAY = 18699;                // see above calculation
 const unsigned long MICROSTEPS_PER_DEGREE_RA  = 12800; // see above calculation
 const unsigned long MICROSTEPS_PER_DEGREE_DEC = MICROSTEPS_PER_DEGREE_RA; // calculate correct value if DEC gears/worm/microsteps differs from RA ones
 
-const unsigned long MICROSTEPS_RA  = 32;              // Driver Microsteps in RA
-const unsigned long MICROSTEPS_DEC = MICROSTEPS_RA;   // Driver Microsteps in DEC
+const unsigned long MICROSTEPS_RA  = 32; // Driver Microsteps in RA
+const unsigned long MICROSTEPS_DEC = 32; // Driver Microsteps in DEC
 
-const long SERIAL_SPEED = 9600;         // serial interface baud. Make sure your computer/phone matches this (or change it)
-long MAX_RANGE = 1800;                  // default max range in deg minutes (1800'=30°). See +range command
+const long SERIAL_SPEED = 9600;          // serial interface baud. Make sure your computer/phone matches this (or change it)
+long MAX_RANGE = 1800;                   // default max range in deg minutes (1800'=30°). See +range command
 
-// Motor clockwise direction: HIGH is as per original design 
-//   change to LOW if you inverted wirings or motor position
-int RA_DIR   = HIGH;                    // Note: change RA_DIR to LOW in Southern Hemisphere
+// Motor clockwise direction: HIGH is for tracking as per original design 
+//          change to LOW if you inverted wirings or motor position or... 
+int RA_DIR   = HIGH;                    // ... change RA_DIR to LOW in Southern Hemisphere
 int DEC_DIR  = HIGH;                    
 
 unsigned int  SLOW_SPEED      = 8;      // RA&DEC slow motion speed (button press) - times the sidereal speed
 const    int  SLOW_SPEED_INC  = 4;      // Slow motion speed increment at +speed command
 
 unsigned long STEP_DELAY_SLEW = 1200;   // Slewing Pulse timing in micros (the higher the pulse, the slower the speed)
+                                        // don't change this to too low values otherwise your scope may take off as an helicopter.
 
-boolean SIDE_OF_PIER_WEST     = true;   // Default Telescope position is west of the mount. Press both buttons for 1sec to reverse
-boolean POWER_SAVING_ENABLED  = true;   // toggle with -sleep on serial, see decSleep()
+boolean SIDE_OF_PIER_WEST     = true;   // Default Telescope position is west of the mount. Press both buttons for 1 sec to reverse
+boolean POWER_SAVING_ENABLED  = true;   // toggle with -sleep on serial, see decSleep(), note this is disable if ST4 port is active
 boolean DEBUG                 = false;  // toggle with +debug on serial
 
 // Arduino Pin Layout
@@ -65,12 +66,23 @@ const int decButtonPin=  7;
 const int decEnableMicroStepsPin = 9;
 const int decSleepPin = 10;
 
+/* Experimental: Uncomment the line below to enable ST4 Port */
+// #define ST4
+
+#ifdef ST4
+unsigned int ST4_PULSE_FACTOR = 20;     // st4 pulse factor, increase to increase period lenght (i.e. decrease speed). Range 10-30
+const int st4NorthPin = A0;
+const int st4SouthPin = A1;
+const int st4EastPin  = A2;
+const int st4WestPin  = A3;
+#endif
+
 /*
  * It is safe to keep the below untouched
  * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <catalogs.h> // load objects (Star List, Messier, NGC)
+#include "catalogs.h" // load objects (Star List, Messier, NGC)
 
 // Number of Microsteps to move RA by 1hour
 const unsigned long MICROSTEPS_PER_HOUR  = MICROSTEPS_PER_DEGREE_RA * 360 / 24;
@@ -79,9 +91,9 @@ const unsigned long MICROSTEPS_PER_HOUR  = MICROSTEPS_PER_DEGREE_RA * 360 / 24;
 //  to match with given STEP_DELAY
 const int CMR = (STEP_DELAY*16/8/2)-1; 
 
-unsigned long raPressTime  = 0;    // time since when RA  button is pressed
-unsigned long decPressTime = 0;    // time since when DEC button is pressed
-unsigned long bothPressTime= 0;    // time since when both buttons are pressed, used for change of pier
+unsigned long raPressTime  = 0;    // when RA  button has been pressed
+unsigned long decPressTime = 0;    // when DEC button has been pressed
+unsigned long bothPressTime= 0;    // when both buttons have been pressed, used for change of pier
 
 unsigned long decLastTime  = 0;    // last time DEC pulse has changed status
 boolean raStepPinStatus    = false;// true = HIGH, false = LOW
@@ -107,17 +119,21 @@ long inRA    = 0;
 long inDEC   = 0;
 
 // Current position in Meade lx200 format, see updateLx200Coords()
-String lx200RA = "00:00:00#";
-String lx200DEC= "+90*00:00#";
+String lx200RA  = "00:00:00#";
+String lx200DEC = "+90*00:00#";
 
 // Vars to implement accelleration
-unsigned long MAX_DELAY = 16383; // limit of delayMicroseconds()
+unsigned long MAX_DELAY = 16383; // limit of delayMicroseconds() for Arduino Uno
 unsigned long decStepDelay   = MAX_DELAY; // initial pulse lenght (slow, to start accelleration)
 unsigned long decTargetDelay = STEP_DELAY/SLOW_SPEED; // pulse length to reach when Dec button is pressed
-unsigned int  decPlayIdx = 0;
+unsigned int  decPlayIdx = 0; // pulse index, Dec will accellerate for first 100 pulses
 
 String _aGotino = "aGotino";
-const unsigned long _ver = 210220;
+const unsigned long _ver = 210701;
+
+// the below is not in #ifdef ST4 since st4PulseDEC is used to determine if to accellerate in decPlay()
+boolean st4PulseRA  = false; // true while ST4 port RA  pulse is ongoing
+boolean st4PulseDEC = false; // true while ST4 port DEC pulse is ongoing
 
 void setup() {
   Serial.begin(SERIAL_SPEED);
@@ -143,6 +159,16 @@ void setup() {
   // init Button pins as Input Pullup so no need resistor
   pinMode(raButtonPin,  INPUT_PULLUP);
   pinMode(decButtonPin, INPUT_PULLUP);
+
+  #ifdef ST4
+  // init ST4 port pins as well
+  pinMode(st4NorthPin, INPUT_PULLUP);
+  pinMode(st4SouthPin, INPUT_PULLUP);
+  pinMode(st4EastPin,  INPUT_PULLUP);
+  pinMode(st4WestPin,  INPUT_PULLUP);
+  POWER_SAVING_ENABLED  = false;          // force disable  since we don't want glitches or delays on DEC sleep/wakeup while guiding
+  #endif
+  
   // init led and turn on for 0.5 sec
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
@@ -199,25 +225,27 @@ ISR(TIMER1_COMPA_vect){
 
 /* Move DEC motor (change pulse) - slow motion
  *   invoked from main loop() if Dec speed is not zero 
+ *   note it is decStepDelay&decTargetDelay that drive the actual speed (period pulse), not decSpeed FIXME: rename decSpeed
+ *   For the first 100 pulses (50 steps) motor accellerates to decTargetDelay
+ *   For ST4 motor moves at decStepDelay
  */
 void decPlay() {
 
   unsigned long dt  = micros() - decLastTime; // time elapsed since last pulse change
   long rttcp = (decStepDelay/2) - dt;         // remaining time to change pulse
 
-  if ( rttcp < 200 && rttcp > 0 ) { // less than 200 micros to change pulse
+  if ( rttcp < 200 && rttcp > 0 ) { // less than 200 micros to change pulse, do it
     delayMicroseconds(rttcp); // hold for the remaining millis (<200)
     decStepPinStatus = !decStepPinStatus;
     digitalWrite(decStepPin, (decStepPinStatus ? HIGH : LOW));
     decLastTime = micros(); // reset time
-    if (decPlayIdx<=100) { // accellerate for first 50 steps (100 pulses)
+    if (decPlayIdx<=100 && !st4PulseDEC) { // accellerate for first 50 steps (100 pulses) if this is not ST4 guiding
       // decrease the pulse from MAX_DELAY to decTargetDelay = STEP_DELAY/SLOW_SPEED
       unsigned int i = decPlayIdx/2; // 0, 0, 1,1,2,2,3,3,..., 50, 50
       decStepDelay = MAX_DELAY-( (MAX_DELAY-decTargetDelay)*i/50); 
       decPlayIdx++; 
     }
-  } else if ( rttcp < 0 ) { // too late!
-    // something happened that causes the time elapsed to be too high, this should never happen
+  } else if ( rttcp < 0 ) { // something happened that causes the time elapsed to be too high, this should never happen
     printLog("Dec: tool late!");
     decLastTime = micros();
   }
@@ -233,7 +261,7 @@ int slewRaDecBySecs(long raSecs, long decSecs) {
 
   // If more than 12h, turn from the opposite side
   if (abs(raSecs) > DAY_SECONDS/2) { // reverse
-    printLog("RA reversed, new RA secs:");
+    printLog("RA reversed, RA secs:");
     raSecs = raSecs+(raSecs>0?-1:1)*DAY_SECONDS;
     printLogUL(raSecs);
   }
@@ -247,8 +275,6 @@ int slewRaDecBySecs(long raSecs, long decSecs) {
   digitalWrite(raDirPin,  (raSecs  > 0 ? RA_DIR :(RA_DIR ==HIGH?LOW:HIGH)));
   digitalWrite(decDirPin, (decSecs > 0 ? DEC_DIR:(DEC_DIR==HIGH?LOW:HIGH)));
 
-  // FIXME: detect if direction has changed and add backlash steps
-
   // calculate how many micro-steps are needed
   unsigned long raSteps  = (abs(raSecs) * MICROSTEPS_PER_HOUR) / 3600;
   unsigned long decSteps = (abs(decSecs) * MICROSTEPS_PER_DEGREE_DEC) / 3600;
@@ -260,7 +286,7 @@ int slewRaDecBySecs(long raSecs, long decSecs) {
   unsigned long decMicroSteps = decSteps - decFullSteps * MICROSTEPS_DEC; // ...remaining microsteps
 
   // Disable microstepping (i.e. enable full steps)
-  printLog("Disabling Microstepping");
+  // printLog("Disabling Microstepping");
   digitalWrite(raEnableMicroStepsPin, LOW);
   digitalWrite(decEnableMicroStepsPin, LOW);
 
@@ -274,27 +300,27 @@ int slewRaDecBySecs(long raSecs, long decSecs) {
   printLog("FullSteps Slew Done");
 
   // re-enable micro stepping
-  printLog("Re-enabling Microstepping");
+  // printLog("Re-enabling Microstepping");
   digitalWrite(raEnableMicroStepsPin, HIGH);
   digitalWrite(decEnableMicroStepsPin, HIGH);
 
   // Final Adjustment
   // Note: we need 6.66 full steps per minute (with the defualt gears settings)
-  //       i.e. one full step is  less than 1/6', i.e. 10". Who cares of fixing such small offset? Well, we do.
-  printLog(" RA MicroSteps:");
+  //       i.e. one full step is  less than 1/6', i.e. <10". Who cares of fixing such small offset? Well, we do.
+  printLog(" RA uSteps:");
   printLogUL(raMicroSteps);
-  printLog(" DEC MicroSteps:");
+  printLog(" DEC uSteps:");
   printLogUL(decMicroSteps);
   slewRaDecBySteps(raMicroSteps, decMicroSteps);
-  printLog("MicroSteps Slew Done");
+  printLog("uSteps Slew Done");
 
-  // If slewing took more than 5 secs, adjust RA
+  // If slewing took more than 5" (secs), adjust RA
   slewTime = micros() - slewTime; // time elapsed for slewing
   if ( slewTime > (5 * 1000000) ) {
-    printLog("*** adjusting Ra by secs: ");
+    printLog("* adjusting Ra by secs: ");
     printLogUL(slewTime / 1000000);
     slewRaDecBySecs(slewTime / 1000000, 0); // it's the real number of seconds!
-    printLog("*** adjusting Ra done");
+    // printLog("*** adjusting Ra done");
   }
 
   // reset RA to right sidereal direction
@@ -525,6 +551,9 @@ void printInfo() {
   Serial.println(POWER_SAVING_ENABLED?"enabled":"disabled");
   Serial.print("Version: ");
   Serial.println(_ver);
+  #ifdef ST4
+  Serial.print("ST4");
+  #endif
 }
 
 /*
@@ -597,7 +626,7 @@ void agoto(String s) {
     } else { // decode coords to inRA and inDEC
       if (s.charAt(1) == 'M' || s.charAt(1) == 'm') { // MESSIER coords
         int m = s.substring(2,5).toInt(); // toInt() returns 0 if conversion fails
-        if (m == 0 || m > 110) { Serial.println("Messier number conversion error"); return; } 
+        if (m == 0 || m > 110) { Serial.println("Messier number error"); return; } 
         // this would fail from progmem: inRA =  Messier[m].ra;
         inRA = (long) pgm_read_dword(&(Messier[m].ra));
         inDEC= (long) pgm_read_dword(&(Messier[m].dec));
@@ -605,14 +634,14 @@ void agoto(String s) {
         Serial.print("M");Serial.println(m);
       } else if (s.charAt(1) == 'S' || s.charAt(1) == 's') { // STARS coords
         int n = s.substring(2,5).toInt(); // toInt() returns 0 if conversion fails
-        if (n < 0 || n > 244) { Serial.println("Star number conversion error"); return; } 
+        if (n < 0 || n > 244) { Serial.println("Star number error"); return; } 
         inRA = (long) pgm_read_dword(&(Stars[n].ra));
         inDEC= (long) pgm_read_dword(&(Stars[n].dec));
         Serial.print(s[0]=='s'?"Set ":"Goto ");
         Serial.print("Star ");Serial.println(n);
       } else if (s.charAt(1) == 'N' || s.charAt(1) == 'n') { // NGC coords
         int n = s.substring(2,6).toInt(); // toInt() returns 0 if conversion fails
-        if (n < 0 || n > 7840) { Serial.println("NGC number conversion error"); return; } 
+        if (n < 0 || n > 7840) { Serial.println("NGC number error"); return; } 
         int ngcElem = ngcLookup(n);
         if (ngcElem>0) {
           inRA  = (long) pgm_read_dword(&(NGCs[ngcElem].ra ));
@@ -626,7 +655,7 @@ void agoto(String s) {
       } else { // HHMMSSdDDMMSS coords
         inRA  = s.substring(1, 3).toInt() * 60 * 60 + s.substring(3, 5).toInt() * 60 + s.substring(5, 7).toInt();
         inDEC = (s.charAt(7) == '+' ? 1 : -1) * (s.substring(8, 10).toInt() * 60 * 60 + s.substring(10, 12).toInt() * 60 + s.substring(12, 14).toInt());
-        if (inRA == 0 || inDEC == 0) { Serial.println("Coordinates conversion error"); return; }
+        if (inRA == 0 || inDEC == 0) { Serial.println("Coordinates error"); return; }
       }
       
       // inRA&inDEC are set
@@ -659,7 +688,7 @@ void agoto(String s) {
           Serial.print("Current Position: ");
           printCoord(currRA, currDEC);
         } else{ 
-          Serial.println("Values exceed max allowed range of degrees:");
+          Serial.println("Values exceed max range (deg) of:");
           Serial.println(MAX_RANGE/60);
         }
       }
@@ -751,16 +780,16 @@ void loop() {
   if ( (digitalRead(raButtonPin) == LOW)  && (micros() - raPressTime) > (300000) ) {
     raPressTime = micros();
     printLog("RA Speed: ");
-    // 1x -> +SLOW_SPEED -> -(SLOW_SPEED-2)
+    // Cycle speed among: +1x -> -SLOW_SPEED -> +(SLOW_SPEED-1)
     if (raSpeed == 1) {
       raSpeed = SLOW_SPEED;
-      digitalWrite(raDirPin, (RA_DIR==HIGH?LOW:HIGH)); // reverse direction at first push ...
+      digitalWrite(raDirPin, (RA_DIR==HIGH?LOW:HIGH)); // reverse direction (W) at first push ...
     } else if  (raSpeed == SLOW_SPEED) {
-      raSpeed = (SLOW_SPEED - 2);
-      digitalWrite(raDirPin, RA_DIR); // ... back to RA_DIR so if any backlash exist...
-    } else if  (raSpeed == (SLOW_SPEED - 2)) {
+      raSpeed = (SLOW_SPEED - 1);
+      digitalWrite(raDirPin, RA_DIR); // ... back to RA_DIR (E) so if any backlash exist...
+    } else if  (raSpeed == (SLOW_SPEED - 1)) {
       raSpeed = 1;
-      digitalWrite(raDirPin, RA_DIR); // ... direction stays RA_DIR and no impact if backlash
+      // digitalWrite(raDirPin, RA_DIR); // ... direction stays RA_DIR (E) and no impact if backlash
     }
     setRaTimer(CMR/raSpeed); // re-set interrupt to change speed
     printLogUL(raSpeed);
@@ -770,7 +799,7 @@ void loop() {
   if (digitalRead(decButtonPin) == LOW && (micros() - decPressTime) > (300000) ) {
     decPressTime = micros();
     printLog("Dec Speed: ");
-    // 0x -> +SLOW_SPEED -> -(SLOW_SPEED-1)
+    // Cycle speed among: 0x -> +SLOW_SPEED -> -(SLOW_SPEED-1)
     if (decSpeed == 0) {
       decSpeed = SLOW_SPEED;
       decSleep(false); // awake it
@@ -788,6 +817,52 @@ void loop() {
     decLastTime = micros();
   }
 
+  #ifdef ST4
+  if (digitalRead(st4NorthPin) == LOW || digitalRead(st4SouthPin) == LOW) { // Pulse in DEC - N or S direction
+    if (!st4PulseDEC) { // if pulse is not already ongoing
+      st4PulseDEC = true; // set pulse is ongoing
+      boolean isNorth = (digitalRead(st4NorthPin) == LOW )?true:false;
+      digitalWrite(decDirPin, isNorth?DEC_DIR: (DEC_DIR==HIGH?LOW:HIGH));
+      decSpeed = 1;     // FIXME: this is to allow loop() to call decPlay(), real speed is determined by  decStepDelay
+      decStepDelay = STEP_DELAY*ST4_PULSE_FACTOR/10; // factor up, period increase, freq decrese (slower)
+      printLog("ST4: DEC Start, new Pulse:");
+      printLogUL(decStepDelay);
+      if (isNorth) {printLog("ST4: North");} else {printLog("ST4: South");}
+    }
+  } else { // no ST4 DEC pulse
+    if (st4PulseDEC) {
+      st4PulseDEC = false;
+      // reset DEC
+      decSpeed = 0;
+      printLog("ST4: Dec Stop");
+    }
+  }
+  if (digitalRead(st4EastPin) == LOW || digitalRead(st4WestPin) == LOW) { // Pulse in RA - W or E direction
+    if (!st4PulseRA) { // if pulse is not ongoing
+      boolean isWest = (digitalRead(st4WestPin) == LOW)?true:false;
+      unsigned int pulseCMR = 0;
+
+     if (isWest) { 
+        pulseCMR = (unsigned long) CMR*ST4_PULSE_FACTOR/(ST4_PULSE_FACTOR+10); // decreases pulseCRM, freq increases => increase tracking speed ("move" west)
+      } else {
+        pulseCMR = CMR+(unsigned long)2*CMR*10/ST4_PULSE_FACTOR; // increases pulseCRM, freq decreases => decrease tracking speed ("move" east)
+      }
+      setRaTimer(pulseCMR); 
+      st4PulseRA = true;
+      printLog("ST4: RA Start, new CRM:");
+      printLogUL(pulseCMR);
+      if (isWest) {printLog("ST4: West");} else {printLog("ST4: East");}
+    }
+  } else { 
+    if (st4PulseRA) {
+      st4PulseRA = false;
+      // reset RA
+      setRaTimer(CMR);  
+      printLog("ST4: RA Stop");
+    }
+  }
+  #endif
+
   // Check if message on serial input
   if (Serial.available() > 0) {
     input[in] = Serial.read(); 
@@ -800,11 +875,11 @@ void loop() {
     // acknowledge LX200 ACK signal (char(6)) for software that tries to autodetect protocol (i.e. Stellarium Plus)
     if (input[in] == char(6)) { Serial.print("P"); return; } // P = Polar
 
-    if (input[in] == '#' || input[in] == '\n') { // time to check what is in the buffer
+    if (input[in] == '#' || input[in] == '\n') { // after a # or a \n it is time to check what is in the buffer
       if ((input[0] == '+' || input[0] == '-' 
-        || input[0] == 's' || input[0] == 'g')) { // agoto
+        || input[0] == 's' || input[0] == 'g')) { // it's agoto protocol
         agoto(input);
-      } else if (input[0] == ':') { // lx200
+      } else if (input[0] == ':') { // it's lx200 protocol
         printLog(input);
         lx200(input);
       } else {
@@ -817,7 +892,7 @@ void loop() {
           Serial.println(" unknown. Expected lx200 or aGotino commands");
         }
       }
-      in = 0; // reset buffer // FIXME!!! the whole input buffer is passed anyway
+      in = 0; // reset buffer // WARNING: the whole input buffer is passed anyway
     } else {
       if (in++>20) in = 0; // prepare for next char or reset buffer if max lenght reached
     } 
@@ -825,6 +900,6 @@ void loop() {
 }
 
 // Helpers to write on serial when DEBUG is active
-void printLog(  String s)         { if (DEBUG) { Serial.print(":::");Serial.println(s); } }
-void printLogL( long l)           { if (DEBUG) { Serial.print(":::");Serial.println(l); } }
-void printLogUL(unsigned long ul) { if (DEBUG) { Serial.print(":::");Serial.println(ul);} }
+void printLog(  String s)         { if (DEBUG) { Serial.print(":");Serial.println(s); } }
+void printLogL( long l)           { if (DEBUG) { Serial.print(":");Serial.println(l); } }
+void printLogUL(unsigned long ul) { if (DEBUG) { Serial.print(":");Serial.println(ul);} }
