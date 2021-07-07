@@ -34,8 +34,8 @@ const unsigned long STEP_DELAY = 18699;                // see above calculation
 const unsigned long MICROSTEPS_PER_DEGREE_RA  = 12800; // see above calculation
 const unsigned long MICROSTEPS_PER_DEGREE_DEC = MICROSTEPS_PER_DEGREE_RA; // calculate correct value if DEC gears/worm/microsteps differs from RA ones
 
-const unsigned long MICROSTEPS_RA  = 32; // Driver Microsteps in RA
-const unsigned long MICROSTEPS_DEC = 32; // Driver Microsteps in DEC
+const unsigned long MICROSTEPS_RA  = 32; // RA  Driver Microsteps
+const unsigned long MICROSTEPS_DEC = 32; // DEC Driver Microsteps
 
 const long SERIAL_SPEED = 9600;          // serial interface baud. Make sure your computer/phone matches this (or change it)
 long MAX_RANGE = 1800;                   // default max range in deg minutes (1800'=30°). See +range command
@@ -109,7 +109,12 @@ long currRA  = 0;
 long currDEC = NORTH_DEC;
 
 int raSpeed  = 1;   // default RA  speed (start at 1x to follow stars)
-int decSpeed = 0;   // default DEC speed (don't move)
+
+const int DEC_HALT = 0;  // dec is not moving
+const int DEC_BTN1 = 1;  // 1st time dec button is pressed
+const int DEC_BTN2 = 2;  // 2nd time dec button is pressed (at 3rd press it goes back to DEC_HALT)
+const int DEC_ST4  = 3;  // dec is moving due to ST4 pulse
+int decState = DEC_HALT; // default DEC speed (don't move)
 
 // Serial Input
 char input[20];     // stores serial input
@@ -190,7 +195,7 @@ void setRaTimer(int cmr) {
    *  => CMR = 145.0959 with prescaler=1024, 18699  with prescaler=0
    *  let's go for the finest one
    */
-  /* Using 8-but Timer 2 (CMR less than 256)
+  /* Using 8-bit Timer 2 (CMR less than 256)
   TCCR2A = 0;// set entire TCCR2A register to 0
   TCCR2B = 0;// same for TCCR2B
   TCNT2  = 0;//initialize counter value to 0
@@ -224,8 +229,8 @@ ISR(TIMER1_COMPA_vect){
 }
 
 /* Move DEC motor (change pulse) - slow motion
- *   invoked from main loop() if Dec speed is not zero 
- *   note it is decStepDelay&decTargetDelay that drive the actual speed (period pulse), not decSpeed FIXME: rename decSpeed
+ *   invoked from main loop() if decState is not DEC_HALT 
+ *   note: it is decStepDelay&decTargetDelay that drive the actual speed (period pulse)
  *   For the first 100 pulses (50 steps) motor accellerates to decTargetDelay
  *   For ST4 motor moves at decStepDelay
  */
@@ -756,7 +761,7 @@ void changeSideOfPier() {
 void loop() {
   
   // move Dec if needed
-  if (decSpeed != 0) {
+  if (decState != DEC_HALT) {
     decPlay();
   }
 
@@ -768,7 +773,7 @@ void loop() {
       // reset motors
       raSpeed = 1;
       setRaTimer(CMR/raSpeed); // reset ra to 1x
-      decSpeed = 0; // stop dec
+      decState = DEC_HALT; // stop dec
       decSleep(true);
     }
   } else {
@@ -799,21 +804,22 @@ void loop() {
   if (digitalRead(decButtonPin) == LOW && (micros() - decPressTime) > (300000) ) {
     decPressTime = micros();
     printLog("Dec Speed: ");
-    // Cycle speed among: 0x -> +SLOW_SPEED -> -(SLOW_SPEED-1)
-    if (decSpeed == 0) {
-      decSpeed = SLOW_SPEED;
+    // Cycle speed among: 0x -> +SLOW_SPEED -> -(SLOW_SPEED-)
+    // note: actual speed is driven by decTargetDelay
+    if (decState == DEC_HALT) {
+      decState = DEC_BTN1;
       decSleep(false); // awake it
       digitalWrite(decDirPin, DEC_DIR);
-    } else if (decSpeed == SLOW_SPEED) {
-      decSpeed = (SLOW_SPEED - 1);
+    } else if (decState == DEC_BTN1) {
+      decState = DEC_BTN2;
       digitalWrite(decDirPin, (DEC_DIR==HIGH?LOW:HIGH));
-    } else if  (decSpeed == (SLOW_SPEED - 1)) {
-      decSpeed = 0; // stop
+    } else if  (decState == DEC_BTN2) {
+      decState = DEC_HALT; // stop
       decSleep(true); // sleep
     }
     printLogUL(SLOW_SPEED);
     decStepDelay = MAX_DELAY; // set initial pulse length (max possible to then accellerate)
-    decPlayIdx = 0;           // set initial pulse index  (used for accelleration in the first steps)
+    decPlayIdx = 0;           // set initial pulse index  (used for accelleration in the first 100 pulses)
     decLastTime = micros();
   }
 
@@ -823,8 +829,10 @@ void loop() {
       st4PulseDEC = true; // set pulse is ongoing
       boolean isNorth = (digitalRead(st4NorthPin) == LOW )?true:false;
       digitalWrite(decDirPin, isNorth?DEC_DIR: (DEC_DIR==HIGH?LOW:HIGH));
-      decSpeed = 1;     // FIXME: this is to allow loop() to call decPlay(), real speed is determined by  decStepDelay
+      decState = DEC_ST4;     // this is to allow loop() to call decPlay(), real speed is determined by decStepDelay:
+      /* Set speed of Dec guide vorrection: */
       decStepDelay = STEP_DELAY*ST4_PULSE_FACTOR/10; // factor up, period increase, freq decrese (slower)
+      
       printLog("ST4: DEC Start, new Pulse:");
       printLogUL(decStepDelay);
       if (isNorth) {printLog("ST4: North");} else {printLog("ST4: South");}
@@ -833,7 +841,7 @@ void loop() {
     if (st4PulseDEC) {
       st4PulseDEC = false;
       // reset DEC
-      decSpeed = 0;
+      decState = DEC_HALT;
       printLog("ST4: Dec Stop");
     }
   }
@@ -847,6 +855,7 @@ void loop() {
       } else {
         pulseCMR = CMR+(unsigned long)2*CMR*10/ST4_PULSE_FACTOR; // increases pulseCRM, freq decreases => decrease tracking speed ("move" east)
       }
+      /* Set speed of RA guide correction */
       setRaTimer(pulseCMR); 
       st4PulseRA = true;
       printLog("ST4: RA Start, new CRM:");

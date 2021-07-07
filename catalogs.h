@@ -4,7 +4,7 @@
  *   Messier objects (110),  aGotino Star List (238) in Epoch J2000
  *   NGC objects Up to mag 11 (738) in B2000
  * 
- *  Copy this file in Arduino/libraries/aGotino and restart the IDE
+ *  Copy this file in same folder of aGotino.ino
  */
 #include <avr/pgmspace.h>
 
@@ -394,6 +394,7 @@ typedef struct {
  * Up to mag 12, 1167 items: 29160 bytes (94%) of program storage space
  * Up to mag 11,  738 items: 24870 bytes (80%) of program storage space
  */
+
 const NGC NGCs[] PROGMEM = {    
 {45, 846, -83460},
 {55, 894, -141060},
