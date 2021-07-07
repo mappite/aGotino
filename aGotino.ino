@@ -3,10 +3,11 @@
 
       * tracking 
       * cycle among forward and backward speeds on RA&Dec at buttons press
-      * listen on serial port for basic LX200 commands (INDI LX200 Basic)
+      * listen on serial port for basic LX200 commands (INDI LX200 Basic, SkySafari, Stellarium etc)
       * listen on serial port for aGotino commands
+      * ST4 port support
 
-    Command set and new code versions at https://github.com/mappite/aGotino
+    Command set and latest updates at https://github.com/mappite/aGotino
     
     by gspeed @ astronomia.com / qde / cloudynights.com forum
     This code is free software under GPL v3 License use at your risk and fun ;)
@@ -37,10 +38,10 @@ const unsigned long MICROSTEPS_PER_DEGREE_DEC = MICROSTEPS_PER_DEGREE_RA; // cal
 const unsigned long MICROSTEPS_RA  = 32; // RA  Driver Microsteps
 const unsigned long MICROSTEPS_DEC = 32; // DEC Driver Microsteps
 
-const long SERIAL_SPEED = 9600;          // serial interface baud. Make sure your computer/phone matches this (or change it)
-long MAX_RANGE = 1800;                   // default max range in deg minutes (1800'=30°). See +range command
+const long SERIAL_SPEED = 9600;          // serial interface baud. Make sure your computer/phone matches this
+long MAX_RANGE = 1800;                   // default max slew range in deg minutes (1800'=30°). See +range command
 
-// Motor clockwise direction: HIGH is for tracking as per original design 
+// Motor clockwise direction: HIGH is for tracking as per original design (W)
 //          change to LOW if you inverted wirings or motor position or... 
 int RA_DIR   = HIGH;                    // ... change RA_DIR to LOW in Southern Hemisphere
 int DEC_DIR  = HIGH;                    
@@ -66,7 +67,7 @@ const int decButtonPin=  7;
 const int decEnableMicroStepsPin = 9;
 const int decSleepPin = 10;
 
-/* Experimental: Uncomment the line below to enable ST4 Port */
+/* Experimental: Uncomment the line below to enable ST4 Port on A0-A3 pins */
 // #define ST4
 
 #ifdef ST4
@@ -82,7 +83,7 @@ const int st4WestPin  = A3;
  * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "catalogs.h" // load objects (Star List, Messier, NGC)
+#include "catalogs.h" // load objects for aGoto protocol (Star List, Messier, NGC)
 
 // Number of Microsteps to move RA by 1hour
 const unsigned long MICROSTEPS_PER_HOUR  = MICROSTEPS_PER_DEGREE_RA * 360 / 24;
@@ -108,13 +109,19 @@ const long NORTH_DEC   = 324000; // 90°
 long currRA  = 0;     
 long currDEC = NORTH_DEC;
 
-int raSpeed  = 1;   // default RA  speed (start at 1x to follow stars)
 
-const int DEC_HALT = 0;  // dec is not moving
-const int DEC_BTN1 = 1;  // 1st time dec button is pressed
-const int DEC_BTN2 = 2;  // 2nd time dec button is pressed (at 3rd press it goes back to DEC_HALT)
-const int DEC_ST4  = 3;  // dec is moving due to ST4 pulse
-int decState = DEC_HALT; // default DEC speed (don't move)
+const int DEC_HALT  = 0;   // dec is not moving
+const int DEC_NORTH = 1;   // 1st time dec button is pressed // FIXME: IT MAY BE THE VICEVERSA NEED TO TEST!
+const int DEC_SOUTH = 2;   // 2nd time dec button is pressed (at 3rd press, re-set to DEC_HALT)
+const int DEC_ST4   = 3;   // dec is moving due to ST4 pulse
+int decState = DEC_HALT;   // initial DEC state (don't move)
+
+const int RA_TRACKING = 0; // tracking at 1x
+const int RA_EAST = 1;     // 1st time button is pressed
+const int RA_WEST = 2;     // 2nd time button is pressed (at 3rd press, re-set to tracking)
+const int RA_ST4  = 3;     // moving due to ST4 pulse
+int raState = RA_TRACKING; // initial RA speed (tracking)
+
 
 // Serial Input
 char input[20];     // stores serial input
@@ -128,17 +135,13 @@ String lx200RA  = "00:00:00#";
 String lx200DEC = "+90*00:00#";
 
 // Vars to implement accelleration
-unsigned long MAX_DELAY = 16383; // limit of delayMicroseconds() for Arduino Uno
+unsigned long MAX_DELAY      = 16383; // limit of delayMicroseconds() for Arduino Uno
 unsigned long decStepDelay   = MAX_DELAY; // initial pulse lenght (slow, to start accelleration)
 unsigned long decTargetDelay = STEP_DELAY/SLOW_SPEED; // pulse length to reach when Dec button is pressed
-unsigned int  decPlayIdx = 0; // pulse index, Dec will accellerate for first 100 pulses
+unsigned int  decPlayIdx     = 0; // pulse index, Dec will accellerate for first 100 pulses
 
 String _aGotino = "aGotino";
-const unsigned long _ver = 210701;
-
-// the below is not in #ifdef ST4 since st4PulseDEC is used to determine if to accellerate in decPlay()
-boolean st4PulseRA  = false; // true while ST4 port RA  pulse is ongoing
-boolean st4PulseDEC = false; // true while ST4 port DEC pulse is ongoing
+const unsigned long _ver = 210708;
 
 void setup() {
   Serial.begin(SERIAL_SPEED);
@@ -244,12 +247,12 @@ void decPlay() {
     decStepPinStatus = !decStepPinStatus;
     digitalWrite(decStepPin, (decStepPinStatus ? HIGH : LOW));
     decLastTime = micros(); // reset time
-    if (decPlayIdx<=100 && !st4PulseDEC) { // accellerate for first 50 steps (100 pulses) if this is not ST4 guiding
-      // decrease the pulse from MAX_DELAY to decTargetDelay = STEP_DELAY/SLOW_SPEED
+    if (decPlayIdx<=100 && decState != DEC_ST4) { // accellerate for first 50 steps (100 pulses) if this is not ST4 guiding
+      // decrease the pulse from decStepDelay = MAX_DELAY to decStepDelay = decTargetDelay = STEP_DELAY/SLOW_SPEED
       unsigned int i = decPlayIdx/2; // 0, 0, 1,1,2,2,3,3,..., 50, 50
       decStepDelay = MAX_DELAY-( (MAX_DELAY-decTargetDelay)*i/50); 
       decPlayIdx++; 
-    }
+    } // else use decStepDelay value for the pulse lenght 
   } else if ( rttcp < 0 ) { // something happened that causes the time elapsed to be too high, this should never happen
     printLog("Dec: tool late!");
     decLastTime = micros();
@@ -484,23 +487,44 @@ void lx200(String s) { // all :.*# commands are passed here
       updateLx200Coords(currRA, currDEC); // recompute strings
     }
     Serial.print(1); // FIXME: input is not validated
-  } else if (s.substring(1,3).equals("MS")) { // :MS# move
-    printLog("MS");
-    // assumes Sr and Sd have been processed hence
-    // inRA and inDEC have been set, now it's time to move
-    long deltaRaSecs  = currRA-inRA;
-    long deltaDecSecs = currDEC-inDEC;
-    // FIXME: need to implement checks, but can't wait for slewRaDecBySecs
-    //        reply since it may takes several seconds:
-    Serial.print(0); // slew is possible 
-    // slewRaDecBySecs replies to lx200 polling with current position until slew ends:
-    if (slewRaDecBySecs(deltaRaSecs, deltaDecSecs) == 1) { // success         
-      currRA  = inRA;
-      currDEC = inDEC;
-      updateLx200Coords(currRA, currDEC); // recompute strings
-    } else { // failure
-      Serial.print("1Range_too_big#");
+  } else if (s.charAt(1) == 'M') { // MOVE:  :MS# (slew), :Mx# (slow move)
+    if (s.charAt(2) == 'S' ) { // SLEW
+      printLog("MS");
+      // assumes Sr and Sd have been processed hence
+      // inRA and inDEC have been set, now it's time to move
+      long deltaRaSecs  = currRA-inRA;
+      long deltaDecSecs = currDEC-inDEC;
+      // FIXME: need to implement checks, but can't wait for slewRaDecBySecs
+      //        reply since it may takes several seconds:
+      Serial.print(0); // slew is possible 
+      // slewRaDecBySecs replies to lx200 polling with current position until slew ends:
+      if (slewRaDecBySecs(deltaRaSecs, deltaDecSecs) == 1) { // success         
+        currRA  = inRA;
+        currDEC = inDEC;
+        updateLx200Coords(currRA, currDEC); // recompute strings
+      } else { // failure
+        Serial.print("1Range_too_big#");
+      }
+    } else {
+      printLog("Mx");
+      switch (s.charAt(2)) {
+          case 'n':
+            moveDecNorth();
+            break;
+          case 's':
+            moveDecSouth();
+            break;
+          case 'w':
+            moveRaWest();
+            break;
+          case 'e':
+            moveRaEast();
+            break;
+        } // default is ignored;
     }
+  } else if (s.charAt(1) == 'Q') { // :Q# or :Qx# stop Dec Motor and set RA to Tracking
+    moveDecHalt();
+    moveRaTracking();
   } else if (s.substring(1,3).equals("CM")) { // :CM# sync
     // assumes Sr and Sd have been processed
     // sync current position with input
@@ -601,6 +625,8 @@ void agoto(String s) {
     }
   } else if (s.substring(1,5).equals("side")) {
     changeSideOfPier();
+    Serial.print("Side of Pier: ");
+    Serial.println(SIDE_OF_PIER_WEST?"W":"E");
   } else if (s.substring(1,5).equals("info")) {
     printInfo();
   } else { // Move, Set or Goto commands
@@ -733,8 +759,6 @@ void printCoord(long raSecs, long decSecs) {
 void changeSideOfPier() {
   SLEWING = true; // stop RA tracking hence give a "sound" feedback (motor stops)
   SIDE_OF_PIER_WEST = !SIDE_OF_PIER_WEST;
-  Serial.print("Side of Pier: "); // FIXME: hope this does not create errors with LX200
-  Serial.println(SIDE_OF_PIER_WEST?"W":"E");
 
   // invert DEC direction
   DEC_DIR = (DEC_DIR==HIGH?LOW:HIGH);
@@ -750,9 +774,53 @@ void changeSideOfPier() {
     delay(1000); digitalWrite(LED_BUILTIN, LOW);
   }
   bothPressTime = 0; // this is to force another full sec to change again
-  digitalWrite(raDirPin, RA_DIR); // set default RA direction
+
+  // reset motors
+  moveRaTracking();
+  moveDecHalt();
+  
   SLEWING = false;
 }
+
+/*
+ * Slow motion movement and tracking/halt 
+ */
+ 
+void moveRaWest() {
+      raState = RA_WEST;
+      setRaTimer(CMR/SLOW_SPEED); // set interrupt to slow motion speed
+      digitalWrite(raDirPin, RA_DIR); // set RA_DIR (W)
+}
+
+void moveRaEast() {
+      raState = RA_EAST;
+      setRaTimer(CMR/SLOW_SPEED); // set interrupt to slow motion speed
+      digitalWrite(raDirPin, (RA_DIR==HIGH?LOW:HIGH)); // set RA_DIR (E)
+}
+
+void moveRaTracking() {
+      raState = RA_TRACKING;
+      setRaTimer(CMR); // re-set interrupt to tracking speed
+      digitalWrite(raDirPin, RA_DIR);
+}
+
+void moveDecNorth() {
+      decState = DEC_NORTH;
+      decSleep(false); // awake motor
+      digitalWrite(decDirPin, DEC_DIR);
+}
+
+void moveDecSouth() {
+      decState = DEC_SOUTH;
+      decSleep(false); // awake motor
+      digitalWrite(decDirPin, (DEC_DIR==HIGH?LOW:HIGH));
+}
+
+void moveDecHalt() {
+      decState = DEC_HALT; // stop
+      decSleep(true); // sleep
+}
+
 
 /*
  * main loop
@@ -770,11 +838,6 @@ void loop() {
     if (bothPressTime == 0) { bothPressTime = micros(); }
     if ( (micros() - bothPressTime) > (1000000) ) { 
       changeSideOfPier();
-      // reset motors
-      raSpeed = 1;
-      setRaTimer(CMR/raSpeed); // reset ra to 1x
-      decState = DEC_HALT; // stop dec
-      decSleep(true);
     }
   } else {
     // if both buttons are not pressed, reset timer to 0
@@ -784,40 +847,30 @@ void loop() {
   // raButton pressed: skip if within 300ms from last press
   if ( (digitalRead(raButtonPin) == LOW)  && (micros() - raPressTime) > (300000) ) {
     raPressTime = micros();
-    printLog("RA Speed: ");
-    // Cycle speed among: +1x -> -SLOW_SPEED -> +(SLOW_SPEED-1)
-    if (raSpeed == 1) {
-      raSpeed = SLOW_SPEED;
-      digitalWrite(raDirPin, (RA_DIR==HIGH?LOW:HIGH)); // reverse direction (W) at first push ...
-    } else if  (raSpeed == SLOW_SPEED) {
-      raSpeed = (SLOW_SPEED - 1);
-      digitalWrite(raDirPin, RA_DIR); // ... back to RA_DIR (E) so if any backlash exist...
-    } else if  (raSpeed == (SLOW_SPEED - 1)) {
-      raSpeed = 1;
-      // digitalWrite(raDirPin, RA_DIR); // ... direction stays RA_DIR (E) and no impact if backlash
+    printLog("RA Slow Motion");
+    // Cycle among: +1x -> -SLOW_SPEED (E) -> +SLOW_SPEED (W)
+    if (raState == RA_TRACKING) {
+      moveRaEast(); // reverse from default direction
+    } else if  (raState == RA_EAST) {
+      moveRaWest(); // back to default direction
+    } else if  (raState == RA_WEST) {
+      moveRaTracking(); // Note: direction stays default one (west) so no impact if backlash exists
     }
-    setRaTimer(CMR/raSpeed); // re-set interrupt to change speed
-    printLogUL(raSpeed);
   }
   
   // decButton pressed: skip if within 300ms from last press
   if (digitalRead(decButtonPin) == LOW && (micros() - decPressTime) > (300000) ) {
     decPressTime = micros();
-    printLog("Dec Speed: ");
+    printLog("Dec Slow Motion");
     // Cycle speed among: 0x -> +SLOW_SPEED -> -(SLOW_SPEED-)
     // note: actual speed is driven by decTargetDelay
     if (decState == DEC_HALT) {
-      decState = DEC_BTN1;
-      decSleep(false); // awake it
-      digitalWrite(decDirPin, DEC_DIR);
-    } else if (decState == DEC_BTN1) {
-      decState = DEC_BTN2;
-      digitalWrite(decDirPin, (DEC_DIR==HIGH?LOW:HIGH));
-    } else if  (decState == DEC_BTN2) {
-      decState = DEC_HALT; // stop
-      decSleep(true); // sleep
+      moveDecNorth();
+    } else if (decState == DEC_NORTH) {
+      moveDecSouth();
+    } else if  (decState == DEC_SOUTH) {
+      moveDecHalt();
     }
-    printLogUL(SLOW_SPEED);
     decStepDelay = MAX_DELAY; // set initial pulse length (max possible to then accellerate)
     decPlayIdx = 0;           // set initial pulse index  (used for accelleration in the first 100 pulses)
     decLastTime = micros();
@@ -825,12 +878,14 @@ void loop() {
 
   #ifdef ST4
   if (digitalRead(st4NorthPin) == LOW || digitalRead(st4SouthPin) == LOW) { // Pulse in DEC - N or S direction
-    if (!st4PulseDEC) { // if pulse is not already ongoing
-      st4PulseDEC = true; // set pulse is ongoing
+    if (decState != DEC_ST4) { // if pulse is not already ongoing
+      // set pulse is ongoing:
+      decState = DEC_ST4;     // this allows loop() to call decPlay(), real speed is determined by decStepDelay:
       boolean isNorth = (digitalRead(st4NorthPin) == LOW )?true:false;
       digitalWrite(decDirPin, isNorth?DEC_DIR: (DEC_DIR==HIGH?LOW:HIGH));
-      decState = DEC_ST4;     // this is to allow loop() to call decPlay(), real speed is determined by decStepDelay:
-      /* Set speed of Dec guide vorrection: */
+      /*
+       * Set speed for Dec guide correction: 
+       */
       decStepDelay = STEP_DELAY*ST4_PULSE_FACTOR/10; // factor up, period increase, freq decrese (slower)
       
       printLog("ST4: DEC Start, new Pulse:");
@@ -838,36 +893,35 @@ void loop() {
       if (isNorth) {printLog("ST4: North");} else {printLog("ST4: South");}
     }
   } else { // no ST4 DEC pulse
-    if (st4PulseDEC) {
-      st4PulseDEC = false;
-      // reset DEC
-      decState = DEC_HALT;
-      printLog("ST4: Dec Stop");
+    if (decState == DEC_ST4) { // halt DEC if it was moving due to ST4 pulse
+      moveDecHalt();
+      printLog("ST4: Dec Halted");
     }
   }
   if (digitalRead(st4EastPin) == LOW || digitalRead(st4WestPin) == LOW) { // Pulse in RA - W or E direction
-    if (!st4PulseRA) { // if pulse is not ongoing
+    if (raState != RA_ST4) { // if pulse is not ongoing
+      raState = RA_ST4; // set oulse ongoing
       boolean isWest = (digitalRead(st4WestPin) == LOW)?true:false;
       unsigned int pulseCMR = 0;
 
-     if (isWest) { 
+      if (isWest) { 
         pulseCMR = (unsigned long) CMR*ST4_PULSE_FACTOR/(ST4_PULSE_FACTOR+10); // decreases pulseCRM, freq increases => increase tracking speed ("move" west)
       } else {
         pulseCMR = CMR+(unsigned long)2*CMR*10/ST4_PULSE_FACTOR; // increases pulseCRM, freq decreases => decrease tracking speed ("move" east)
       }
-      /* Set speed of RA guide correction */
+      /* 
+       * Set speed of RA guide correction 
+       */
       setRaTimer(pulseCMR); 
-      st4PulseRA = true;
+      
       printLog("ST4: RA Start, new CRM:");
       printLogUL(pulseCMR);
       if (isWest) {printLog("ST4: West");} else {printLog("ST4: East");}
     }
-  } else { 
-    if (st4PulseRA) {
-      st4PulseRA = false;
-      // reset RA
-      setRaTimer(CMR);  
-      printLog("ST4: RA Stop");
+  } else { // no ST4 RA Pulse
+    if (raState == RA_ST4) { // Re-set to tracking if it was moving due to ST4 pulse
+      moveRaTracking();
+      printLog("ST4: RA Tracking");
     }
   }
   #endif
