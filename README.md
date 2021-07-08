@@ -1,11 +1,14 @@
 # aGotino
 A telescope Goto solution based on Arduino (Nano or up) that supports:
 
-- aGotino commands - an Android phone can act as a remote via an [USB OTG cable](https://www.amazon.com/s?k=usb+otg+cable) or via Bluetooth
+- tracking
 - basic Meade LX200 protocol - drive with Stellarium, SkySafari Plus/Pro(mobile), Kstars, Carte du Ciel or any software that supports INDI
-- ST4 port for guiding (see ST4 branch)
+- aGotino commands
+- ST4 port for guiding
 
-aGotino provides tracking and **hybrid goto&starhopping**: point the scope to something you can easily find and then reach a remote, low magnitude object nearby - default *nearby* is 30° so you will always find some bright stars around. Star alignment procedures are _not_ required, you can move and rotate your scope freely, until you need that extra help. 
+aGotino can be controlled via an USB cable or via bluetooth from a mobile device or PC.
+ 
+aGotino provides **hybrid goto&starhopping**: point the scope to something you can easily find and then reach a remote, low magnitude object nearby - default *nearby* is 30° so you will always find some bright stars around. Star alignment procedures are _not_ required, you can move and rotate your scope freely, until you need that extra help. 
 
 No additional boards needed, just wire Arduino and two stepper Drivers to do the job. While aGotino will grow in functionalities, you can  upgrade to other solutions, like [OnStep](https://onstep.groups.io/g/main), and re-use almost all of the hardware.
 
@@ -21,6 +24,14 @@ Photos and hardware details on [CloudyNights (English)](https://www.cloudynights
 - listen on serial port for basic LX200 commands
 - listen on serial port for aGotino commands
   - 248 bright stars, Messier (all) and 768 NGC objects (up to mag 11) are in memory
+
+### LX200 Protocol Support
+Sync&Slew actions are supported, commands **`:GR :GD :Sr :Sd :MS :Mx :CM :Q :GVO :GVN ACK`**  
+Tested with Stellarium (direct), INDI LX200 Basic driver (KStars, Cartes du Ciel, Stellarium, etc), SkySafari Plus and Stellarium Plus (mobile)
+
+[Video: SkySafari Mobile with aGotino](https://www.youtube.com/watch?v=mhODsDZTl5U)
+
+[Video: Stellarium from a PC with aGotino](https://youtu.be/PdkoGX5PcDA)
 
 ### aGotino Command set
 From an Android device you can use [Serial USB Terminal](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it) or [Serial Bluetooth Terminal](https://play.google.com/store/apps/details?id=de.kai_morich.serial_bluetooth_terminal&hl=it&gl=US) apps. From a PC any terminal emulator should work. 
@@ -79,15 +90,6 @@ Slew -1° in RA (i.e. +1° West) and +1° Dec (North). Note 1°=60' (arcmins) wh
 
 [Here a video: aGotino in action](https://www.youtube.com/watch?v=YF_J7_7lyB4)
 
-### LX200 Protocol Support
-
-Sync&Slew actions are supported, commands **`:GR :GD :Sr :Sd :MS :CM :Q :GVO :GVN ACK`**  
-Tested with Stellarium (direct), INDI LX200 Basic driver (KStars, Cartes du Ciel, Stellarium, etc), SkySafari Plus and Stellarium Plus (mobile)
-
-[Video: Stellarium from a PC with aGotino](https://youtu.be/PdkoGX5PcDA)
-
-[Video: SkySafari Mobile with aGotino](https://www.youtube.com/watch?v=fBjxpKKCwJc)
-
 ### Side of Pier
 
 Default value for *Side of Pier* is West, meaning your scope is supposed to be West of the mount, usually pointing East. If your scope is on East side of the mount, you need to push both buttons for 1 sec or issue a **`+side`** command to let aGotino know that, since Declination movement has to invert direction. When setting East, motors pause for 3secs while onboard led turns on. When going back to West, onboard led blinks twice. 
@@ -95,7 +97,7 @@ Default value for *Side of Pier* is West, meaning your scope is supposed to be W
 ### Files
 
     aGotino.ino           Arduino C Source
-    catalogs.h            Object Catalogues (J2000.0)
+    catalogs.h            Object Catalogues (J2000.0) for aGotino commands
     aGotino-StarList.pdf  Star list in PDF
     aGotino-wiring.png    wirings 
 
@@ -119,7 +121,7 @@ The above example is for an EQ5/Exos2 with 40T-16T pulleys: it results in a trac
 
 ### Implementation
 
-- Copy _catalogs.h_ in Arduino/libraries/aGotino/ and _aGotino.ino_ in Arduino/aGotino/ 
+- Copy _aGotino.ino_ and _catalogs.h_ in Arduino/aGotino/ 
 - Open _aGotino.ino_ in Arduino IDE and edit header to set MICROSTEPS_PER_DEGREE_AR & STEP_DELAY values for your mount and (optional) change any other default values to fit your preferences.
 - Compile and upload to your Arduino device.
 
@@ -137,17 +139,15 @@ The above example is for an EQ5/Exos2 with 40T-16T pulleys: it results in a trac
 ![Hardware](https://imgur.com/zhQLEPC.png)
 
 ### Bluetooth
-Tested with HC-05 (Bluetooth Classic) and HC-08/10 (BLE) BT modules - just wire BT module RX&TX pins to Arduino TX&RX, BT module RX pin is rated 3.3v so you should use a couple of resistors as voltage divider to lower Arduino TX voltage.  You can then connect using [Serial Bluetooth Terminal App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_bluetooth_terminal&hl=it&gl=US). Note: when BT adapter is wired to TX&RX the USB port is not functional.
 
-SkySafari Plus/Pro or Stellarium Plus work directly with Bluetooth Classic (2.0), while with BLE you need a bridge. Note: You don't need bluetooth to use these mobile apps, you can wire via USB and use a [USB/WIFI/BT Bridge App](https://play.google.com/store/apps/details?id=masar.bluetoothbridge.pro&hl=en_US&gl=US) - see SkySafari video posted above.
+Tested with HC-05 (Bluetooth Classic - recommended for SkySafari/Stellarium Plus) and HC-08/10 (BLE) BT modules - just wire BT module RX&TX pins to Arduino TX&RX, BT module RX pin is rated 3.3v so you should use a couple of resistors as voltage divider to lower Arduino TX voltage (I did not).
 
-You can of course configure the bluetooth connection as a serial device in your computer and connect via Stellarium/Indi (on Linux, setup /dev/rfcomm0 or for BLE devices see [BLE-Serial](https://github.com/Jakeler/ble-serial)). 
+You can then connect using [Serial Bluetooth Terminal App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_bluetooth_terminal&hl=it&gl=US) or SkySafary/Stellarium Plus from mobile devices.
+
+On a PC you can configure the bluetooth connection as a serial device in your computer and connect via Stellarium/Indi (on Linux, setup /dev/rfcomm0 or for BLE devices see [BLE-Serial](https://github.com/Jakeler/ble-serial)). 
+
+Note: when BT adapter is powered and wired to Arduino, the Arduino USB port is not fully functional - disconnect to upload a new firmware.
 
 ### ST4
-ST4 port is available in [ST4 branch](https://github.com/mappite/aGotino/blob/ST4/README.md) - Arduino pins A0,A1,A2,A3 (North, South, East, West) can be connected directly to your camera ST4 port via a RJ cable (6 wires - one is for GND). The variable ST4_FACTOR can be used to decrease/increase speed - default value (20) guides at 0.5x,  range goes from 10 (faster) to 30 (slower).
 
-### Todo
-
-- Lookup objects by constellation
-- Support pulse guide LX200-style commands to allow guiding via phd2 / or add ST4 port
-- Show Battery Level
+Uncomment the `#ifdef ST4` line in aGotino.ino to enable ST4 port. Arduino pins A0,A1,A2,A3 (North, South, East, West) can be connected directly to your camera ST4 port via a RJ cable (6 wires - one is for GND). The variable ST4_FACTOR can be used to decrease/increase speed - default value (20) guides at 0.5x,  range goes from 10 (faster) to 30 (slower).
