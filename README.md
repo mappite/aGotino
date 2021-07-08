@@ -117,7 +117,7 @@ Below is how to calculate stepper motor pulse length to drive your mount at side
                                      // = microseconds to advance a microstep
                                      // 86164 is earth 360deg rotation time in secs (23h56m04s)
                                   
-The above example is for an EQ5/Exos2 with 40T-16T pulleys: it results in a tracking precision of 53 microsteps/second or 0.281 arcsec/microstep - which appears to be the same figures of ES/Losmandy G-11 mount. With a good polar alignment, goto accuracy within the default 30° is under 5'.
+The above example is for an EQ5/Exos2 with 40T-16T pulleys: tracking precision is 53 microsteps/second or 0.281 arcsec/microstep - which appears to be the same figures of ES/Losmandy G-11 mount. With a good polar alignment, goto accuracy within the default 30° is under 5': if you get worse results check your pulleys are tightned, verify your mount polar alignemnt and level.  
 
 ### Implementation
 
@@ -142,7 +142,7 @@ The above example is for an EQ5/Exos2 with 40T-16T pulleys: it results in a trac
 
 Tested with HC-05 (Bluetooth Classic - recommended for SkySafari/Stellarium Plus) and HC-08/10 (BLE) BT modules - just wire BT module RX&TX pins to Arduino TX&RX, BT module RX pin is rated 3.3v so you should use a couple of resistors as voltage divider to lower Arduino TX voltage (I did not).
 
-You can then connect using [Serial Bluetooth Terminal App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_bluetooth_terminal&hl=it&gl=US) or SkySafary/Stellarium Plus from mobile devices.
+From a mobile device you can then connect using [Serial Bluetooth Terminal App](https://play.google.com/store/apps/details?id=de.kai_morich.serial_bluetooth_terminal&hl=it&gl=US) or SkySafary/Stellarium Plus - or I assume any other app that supports LX200.
 
 On a PC you can configure the bluetooth connection as a serial device in your computer and connect via Stellarium/Indi (on Linux, setup /dev/rfcomm0 or for BLE devices see [BLE-Serial](https://github.com/Jakeler/ble-serial)). 
 
@@ -150,4 +150,8 @@ Note: when BT adapter is powered and wired to Arduino, the Arduino USB port is n
 
 ### ST4
 
-Uncomment the `#ifdef ST4` line in aGotino.ino to enable ST4 port. Arduino pins A0,A1,A2,A3 (North, South, East, West) can be connected directly to your camera ST4 port via a RJ cable (6 wires - one is for GND). The variable ST4_FACTOR can be used to decrease/increase speed - default value (20) guides at 0.5x,  range goes from 10 (faster) to 30 (slower).
+Uncomment the `#ifdef ST4` line in aGotino.ino to enable ST4 port. 
+Arduino pins A0,A1,A2,A3 (North, South, East, West) can be connected directly to your camera ST4 port via a RJ cable (6 wires - one is for GND). 
+The variable `ST4_FACTOR` can be used to decrease/increase speed - default value (20) guides at 0.5x,  range goes from 10 (faster) to 30 (slower).
+
+Have fun!
