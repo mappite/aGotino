@@ -138,7 +138,7 @@ The above example is for an EQ5/Exos2 with 40T-16T pulleys: tracking precision i
 
 ![Hardware](https://imgur.com/zhQLEPC.png)
 
-TMC2208 has been reported as a valid alternative to DRV8825, to reduce motor noise and increase smoothness also when in Mode 1 (legacy) with "just" 16 microsteps: the 256 microstep interpolation guarantees a very smooth operations. To use TMC2208 the following mod are required:
+TMC2208 driver has been reported as a valid DRV8825 alternative to reduce motor noise and increase smoothness also when in Mode 1 (legacy) with "just" 16 microsteps: the 256 microsteps interpolation guarantees a very smooth operation. To use TMC2208 instead of DRV8825 the following mods are required:
 
     TMC2208 <-> Arduino
         VIO <-> +5VDC
