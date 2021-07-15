@@ -6,9 +6,7 @@ A telescope Goto solution based on Arduino (Nano or up) that supports:
 - aGotino commands
 - ST4 port for guiding
 
-aGotino can be controlled via an USB cable or via bluetooth from a mobile device or PC.
- 
-aGotino provides **hybrid goto&starhopping**: point the scope to something you can easily find and then reach a remote, low magnitude object nearby - default *nearby* is 30° so you will always find some bright stars around. Star alignment procedures are _not_ required, you can move and rotate your scope freely, until you need that extra help. 
+aGotino can be controlled via an USB cable or via bluetooth from a mobile device or PC. Point the scope to something you can easily find (a bright star), align/sync with it, and then reach a remote, low magnitude object nearby - default *nearby* is 30° so you will always find some bright stars around. Star alignment procedures are _not_ required, you can move and rotate your scope freely, until you need that extra help. 
 
 No additional boards needed, just wire Arduino and two stepper Drivers to do the job. While aGotino will grow in functionalities, you can  upgrade to other solutions, like [OnStep](https://onstep.groups.io/g/main), and re-use almost all of the hardware.
 
@@ -145,8 +143,8 @@ TMC2208 has been reported as a valid alternative to DRV8825, to reduce motor noi
     TMC2208 <-> Arduino
         VIO <-> +5VDC
          EN <-> GND
-    Do not connect NC, PDN, CLK (these matches with MS3, RES, SLP in DRV8825). 
-    MS1&MS2 stay connected to D9 as well as other pins match DRV8825 schema.
+    Do not connect NC, PDN, CLK (these would match with MS3, RES, SLP in DRV8825). 
+    MS1&MS2 stay connected to D9 as well as other pins continue to match DRV8825 schema.
 
 
 ### Bluetooth
