@@ -145,7 +145,6 @@ TMC2208 has been reported as a valid alternative to DRV8825, to reduce motor noi
     TMC2208 <-> Arduino
         VIO <-> +5VDC
          EN <-> GND
-
     Do not connect NC, PDN, CLK (these matches with MS3, RES, SLP in DRV8825). 
     MS1&MS2 stay connected to D9 as well as other pins match DRV8825 schema.
 
