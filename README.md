@@ -121,15 +121,17 @@ The above example is for an EQ5/Exos2 with 40T-16T pulleys: tracking precision i
 
 ### Implementation
 
+#### Software
+
 - Copy _aGotino.ino_ and _catalogs.h_ in Arduino/aGotino/ 
-- Open _aGotino.ino_ in Arduino IDE and edit header to set MICROSTEPS_PER_DEGREE_AR & STEP_DELAY values for your mount and (optional) change any other default values to fit your preferences.
+- Open _aGotino.ino_ in Arduino IDE and edit header to set `MICROSTEPS_PER_DEGREE_AR` & `STEP_DELAY` values for your mount and (optional) change any other default values to fit your preferences.
 - Compile and upload to your Arduino device.
 
-### Hardware
+#### Hardware
 
-- 2 Stepper Motors:  Nema 17 400 step per revolution seems a great solution - for visual only you can select smaller ones
+- 2 Stepper Motors:  Nema 17 400 steps per revolution seems a great solution
   - Supports to attach motors to the mount - depends on your mount, be creative and use a 3D printer if you have one ;)
-- 2 Drivers: with at least 32 microsteps. Cheap DRV8825 works, better TMC or LV can be used of course
+- 2 Drivers: cheap DRV8825 works well (32 microsteps), better TMC or LV can be used of course (see below).
 - 4 Pulleys and 2 Belts (GT2). Size depends on your mount (see [Belt Calculator](https://www.bbman.com/belt-length-calculator/))
 - RJ11 cable with two RJ11 sockets to connect the Dec Motor
 - Dupont cables, a couple of momentary buttons and a 100µF Capacitor to protect the circuit.
@@ -137,6 +139,16 @@ The above example is for an EQ5/Exos2 with 40T-16T pulleys: tracking precision i
 - (optional) Bluetooth Adapter, see below
 
 ![Hardware](https://imgur.com/zhQLEPC.png)
+
+TMC2208 has been reported as a valid alternative to DRV8825, to reduce motor noise and increase smoothness also when in Mode 1 (legacy) with "just" 16 microsteps: the 256 microstep interpolation guarantees a very smooth operations. To use TMC2208 the following mod are required:
+
+    TMC2208 <-> Arduino
+        VIO <-> +5VDC
+         EN <-> GND
+
+    Do not connect NC, PDN, CLK (these matches with MS3, RES, SLP in DRV8825). 
+    MS1&MS2 stay connected to D9 as well as other pins match DRV8825 schema.
+
 
 ### Bluetooth
 
