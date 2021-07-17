@@ -1,10 +1,5 @@
 # aGotino
-**A telescope Goto solution based on Arduino** (Nano, Uno or up). Supports:
-
-- tracking
-- basic Meade LX200 protocol - drive with Stellarium, SkySafari Plus/Pro(mobile), Kstars, Carte du Ciel or any software that supports INDI
-- aGotino commands
-- ST4 port for guiding
+**A telescope Goto solution based on Arduino** (Nano, Uno or up).
 
 aGotino can be controlled via an USB cable or via bluetooth from a mobile device or PC. Point the scope to something you can easily find (a bright star), align/sync with it, and then reach a remote, low magnitude object nearby - default *nearby* is 30° so you will always find some bright stars around. Star alignment procedures are _not_ required, you can move and rotate your scope freely, until you need that extra help. 
 
@@ -16,12 +11,13 @@ Photos and hardware details on [CloudyNights (English)](https://www.cloudynights
 
 ### Features
 
-- tracking - move Right Ascension at sidereal speed, 1x
+- tracking
+- listed for basic Meade LX200 protocol - drive with Stellarium, SkySafari Plus/Pro(mobile), Kstars, Carte du Ciel or any software that supports INDI
+- listen for aGotino commands
+  - 248 bright stars, Messier (all) and 768 NGC objects (up to mag 11) are in memory
+- ST4 port for guiding
 - two buttons to cycle among RA&Dec forward and backward slow motion (8x) 
   - press both buttons for 1sec to change side of pier (default West, see below).
-- listen on serial port for basic LX200 commands
-- listen on serial port for aGotino commands
-  - 248 bright stars, Messier (all) and 768 NGC objects (up to mag 11) are in memory
 
 ### LX200 Protocol Support
 Sync&Slew actions are supported, commands **`:GR :GD :Sr :Sd :MS :Mx :CM :Q :GVO :GVN ACK`**  
