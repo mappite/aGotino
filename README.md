@@ -12,7 +12,7 @@ Photos and hardware details on [CloudyNights (English)](https://www.cloudynights
 ### Features
 
 - tracking
-- listed for basic Meade LX200 protocol - drive with Stellarium, SkySafari Plus/Pro(mobile), Kstars, Carte du Ciel or any software that supports INDI
+- listen for basic Meade LX200 protocol - drive with Stellarium, SkySafari Plus/Pro(mobile), Kstars, Carte du Ciel or any software that supports INDI
 - listen for aGotino commands
   - 248 bright stars, Messier (all) and 768 NGC objects (up to mag 11) are in memory
 - ST4 port for guiding
@@ -82,7 +82,7 @@ Slew -1° in RA (i.e. +1° West) and +1° Dec (North). Note 1°=60' (arcmins) wh
     21:23:12  *** done
     21:23:12 Current Position: 1h59'54" 43°19'47"
 
-[Here a video: aGotino in action](https://www.youtube.com/watch?v=YF_J7_7lyB4)
+[Video: aGotino in action](https://www.youtube.com/watch?v=YF_J7_7lyB4)
 
 ### Side of Pier
 
