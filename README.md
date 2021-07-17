@@ -1,5 +1,5 @@
 # aGotino
-A telescope Goto solution based on Arduino (Nano or up) that supports:
+**A telescope Goto solution based on Arduino** (Nano, Uno or up). Supports:
 
 - tracking
 - basic Meade LX200 protocol - drive with Stellarium, SkySafari Plus/Pro(mobile), Kstars, Carte du Ciel or any software that supports INDI
