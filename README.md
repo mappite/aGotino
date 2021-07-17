@@ -159,4 +159,4 @@ Uncomment the `#ifdef ST4` line in aGotino.ino to enable ST4 port.
 Arduino pins A0,A1,A2,A3 (North, South, East, West) can be connected directly to your camera ST4 port via a RJ cable (6 wires - one is for GND). 
 The variable `ST4_FACTOR` can be used to decrease/increase speed - default value (20) guides at 0.5x,  range goes from 10 (faster) to 30 (slower).
 
-Have fun!
+### Have fun!
