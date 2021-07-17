@@ -1,7 +1,7 @@
 # aGotino
 **A telescope Goto solution based on Arduino** (Nano, Uno or up).
 
-aGotino can be controlled via an USB cable or via bluetooth from a mobile device or PC. Point the scope to something you can easily find (a bright star), align/sync with it, and then reach a remote, low magnitude object nearby - default *nearby* is 30° so you will always find some bright stars around. Star alignment procedures are _not_ required, you can move and rotate your scope freely, until you need that extra help. 
+aGotino can be controlled via bluetooth or USB from a mobile device or PC/Mac. Point the scope to something you can easily find (a bright star), align/sync with it, and then reach a remote, low magnitude object nearby. Star alignment procedures are _not_ required, you can move and rotate your scope freely, until you need that extra help. 
 
 No additional boards needed, just wire Arduino and two stepper Drivers to do the job. While aGotino will grow in functionalities, you can  upgrade to other solutions, like [OnStep](https://onstep.groups.io/g/main), and re-use almost all of the hardware.
 
@@ -28,7 +28,7 @@ Tested with Stellarium (direct), INDI LX200 Basic driver (KStars, Cartes du Ciel
 [Video: Stellarium from a PC with aGotino](https://youtu.be/PdkoGX5PcDA)
 
 ### aGotino Command set
-From an Android device you can use [Serial USB Terminal](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it) or [Serial Bluetooth Terminal](https://play.google.com/store/apps/details?id=de.kai_morich.serial_bluetooth_terminal&hl=it&gl=US) apps. From a PC any terminal emulator should work. 
+From an Android device you can use [Serial USB Terminal](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it) or [Serial Bluetooth Terminal](https://play.google.com/store/apps/details?id=de.kai_morich.serial_bluetooth_terminal&hl=it&gl=US) app while from a PC/Mac any terminal emulator should work. 
 
 **x** can be **s (set)** or **g (goto)**:    
   - **`x HHMMSS±DDMMSS`** set/goto coordinates
