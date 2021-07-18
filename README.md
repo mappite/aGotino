@@ -106,7 +106,7 @@ The above example is for an EQ5/Exos2 with 40T-16T pulleys: tracking precision i
 
 #### Software
 
-##### Files
+Files:
 
     aGotino.ino           Arduino C Source
     catalogs.h            Object Catalogues (J2000.0) for aGotino commands
