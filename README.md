@@ -19,7 +19,7 @@ Photos and hardware details on [CloudyNights (English)](https://www.cloudynights
 - two buttons to cycle among RA&Dec forward and backward slow motion (8x) 
   - press both buttons for 1sec to change side of pier (default West, see below).
 
-### LX200 Protocol Support
+### LX200 Protocol
 Sync&Slew actions are supported, commands **`:GR :GD :Sr :Sd :MS :Mx :CM :Q :GVO :GVN ACK`**  
 Tested with Stellarium (direct), INDI LX200 Basic driver (KStars, Cartes du Ciel, Stellarium, etc), SkySafari Plus and Stellarium Plus (mobile)
 
@@ -27,9 +27,10 @@ Tested with Stellarium (direct), INDI LX200 Basic driver (KStars, Cartes du Ciel
 
 [Video: Stellarium from a PC with aGotino](https://youtu.be/PdkoGX5PcDA)
 
-### aGotino Command set
-From an Android device you can use [Serial USB Terminal](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it) or [Serial Bluetooth Terminal](https://play.google.com/store/apps/details?id=de.kai_morich.serial_bluetooth_terminal&hl=it&gl=US) app while from a PC/Mac any terminal emulator should work. 
+### aGotino Protocol
+From an Android device you can use [Serial USB Terminal](https://play.google.com/store/apps/details?id=de.kai_morich.serial_usb_terminal&hl=it) or [Serial Bluetooth Terminal](https://play.google.com/store/apps/details?id=de.kai_morich.serial_bluetooth_terminal&hl=it&gl=US) app or similar while from a PC/Mac any terminal emulator should work. Default serial speed is 9600 baud.
 
+#### Command set
 **x** can be **s (set)** or **g (goto)**:    
   - **`x HHMMSS±DDMMSS`** set/goto coordinates
   - **`x Mn`**            set/goto Messier object n
@@ -57,7 +58,6 @@ The list contains α, β, γ constellation stars up to mag 4 and all other stars
 
 Point scope to Mizar in UMa, set (sync current position) Star 223 in aGotino Star List, and slew to M101 Pinwheel Galaxy;  point Altair in Aql, set using coordinates, and slew to M11 Wild Duck
 
-    19:06:34 aGotino: ready.
     > s S223
     19:06:58 Set Star 223      
     19:06:58 Current Position: 13h23'56" 54°55'31
@@ -68,11 +68,6 @@ Point scope to Mizar in UMa, set (sync current position) Star 223 in aGotino Sta
     19:07:17 Current Position: 14h03'12" 54°20'57"
     > s 195147+085206
     19:09:59 Current Position: 19h51'47" 08°52'06"
-    > g M11
-    19:10:19 Goto M11
-    19:10:19  *** moving...
-    19:10:32  *** done
-    19:10:32 Current Position: 18h51'06" ‑06°16'00"
 
 Slew -1° in RA (i.e. +1° West) and +1° Dec (North). Note 1°=60' (arcmins) which translates to 60/15 = 4 minutes.
 
@@ -88,12 +83,6 @@ Slew -1° in RA (i.e. +1° West) and +1° Dec (North). Note 1°=60' (arcmins) wh
 
 Default value for *Side of Pier* is West, meaning your scope is supposed to be West of the mount, usually pointing East. If your scope is on East side of the mount, you need to push both buttons for 1 sec or issue a **`+side`** command to let aGotino know that, since Declination movement has to invert direction. When setting East, motors pause for 3secs while onboard led turns on. When going back to West, onboard led blinks twice. 
 
-### Files
-
-    aGotino.ino           Arduino C Source
-    catalogs.h            Object Catalogues (J2000.0) for aGotino commands
-    aGotino-StarList.pdf  Star list in PDF
-    aGotino-wiring.png    wirings 
 
 ### AstroMath (i.e. adapt for your mount)
 
@@ -117,13 +106,20 @@ The above example is for an EQ5/Exos2 with 40T-16T pulleys: tracking precision i
 
 #### Software
 
+##### Files
+
+    aGotino.ino           Arduino C Source
+    catalogs.h            Object Catalogues (J2000.0) for aGotino commands
+    aGotino-StarList.pdf  Star list in PDF
+    aGotino-wiring.png    wirings 
+
 - Copy _aGotino.ino_ and _catalogs.h_ in Arduino/aGotino/ 
-- Open _aGotino.ino_ in Arduino IDE and edit header to set `MICROSTEPS_PER_DEGREE_AR` & `STEP_DELAY` values for your mount and (optional) change any other default values to fit your preferences.
+- Open _aGotino.ino_ in Arduino IDE and edit header to set `MICROSTEPS_PER_DEGREE_AR` & `STEP_DELAY` values for your mount and (optional), change any other default values to fit your preferences.
 - Compile and upload to your Arduino device.
 
 #### Hardware
 
-- 2 Stepper Motors:  Nema 17 400 steps per revolution seems a great solution
+- 2 Stepper Motors:  Nema 17 with 400 steps per revolution seems a great solution
   - Supports to attach motors to the mount - depends on your mount, be creative and use a 3D printer if you have one ;)
 - 2 Drivers: cheap DRV8825 works well (32 microsteps), better TMC or LV can be used of course (see below).
 - 4 Pulleys and 2 Belts (GT2). Size depends on your mount (see [Belt Calculator](https://www.bbman.com/belt-length-calculator/))
