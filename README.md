@@ -56,7 +56,7 @@ The list contains α, β, γ constellation stars up to mag 4 and all other stars
 
 #### Example 
 
-Point scope to Mizar in UMa, set (sync current position) Star 223 in aGotino Star List, and slew to M101 Pinwheel Galaxy;  point Altair in Aql, set using coordinates, and slew to M11 Wild Duck
+Point scope to Mizar in UMa, set (sync/align current position) Star 223 in aGotino Star List, and slew to M101 Pinwheel Galaxy;  point Altair in Aql, set current position using coordinates
 
     > s S223
     19:06:58 Set Star 223      
