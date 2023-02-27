@@ -284,8 +284,9 @@ int slewRaDecBySecs(long raSecs, long decSecs) {
   digitalWrite(decDirPin, (decSecs > 0 ? DEC_DIR:(DEC_DIR==HIGH?LOW:HIGH)));
 
   // calculate how many micro-steps are needed
-  unsigned long raSteps  = (abs(raSecs) * MICROSTEPS_PER_HOUR) / 3600;
-  unsigned long decSteps = (abs(decSecs) * MICROSTEPS_PER_DEGREE_DEC) / 3600;
+  // inner division is to avoid long overflow for 46+ degrees
+  unsigned long raSteps  = (abs(raSecs) * (MICROSTEPS_PER_HOUR/100)) / 36;
+  unsigned long decSteps = (abs(decSecs) * (MICROSTEPS_PER_DEGREE_DEC/100)) / 36;
 
   // calculate how many full&micro steps are needed
   unsigned long raFullSteps   = raSteps / MICROSTEPS_RA;             // this will truncate the result...
