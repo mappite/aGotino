@@ -19,7 +19,7 @@
    Worm Ratio                  144   // 144 eq5/exos2, 135 heq5, 130 eq3-2
    Other (Pulley/Gear) Ratio     2.5 // depends on your pulley setup e.g. 40T/16T = 2.5
    Steps per revolution        400   // or usually 200 depends on your motor
-   Microstep                    32   // depends on driver
+   Microsteps                   32   // number of microsteps per step, depends on driver
 
    MICROSTEPS_PER_DEGREE_RA  12800   // = WormRatio*OtherRatio*StepsPerRevolution*Microsteps/360
                                      // = number of microsteps to rotate the scope by 1 degree
@@ -28,15 +28,23 @@
                                      // = microseconds to advance a microstep at 1x
                                      // 86164 is the number of secs for earth 360deg rotation (23h56m04s)
 
- * Update the values below to match your mount/gear ratios and your preferences: 
+ * Update the values below to match your mount/gear ratio and your preferences: 
  * * * * * * */
 
 const unsigned long STEP_DELAY = 18699;                // see above calculation
 const unsigned long MICROSTEPS_PER_DEGREE_RA  = 12800; // see above calculation
-const unsigned long MICROSTEPS_PER_DEGREE_DEC = MICROSTEPS_PER_DEGREE_RA; // calculate correct value if DEC gears/worm/microsteps differs from RA ones
+const unsigned long MICROSTEPS_PER_DEGREE_DEC = MICROSTEPS_PER_DEGREE_RA; // specify a different value if DEC gears/worm/microsteps differs from RA ones
 
-const unsigned long MICROSTEPS_RA  = 32; // RA  Driver Microsteps
-const unsigned long MICROSTEPS_DEC = 32; // DEC Driver Microsteps
+// Set number of RA driver microsteps per step when raEnableMicroStepsPin is High or Low
+// For DRV8825: 32 (High) and 1 (Low) 
+const unsigned long MICROSTEPS_RA_HIGH  = 32; 
+const unsigned long MICROSTEPS_RA_LOW = 1;    
+// For TMC drivers refer to datasheet/your wiring to know correct values (see aGotino github page for examples)
+//   example in TMC2208 if both MS1 & MS2 are driven by raEnableMicroStepsPin values are 16 (High) and 8 (Low)
+
+// Same as above but for DEC
+const unsigned long MICROSTEPS_DEC_HIGH  = 32; 
+const unsigned long MICROSTEPS_DEC_LOW = 1;    
 
 const long SERIAL_SPEED = 9600;          // serial interface baud. Make sure your computer/phone matches this
 long MAX_RANGE = 1800;                   // default max slew range in deg minutes (1800'=30°). See +range command
@@ -53,7 +61,7 @@ unsigned long STEP_DELAY_SLEW = 1200;   // Slewing Pulse timing in micros (the h
                                         // don't change this to too low values otherwise your scope may take off as an helicopter.
 
 boolean SIDE_OF_PIER_WEST     = true;   // Default Telescope position is west of the mount. Press both buttons for 1 sec to reverse
-boolean POWER_SAVING_ENABLED  = true;   // toggle with -sleep on serial, see decSleep(), note this is disable if ST4 port is active
+boolean POWER_SAVING_ENABLED  = true;   // toggle with -sleep on serial, see decSleep(), note this is disabled if ST4 port is active
 boolean DEBUG                 = false;  // toggle with +debug on serial
 
 // Arduino Pin Layout
@@ -84,6 +92,9 @@ const int st4WestPin  = A3;
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "catalogs.h" // load objects for aGoto protocol (Star List, Messier, NGC)
+
+const unsigned long MICROSTEPS_RA_RATIO  = MICROSTEPS_RA_HIGH / MICROSTEPS_RA_LOW;  
+const unsigned long MICROSTEPS_DEC_RATIO = MICROSTEPS_DEC_HIGH / MICROSTEPS_DEC_LOW;
 
 // Number of Microsteps to move RA by 1hour
 const unsigned long MICROSTEPS_PER_HOUR  = MICROSTEPS_PER_DEGREE_RA * 360 / 24;
@@ -263,7 +274,7 @@ void decPlay() {
  *  Slew RA and Dec by seconds/arceconds (ra/dec)
  *   motors direction is set according to sign
  *   RA 1x direction is re-set at the end
- *   microstepping is disabled for fast movements and (re-)enabled for finer ones
+ *   naming convention refer to DRV8825 where micostepping is disabled (full step) and then re-enabled (micro steps)
  */
 int slewRaDecBySecs(long raSecs, long decSecs) {
 
@@ -283,23 +294,22 @@ int slewRaDecBySecs(long raSecs, long decSecs) {
   digitalWrite(raDirPin,  (raSecs  > 0 ? RA_DIR :(RA_DIR ==HIGH?LOW:HIGH)));
   digitalWrite(decDirPin, (decSecs > 0 ? DEC_DIR:(DEC_DIR==HIGH?LOW:HIGH)));
 
-  // calculate how many micro-steps are needed
+  // calculate how many steps are needed when max microstepping is enabled, i.e. raEnableMicroStepsPin and decEnableMicroStepsPin = high
   // inner division is to avoid long overflow for 46+ degrees
   unsigned long raSteps  = (abs(raSecs) * (MICROSTEPS_PER_HOUR/100)) / 36;
   unsigned long decSteps = (abs(decSecs) * (MICROSTEPS_PER_DEGREE_DEC/100)) / 36;
 
   // calculate how many full&micro steps are needed
-  unsigned long raFullSteps   = raSteps / MICROSTEPS_RA;             // this will truncate the result...
-  unsigned long raMicroSteps  = raSteps - raFullSteps * MICROSTEPS_RA; // ...remaining microsteps
-  unsigned long decFullSteps  = decSteps / MICROSTEPS_DEC;            // this will truncate the result...
-  unsigned long decMicroSteps = decSteps - decFullSteps * MICROSTEPS_DEC; // ...remaining microsteps
+  unsigned long raFullSteps   = raSteps / MICROSTEPS_RA_RATIO;               // this will truncate the result...
+  unsigned long raMicroSteps  = raSteps - raFullSteps * MICROSTEPS_RA_RATIO; // ...remaining microsteps
+  unsigned long decFullSteps  = decSteps / MICROSTEPS_DEC_RATIO;                // this will truncate the result...
+  unsigned long decMicroSteps = decSteps - decFullSteps * MICROSTEPS_DEC_RATIO; // ...remaining microsteps
 
-  // Disable microstepping (i.e. enable full steps)
-  // printLog("Disabling Microstepping");
+  // Disable microstepping (for DRV8825, for other drivers this may reduce, ref to  MICROSTEPS_RA_HIGH / MICROSTEPS_DEC_LOW  values)
   digitalWrite(raEnableMicroStepsPin, LOW);
   digitalWrite(decEnableMicroStepsPin, LOW);
 
-  // Fast Move (full steps)
+  // Fast Move
   printLog(" RA FullSteps:  ");
   printLogUL(raFullSteps);
   printLog(" DEC FullSteps: ");
