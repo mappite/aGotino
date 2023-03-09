@@ -130,14 +130,37 @@ Files:
 
 ![Hardware](https://imgur.com/zhQLEPC.png)
 
-TMC2208 driver has been reported as a valid DRV8825 alternative to reduce motor noise and increase smoothness also when in Mode 1 (legacy) with "just" 16 microsteps: the 256 microsteps interpolation guarantees a very smooth operation. To use TMC2208 instead of DRV8825 the following mods are required:
+### Motor Driver
+
+Default wiring and code is for the cheap DRV8825 driver, TMC (and other) drivers are valid alternative to reduce motor noise and increase smoothness (for example TMC2208 in legacy Mode 1 with "just" 16 microsteps has actually a fine 256 microsteps interpolation). 
+
+TMC driver to Ardunio connections needs to be:
 
     TMC2208 <-> Arduino
         VIO <-> +5VDC
          EN <-> GND
     Do not connect NC, PDN, CLK (these would match with MS3, RES, SLP in DRV8825). 
-    MS1&MS2 stay connected to D9 as well as other pins continue to match DRV8825 schema.
+    MS1&MS2 connection depends on driver while other pins continue to match DRV8825 schema.
 
+Check your driver datasheet to know what is the number of microsteps when MS1&MS2 are High or Low, wire the driver according to your needs and update MICROSTEPS_RA_HIGH/LOW and MICROSTEPS_DEC_HIGH/LOW in aGotino.ino code (lines 40-47). 
+
+For TMC2208, you can connect MS1 to VIO and leave just MS2 to be driven by Arduino D2 (RA motor) or D9 (DEC motor). This means when D2 (or D9) is LOW the driver will work with 2 microsteps, while when D2 (or D9) are HIGH the driver will work with 16 microsteps.
+
+    MICROSTEPS_RA_HIGH  = 16
+    MICROSTEPS_RA_LOW   = 2
+    MICROSTEPS_DEC_HIGH = 16
+    MICROSTEPS_DEC_LOW  = 2
+
+For TMC2225, you can connect both MS1&MS2 to Arduino D2 (RA) or D9 (DEC) to obtain 32 microsteps when high and 4 when low.
+
+    MICROSTEPS_HIGH_RA  = 32;
+    MICROSTEPS_HIGH_DEC = 32;
+    MICROSTEPS_LOW_RA  = 4;
+    MICROSTEPS_LOW_DEC = 4;
+
+If slewing is too slow, reduce (gently...) STEP_DELAY_SLEW. 
+
+> Usage of TMC or other drivers are wellcome to be reported in [CloudyNight aGotino  post](https://www.cloudynights.com/topic/735800-agotino-a-simple-arduino-nano-goto/) so this section can be expanded.
 
 ### Bluetooth
 
