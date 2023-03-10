@@ -142,7 +142,7 @@ TMC driver to Ardunio connections needs to be:
     Do not connect NC, PDN, CLK (these would match with MS3, RES, SLP in DRV8825). 
     MS1&MS2 connection depends on driver while other pins continue to match DRV8825 schema.
 
-Check your driver datasheet to know what is the number of microsteps when MS1&MS2 are High or Low, wire the driver according to your needs and update `MICROSTEPS_RA_HIGH/LOW` and `MICROSTEPS_DEC_HIGH/LOW` in aGotino.ino code (lines 40-47). 
+Check your driver datasheet to know what is the number of microsteps when MS1&MS2 are High or Low, wire the driver according to your needs and update `MICROSTEPS_RA_HIGH/LOW` and `MICROSTEPS_DEC_HIGH/LOW` values in aGotino.ino code (lines 40-47). 
 
 For TMC2208, you can connect MS1 to VIO and leave just MS2 to be driven by Arduino D2 (RA motor) or D9 (DEC motor). This means when D2 (or D9) is LOW the driver will work with 2 microsteps, while when D2 (or D9) are high the driver will work with 16 microsteps.
 
@@ -153,10 +153,10 @@ For TMC2208, you can connect MS1 to VIO and leave just MS2 to be driven by Ardui
 
 For TMC2225, you can connect both MS1&MS2 to Arduino D2 (RA) or D9 (DEC) to obtain 32 microsteps when high and 4 when low.
 
-    MICROSTEPS_HIGH_RA  = 32;
-    MICROSTEPS_HIGH_DEC = 32;
-    MICROSTEPS_LOW_RA  = 4;
-    MICROSTEPS_LOW_DEC = 4;
+    MICROSTEPS_RA_HIGH  = 32
+    MICROSTEPS_RA_LOW   = 4
+    MICROSTEPS_DEC_HIGH = 32
+    MICROSTEPS_DEC_LOW  = 4
 
 If slewing is too slow, reduce `STEP_DELAY_SLEW` (gently...). 
 
