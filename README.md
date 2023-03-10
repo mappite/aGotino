@@ -170,7 +170,7 @@ From a mobile device you can then connect using [Serial Bluetooth Terminal App](
 
 On a PC you can configure the bluetooth connection as a serial device in your computer and connect via Stellarium/Indi (on Linux, setup /dev/rfcomm0 or for BLE devices see [BLE-Serial](https://github.com/Jakeler/ble-serial)). 
 
-Note: when BT adapter is powered and wired to Arduino RX/TX, the Arduino USB port is not fully functional - disconnect BT Adapter power or RX/TX cables to upload a new firmware.
+> Note: when BT adapter is powered and wired to Arduino RX/TX, the Arduino USB port is not fully functional - disconnect BT Adapter power or RX/TX cables to upload a new firmware.
 
 ### ST4
 
