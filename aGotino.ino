@@ -33,36 +33,37 @@
 
 const unsigned long STEP_DELAY = 18699;                // see above calculation
 const unsigned long MICROSTEPS_PER_DEGREE_RA  = 12800; // see above calculation
-const unsigned long MICROSTEPS_PER_DEGREE_DEC = MICROSTEPS_PER_DEGREE_RA; // specify a different value if DEC gears/worm/microsteps differs from RA ones
+const unsigned long MICROSTEPS_PER_DEGREE_DEC = MICROSTEPS_PER_DEGREE_RA; // set a different value if DEC gears/worm/microsteps differs from RA ones
 
-// Set number of RA driver microsteps per step when raEnableMicroStepsPin is High or Low
-// For DRV8825: 32 (High) and 1 (Low) 
-const unsigned long MICROSTEPS_RA_HIGH  = 32; 
-const unsigned long MICROSTEPS_RA_LOW = 1;    
-// For TMC drivers refer to datasheet/your wiring to know correct values (see aGotino github page for examples)
-//   example in TMC2208 if both MS1 & MS2 are driven by raEnableMicroStepsPin values are 16 (High) and 8 (Low)
-
+/* Set number of RA driver microsteps per step when raEnableMicroStepsPin is High or Low
+ *  default values are for DRV8825, for other drivers refer to datasheet/your wiring to know correct values
+ *  Example in TMC2208, if MS1 is to VIO and MS2 is driven by raEnableMicroStepsPin, values are 16 (High) and 2 (Low)
+ *          check on aGotino github page for examples
+ */
+const unsigned long MICROSTEPS_RA_HIGH = 32; 
+const unsigned long MICROSTEPS_RA_LOW  = 1;   
 // Same as above but for DEC
-const unsigned long MICROSTEPS_DEC_HIGH  = 32; 
-const unsigned long MICROSTEPS_DEC_LOW = 1;    
+const unsigned long MICROSTEPS_DEC_HIGH = 32; 
+const unsigned long MICROSTEPS_DEC_LOW  = 1;    
 
-const long SERIAL_SPEED = 9600;          // serial interface baud. Make sure your computer/phone matches this
+const long SERIAL_SPEED = 9600;          // serial interface baud. Make sure your computer/phone matches this.
 long MAX_RANGE = 1800;                   // default max slew range in deg minutes (1800'=30°). See +range command
 
-// Motor clockwise direction: HIGH is for tracking as per original design (W)
-//          change to LOW if you inverted wirings or motor position or... 
-int RA_DIR   = HIGH;                    // ... change RA_DIR to LOW in Southern Hemisphere
-int DEC_DIR  = HIGH;                    
-
-unsigned int  SLOW_SPEED      = 8;      // RA&DEC slow motion speed (button press) - times the sidereal speed
-const    int  SLOW_SPEED_INC  = 4;      // Slow motion speed increment at +speed command
-
+// Change this value if you want slewing to occour faster or slower
 unsigned long STEP_DELAY_SLEW = 1200;   // Slewing Pulse timing in micros (the higher the pulse, the slower the speed)
                                         // don't change this to too low values otherwise your scope may take off as an helicopter.
 
+// Motor clockwise direction: HIGH matches original design, change to LOW if you inverted wirings or motor position or... 
+int RA_DIR  = HIGH;                     // ... change RA_DIR to LOW in Southern Hemisphere
+int DEC_DIR = HIGH;                    
+
 boolean SIDE_OF_PIER_WEST     = true;   // Default Telescope position is west of the mount. Press both buttons for 1 sec to reverse
 boolean POWER_SAVING_ENABLED  = true;   // toggle with -sleep on serial, see decSleep(), note this is disabled if ST4 port is active
-boolean DEBUG                 = false;  // toggle with +debug on serial
+                                        // when enabled, this may create a small glitch on first Dec movement
+
+// movement speed when pushing phisical buttons or arrows key in app
+unsigned int SLOW_SPEED      = 8;      // RA&DEC slow motion speed (button press) - times the sidereal speed
+const    int SLOW_SPEED_INC  = 4;      // Slow motion speed increment at +speed command
 
 // Arduino Pin Layout
 const int raDirPin    =  4;
@@ -74,6 +75,8 @@ const int decStepPin  = 11;
 const int decButtonPin=  7;
 const int decEnableMicroStepsPin = 9;
 const int decSleepPin = 10;
+
+boolean DEBUG = false;  // toggle with +debug on serial, when true additional info are reported on serial 
 
 /* Experimental: Uncomment the line below to enable ST4 Port on A0-A3 pins */
 // #define ST4
