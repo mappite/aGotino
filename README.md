@@ -20,7 +20,7 @@ Photos and hardware details on [CloudyNights (English)](https://www.cloudynights
   - press both buttons for 1sec to change side of pier (default West, see below).
 
 ### LX200 Protocol
-Sync&Slew actions are supported, commands **`:GR :GD :Sr :Sd :MS :Mx :CM :Q :GVO :GVN ACK`**  
+Sync&Slew actions are supported, commands **`:GR :GD :Sr :Sd :MS :Mx :CM :Q :GVP :GVN ACK`**  
 Tested with Stellarium (direct), INDI LX200 Basic driver (KStars, Cartes du Ciel, Stellarium, etc), SkySafari Plus and Stellarium Plus (mobile)
 
 [Video: SkySafari Mobile with aGotino](https://www.youtube.com/watch?v=mhODsDZTl5U)
