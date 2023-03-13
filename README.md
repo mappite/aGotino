@@ -12,7 +12,7 @@ Photos and hardware details on [CloudyNights (English)](https://www.cloudynights
 ### Features
 
 - tracking
-- listen for basic Meade LX200 protocol - drive with Stellarium (PC & Mobile), SkySafari Plus/Pro(mobile), Kstars, Carte du Ciel or any software that supports INDI
+- listen for basic Meade LX200 protocol - drive with Stellarium (PC & mobile), SkySafari Plus/Pro (mobile), Kstars, Carte du Ciel or any software that supports INDI
 - listen for aGotino commands
   - 248 bright stars, Messier (all) and 768 NGC objects (up to mag 11) are in memory
 - ST4 port for guiding
