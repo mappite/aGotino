@@ -12,7 +12,7 @@ Photos and hardware details on [CloudyNights (English)](https://www.cloudynights
 ### Features
 
 - tracking
-- listen for basic Meade LX200 protocol - drive with Stellarium, SkySafari Plus/Pro(mobile), Kstars, Carte du Ciel or any software that supports INDI
+- listen for basic Meade LX200 protocol - drive with Stellarium (PC & Mobile), SkySafari Plus/Pro(mobile), Kstars, Carte du Ciel or any software that supports INDI
 - listen for aGotino commands
   - 248 bright stars, Messier (all) and 768 NGC objects (up to mag 11) are in memory
 - ST4 port for guiding
@@ -20,7 +20,7 @@ Photos and hardware details on [CloudyNights (English)](https://www.cloudynights
   - press both buttons for 1sec to change side of pier (default West, see below).
 
 ### LX200 Protocol
-Sync&Slew actions are supported, commands **`:GR :GD :Sr :Sd :MS :Mx :CM :Q :GVP :GVN ACK`**  
+Sync&Slew actions are supported, commands **`:GR :GD :Sr :Sd :MS :Mx :CM :Q :GVP :GVN :D ACK`**  
 Tested with Stellarium (direct), INDI LX200 Basic driver (KStars, Cartes du Ciel, Stellarium, etc), SkySafari Plus and Stellarium Plus (mobile)
 
 [Video: SkySafari Mobile with aGotino](https://www.youtube.com/watch?v=mhODsDZTl5U)
