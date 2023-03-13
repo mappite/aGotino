@@ -155,7 +155,7 @@ unsigned long decTargetDelay = STEP_DELAY/SLOW_SPEED; // pulse length to reach w
 unsigned int  decPlayIdx     = 0; // pulse index, Dec will accellerate for first 100 pulses
 
 String _aGotino = "aGotino";
-const unsigned long _ver = 210708;
+const unsigned long _ver = 230312;
 
 void setup() {
   Serial.begin(SERIAL_SPEED);
@@ -353,20 +353,20 @@ int slewRaDecBySecs(long raSecs, long decSecs) {
 }
 
 /*
- *  Slew RA and Dec by steps
+ *  Slew RA and Dec by a number of steps
  *   . assume direction and microstepping is set
- *   . turn system led on 
+ *   . turn led on 
  *   . set SLEWING to true to hold RA interrupt tracking
- *   . while slewing, listen on serial port and reply to lx200 GR&GD
- *      commands with current (initial) position to avoid
- *      INDI timeouts during long slewings actions
+ *   . while slewing, listen on serial port and reply to lx200 :GR#, :GD# and :D# commands
+ *            these commands are required to avoid INDI timeouts during long slewings actions
+ *   FIXME: initial position is returned, not real time one while slewing
  */
 void slewRaDecBySteps(unsigned long raSteps, unsigned long decSteps) {
   digitalWrite(LED_BUILTIN, HIGH);
   SLEWING = true;
 
   // wake up Dec motor if needed 
-  // FIXME: shoud this be moved to slewRaDecBySecs to avoid glitches? This pauses 2millis every time
+  // FIXME: this pauses 2millis every time
   if (decSteps != 0) {
     decSleep(false);
   }
@@ -396,11 +396,16 @@ void slewRaDecBySteps(unsigned long raSteps, unsigned long decSteps) {
     if (Serial.available() > 0) {
       delayLX200Micros = micros();
       input[in] = Serial.read();
-      if (input[in] == '#' && in > 1 ) {
-        if (input[in-1] == 'R') { // :GR#
+      if (input[in] == '#' && in > 1 ) { // it's time to read the input
+        if (input[in-2] == 'G' && input[in-1] == 'R' ) { // :GR#
           Serial.print(lx200RA);
-        } else if (input[in-1] == 'D') { // :GD#
+        } else if (input[in-2] == 'G' && input[in-1] == 'D') { // :GD#
           Serial.print(lx200DEC);
+        } else if (input[in-2] == ':' && input[in-1] == 'D') { // :D# report if it is slewing
+          printLog("D");
+          // slewing is char(127) (DEL) followed by #
+          Serial.print(char(127)); 
+          Serial.print("#"); 
         } else if (input[in-1] == 'Q') { // :Q# stop FIXME: motors stops but current coordinates are set to new target...
           printLog("Slew Stop");
           break;
@@ -545,8 +550,11 @@ void lx200(String s) { // all :.*# commands are passed here
     printLog("CM");
     currRA  = inRA;
     currDEC = inDEC;
-    Serial.print("Synced#");
+    Serial.print("0#"); // to accomodate Stellarium direct connection that expects a 0
     updateLx200Coords(currRA, currDEC); // recompute strings
+  } else if (s.charAt(1) == 'D') { // :D# report if slewing
+    printLog("D");
+    Serial.print("#"); // not slewing
   }
 }
 
@@ -945,7 +953,7 @@ void loop() {
     input[in] = Serial.read(); 
 
     // discard blanks. Meade LX200 specs states :Sd and :Sr are
-    // not followed by a blank but some implementation does include it.
+    // not followed by a blank but some implementations do include it.
     // also this allows aGoto commands to be typed with blanks
     if (input[in] == ' ') return; 
     
