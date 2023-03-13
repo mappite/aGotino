@@ -20,7 +20,7 @@ Photos and hardware details on [CloudyNights (English)](https://www.cloudynights
   - press both buttons for 1sec to change side of pier (default West, see below).
 
 ### LX200 Protocol
-Sync&Slew actions are supported, commands **`:GR :GD :Sr :Sd :MS :Mx :CM :Q :GVO :GVN ACK`**  
+Sync&Slew actions are supported, commands **`:GR :GD :Sr :Sd :MS :Mx :CM :Q :GVP :GVN ACK`**  
 Tested with Stellarium (direct), INDI LX200 Basic driver (KStars, Cartes du Ciel, Stellarium, etc), SkySafari Plus and Stellarium Plus (mobile)
 
 [Video: SkySafari Mobile with aGotino](https://www.youtube.com/watch?v=mhODsDZTl5U)
@@ -100,7 +100,7 @@ Below is how to calculate stepper motor pulse length to drive your mount at side
                                      // = microseconds to advance a microstep
                                      // 86164 is earth 360deg rotation time in secs (23h56m04s)
                                   
-The above example is for an EQ5/Exos2 with 40T-16T pulleys: tracking precision is 53 microsteps/second or 0.281 arcsec/microstep - which appears to be the same figures of ES/Losmandy G-11 mount. With a good polar alignment, goto accuracy within the default 30° is under 5': if you get worse results check your pulleys are tightned, verify your mount polar alignemnt and level.  
+The above example is for an EQ5/Exos2 with 40T-16T pulleys using DRV8825 driver and a 400 steps per rev motor: tracking precision is 53 microsteps/second or 0.281 arcsec/microstep - which appears to be the same figures of ES/Losmandy G-11 mount. With a good polar alignment, goto accuracy within the default 30° is under 5': if you get worse results check your pulleys are tightned, verify your mount polar alignemnt and level.  
 
 ### Implementation
 
@@ -130,14 +130,37 @@ Files:
 
 ![Hardware](https://imgur.com/zhQLEPC.png)
 
-TMC2208 driver has been reported as a valid DRV8825 alternative to reduce motor noise and increase smoothness also when in Mode 1 (legacy) with "just" 16 microsteps: the 256 microsteps interpolation guarantees a very smooth operation. To use TMC2208 instead of DRV8825 the following mods are required:
+### Motor Driver
+
+Default wiring and code is for the cheap DRV8825 driver, TMC (and other) drivers are valid alternative to reduce motor noise and increase smoothness (for example TMC2208 in legacy Mode 1 with "just" 16 microsteps has actually a fine 256 microsteps interpolation). 
+
+TMC driver to Ardunio connections needs to be:
 
     TMC2208 <-> Arduino
         VIO <-> +5VDC
          EN <-> GND
     Do not connect NC, PDN, CLK (these would match with MS3, RES, SLP in DRV8825). 
-    MS1&MS2 stay connected to D9 as well as other pins continue to match DRV8825 schema.
+    MS1&MS2 connection depends on driver while other pins continue to match DRV8825 schema.
 
+Check your driver datasheet to know what is the number of microsteps when MS1&MS2 are High or Low, wire the driver according to your needs and update `MICROSTEPS_RA_HIGH/LOW` and `MICROSTEPS_DEC_HIGH/LOW` values in aGotino.ino code (lines 40-47). 
+
+For TMC2208, you can connect MS1 to VIO and leave just MS2 to be driven by Arduino D2 (RA motor) or D9 (DEC motor). This means when D2 (or D9) is LOW the driver will work with 2 microsteps, while when D2 (or D9) are high the driver will work with 16 microsteps.
+
+    MICROSTEPS_RA_HIGH  = 16
+    MICROSTEPS_RA_LOW   = 2
+    MICROSTEPS_DEC_HIGH = 16
+    MICROSTEPS_DEC_LOW  = 2
+
+For TMC2225, you can connect both MS1&MS2 to Arduino D2 (RA) or D9 (DEC) to obtain 32 microsteps when high and 4 when low.
+
+    MICROSTEPS_RA_HIGH  = 32
+    MICROSTEPS_RA_LOW   = 4
+    MICROSTEPS_DEC_HIGH = 32
+    MICROSTEPS_DEC_LOW  = 4
+
+If slewing is too slow, reduce `STEP_DELAY_SLEW` (gently...). 
+
+> Usage of TMC or other drivers are welcome to be reported in [CloudyNight aGotino  post](https://www.cloudynights.com/topic/735800-agotino-a-simple-arduino-nano-goto/) so this section can be expanded.
 
 ### Bluetooth
 
@@ -147,7 +170,7 @@ From a mobile device you can then connect using [Serial Bluetooth Terminal App](
 
 On a PC you can configure the bluetooth connection as a serial device in your computer and connect via Stellarium/Indi (on Linux, setup /dev/rfcomm0 or for BLE devices see [BLE-Serial](https://github.com/Jakeler/ble-serial)). 
 
-Note: when BT adapter is powered and wired to Arduino RX/TX, the Arduino USB port is not fully functional - disconnect BT Adapter power or RX/TX cables to upload a new firmware.
+> Note: when BT adapter is powered and wired to Arduino RX/TX, the Arduino USB port is not fully functional - disconnect BT Adapter power or RX/TX cables to upload a new firmware.
 
 ### ST4
 
